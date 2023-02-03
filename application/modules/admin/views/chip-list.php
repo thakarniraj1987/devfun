@@ -118,7 +118,7 @@
                   } else {
                       new PNotify({
                           title: "Success",
-                          text: data.message?data.message:"Something went wrong please try again later",
+                          text: "Something went wrong please try again later",
                           styling: "bootstrap3",
                           type: "error",
                           delay: 3000,

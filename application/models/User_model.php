@@ -66,17 +66,14 @@ class User_model extends My_Model
 
         $search = $pagingParams['search'];
         if (!empty($search)) {
-            $this->db->group_start();
             $this->db->like('name', $search);
             $this->db->or_like('user_name', $search);
-            $this->db->group_end();
-
         }
 
         $return = $this->get_with_count(null, $pagingParams['records_per_page'], $pagingParams['offset']);
 
 
-           return $return;
+          return $return;
     }
 
 
@@ -120,10 +117,8 @@ class User_model extends My_Model
 
         $search = $pagingParams['search'];
         if (!empty($search)) {
-            $this->db->group_start();
             $this->db->like('name', $search);
             $this->db->or_like('user_name', $search);
-            $this->db->group_end();
         }
 
         $return = $this->get_with_count(null, $pagingParams['records_per_page'], $pagingParams['offset']);
@@ -159,7 +154,6 @@ class User_model extends My_Model
         if (count($dataValues) > 0) {
             if (array_key_exists('user_id', $dataValues) && !empty($dataValues['user_id'])) {
                 $this->db->where('user_id', $dataValues['user_id']);
-            
                 $dataValues["updated_at"] = date("Y-m-d H:i:s");
                 $this->db->where('is_delete', 'No');
                 $dataValues['last_update_ip'] = $_SERVER['REMOTE_ADDR'];
@@ -176,12 +170,6 @@ class User_model extends My_Model
         return $user_id;
     }
 
-    public function update_password($where_arr,$update_arr)
-    {
-        $this->db->where($where_arr);
-        $this->db->update('registered_users', $update_arr);
-    }
-
 
     public function getUserById($user_id)
     {
@@ -191,6 +179,7 @@ class User_model extends My_Model
             $this->db->from('registered_users as e');
             $this->db->where('e.user_id', $user_id);
             $this->db->where('is_delete', 'No');
+
 
             $return = $this->db->get()->row();
         }
@@ -219,20 +208,6 @@ class User_model extends My_Model
         $this->db->select('*');
         $this->db->from('registered_users');
         $this->db->where('user_name', $username);
-        $this->db->where('is_delete', 'No');
-        $this->db->where('site_code', getCustomConfigItem('site_code'));
-        $query = $this->db->get()->row();
-
-        return $query;
-    }
-
-    public function check_username_exists_for_forgot_password($where)
-    {
-        $data = array();
-
-        $this->db->select('*');
-        $this->db->from('registered_users');
-        $this->db->where($where);
         $this->db->where('is_delete', 'No');
 
         $query = $this->db->get()->row();
@@ -346,15 +321,15 @@ class User_model extends My_Model
         return $return;
     }
 
-    public function getUserByUserName($user_name)
+    public function getUserByUserName($user_id)
     {
         $return = NULL;
-        if (!empty($user_name)) {
+        if (!empty($user_id)) {
             $this->db->select('e.*');
             $this->db->from('registered_users as e');
-            $this->db->where('e.user_name', $user_name);
+            $this->db->where('e.user_name', $user_id);
             $this->db->where('is_delete', 'No');
-            $this->db->where('site_code', getCustomConfigItem('site_code'));
+
             $return = $this->db->get()->row_array();
         }
         return $return;
@@ -427,7 +402,6 @@ class User_model extends My_Model
             $this->db->select('user_id,user_name,name');
             $this->db->from('registered_users as e');
             $this->db->where('is_delete', 'No');
-            $this->db->where('site_code', getCustomConfigItem('site_code'));
 
             $this->db->where('e.master_id', $user_id);
             if ($userName != null) {
@@ -493,36 +467,4 @@ class User_model extends My_Model
         return $return;
     }
 
-
-    public function getUserIdsBySiteCode($site_code)
-    {
-        $return = NULL;
-        if (!empty($site_code)) {
-            $this->db->select('e.user_id');
-            $this->db->from('registered_users as e');
-            $this->db->where('is_delete', 'No');
-
-            $this->db->where('e.site_code', $site_code);
-           
-            $return = $this->db->get()->result();
-        }
-
-
-        return $return;
-    }
-
-    public function get_referred_user_count($dataArray)
-    {
-        $this->db->select('registered_users.*');
-        $this->db->from('registered_users ');
-        $this->db->join('deposit_request d', 'd.user_id = registered_users.user_id', 'left');
-        $this->db->where('is_delete', 'No');
-        // $this->db->where('d.status', 'Confirm');
-        $this->db->where('registered_users.referral_code', $dataArray['referral_code']);
-        $this->db->group_by('registered_users.user_id');
-        $query = $this->db->get();        
-        $return = $query->num_rows();
-
-        return $return;
-    }
 }

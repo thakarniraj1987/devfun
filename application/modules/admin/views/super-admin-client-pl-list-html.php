@@ -72,7 +72,7 @@
                     $total_amount  += $user_pl;
 
 
-              ?>
+            ?>
 
                     <tr class=" content_user_table ">
                         <td><a href="<?php echo base_url(); ?>clientpl/<?php echo $report['user_id'] ?>"><?php echo $report['user_name'] ?></a></td>
@@ -160,7 +160,7 @@
             </tr>
         </tfoot>
     <?php
-            }?>
+            } ?>
 </div>
 
 <script src="https://www.365exch.vip/assets/js/serialize_json.js"></script>

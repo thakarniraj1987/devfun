@@ -988,11 +988,11 @@ function setCookieMatch(MarketId, matchId, isMatchOdds) {
     }
 
 
-    // function goBack() {
+    function goBack() {
 
 
-    //     window.history.back();
-    // }
+        window.history.back();
+    }
 
     function updateTerm() {
         $.ajax({
@@ -1591,7 +1591,11 @@ function setCookieMatch(MarketId, matchId, isMatchOdds) {
             }
             i++;
         });
-
+        $('.UserChipData').click(function() {
+            var html = '<div id="addUser" class="modal fade" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header mod-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Chip Setting</h4></div><div class="modal-body"><div id="addUserMsg"></div><form id="stockez_add" method="post" class="form-inline"><div class="modal-body"><span id="msg_error"></span><span id="errmsg"></span><input type="hidden" name="ChipUserID" id="ChipUserID" value=""><div class="fullrow"><div class="col-md-6 col-sm-6col-xs-6" ><div class="form-group"><label for="email">Chips Name 1:</label><input type="text" name="Name1" class="form-control" id="Name1"><span id="Name1N" class="errmsg"></span></div></div><div class="col-md-6 col-sm-6col-xs-6"><div class="form-group"><label for="pwd">Chip Value 1:</label><input type="text" name="Value1" class="form-control" id="Value1" ><span id="Value1N" class="errmsg"></span> </div> </div> <div class="col-md-6 col-sm-6col-xs-6" > <div class="form-group"> <label for="email">Chips Name 2:</label> <input type="text" name="Name2" class="form-control" id="Name2" > <span id="Name2N" class="errmsg"></span> </div> </div> <div class="col-md-6 col-sm-6col-xs-6" > <div class="form-group"> <label for="pwd">Chip Value 2:</label> <input type="text" name="Value2" class="form-control" id="Value2" > <span id="Value2N" class="errmsg"></span> </div> </div> <div class="col-md-6 col-sm-6col-xs-6" > <div class="form-group"> <label for="email">Chips Name 3:</label> <input type="text" name="Name3" class="form-control" id="Name3" > <span id="Name3N" class="errmsg"></span> </div> </div> <div class="col-md-6 col-sm-6col-xs-6" > <div class="form-group"> <label for="pwd">Chip Value 3:</label> <input type="text" name="Value3" class="form-control" id="Value3" > <span id="Value3N" class="errmsg"></span> </div> </div> <div class="col-md-6 col-sm-6col-xs-6" > <div class="form-group"> <label for="email">Chips Name 4:</label> <input type="text" name="Name4" class="form-control" id="Name4" > <span id="Name4N" class="errmsg"></span> </div> </div> <div class="col-md-6 col-sm-6col-xs-6" > <div class="form-group"> <label for="pwd">Chip Value 4:</label> <input type="text" name="Value4" class="form-control" id="Value4" > <span id="Value4N" class="errmsg"></span> </div> </div> <div class="col-md-6 col-sm-6col-xs-6" > <div class="form-group"> <label for="email">Chips Name 5:</label> <input type="text" name="Name5" class="form-control" id="Name5" > <span id="Name5N" class="errmsg"></span> </div> </div> <div class="col-md-6 col-sm-6col-xs-6" > <div class="form-group"> <label for="pwd">Chip Value 5:</label> <input type="text" name="Value5" class="form-control" id="Value5" > <span id="Value5N" class="errmsg"></span> </div> </div> <div class="col-md-6 col-sm-6col-xs-6" > <div class="form-group"> <label for="email">Chips Name 6:</label> <input type="text" name="Name6" class="form-control" id="Name6" > <span id="Name6N" class="errmsg"></span> </div> </div> <div class="col-md-6 col-sm-6col-xs-6" > <div class="form-group"> <label for="pwd">Chip Value 6:</label> <input type="text" name="Value6" class="form-control" id="Value6" > <span id="Value6N" class="errmsg"></span> </div> </div> </div> </div> <div class="modal-footer" > <div class="text-center" id="button_change"> <button type="button" class="btn btn-success" id="updateUserChip" > Update Chip Setting </button> </div> <div class="clearfix"></div> </div> </form> </div> </div> </div></div>';
+            $('.forModal').html(html);
+            setChipStackVal();
+        });
 
         /*From Left.php*/
         $('.dropdown-submenu a.test').on("click", function(e) {

@@ -53,10 +53,6 @@
             // $data['count_jobpost'] = $this->CI->commonlib->get_total_jobpost();
             // $data['count_skill'] = $this->CI->commonlib->get_total_skill();
             // $data['count_country'] = $this->CI->commonlib->get_total_country();
-            $this->_CI->load->model('PaymentMethods_model');
-            $master_id = get_user_id();
-            
-            $data['request_counts']=$this->_CI->PaymentMethods_model->get_request_counts($master_id);
             $data['uri_segment_2'] = $this->CI->uri->segment(2);
             $data['uri_segment_3'] = $this->CI->uri->segment(3);
             $data["sidebar"] = $this->CI->load->viewPartial($this->viewPath . 'sidebar', $data);

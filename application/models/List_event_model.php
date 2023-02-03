@@ -60,7 +60,6 @@ class List_event_model extends My_Model
         $this->db->order_by('created_at','DESC');
 
         $return = $this->db->get()->result();
-
         return $return;
     }
 }

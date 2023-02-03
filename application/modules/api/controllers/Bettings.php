@@ -545,8 +545,4 @@ class Bettings extends My_Controller
             }
         }
     }
-
-    public function get_anim_url(){
-        p(get_anim_url());
-    }
 }

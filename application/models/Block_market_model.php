@@ -52,7 +52,7 @@ class Block_market_model extends My_Model
         $this->db->where($dataValues);
         $return = $this->db->get()->result_array();
         
-// p($this->db->last_query());
+
          return $return;
     }
 

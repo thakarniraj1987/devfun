@@ -40,7 +40,7 @@ if (!empty($events)) {
                                     </span>
                                     <div class="block_box_btn">
                                         <button class="btn btn-primary btn-xs" onclick="getCurrentBets(<?php echo $event['event_id']; ?>)">Bets</button>
-                                        
+                                        <button class="btn btn-primary btn-xs" onclick="closeBetBox(<?php echo $event['event_id']; ?>)">X</button>
                                     </div>
                                 </div>
                             </div>

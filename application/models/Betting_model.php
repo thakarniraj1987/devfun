@@ -106,8 +106,6 @@ class Betting_model extends My_Model
 
     public function get_bettings_list($dataValues)
     {
-
-        $match_id = $dataValues['match_id'];
         if (!empty($dataValues)) {
             $this->db->select('*,rs.user_name,rs.user_name as client_name,rs.name as client_user_name,mt.market_name as market_name,et.name as game, b.created_at as created_at');
             $this->db->from('betting as b');
@@ -116,22 +114,10 @@ class Betting_model extends My_Model
 
             $this->db->join('registered_users as rs', 'rs.user_id = b.user_id', 'left');
             $this->db->join('market_types as mt', 'mt.market_id = b.market_id', 'left');
-
-            if ($match_id == '98790' || $match_id == '56767' || $match_id == '56967' || $match_id == '87564' || $match_id == '56768' || $match_id == '98791') {
-                $this->db->join('market_book_odds as mbs', 'mt.market_id = mbs.market_id', 'left');
-            }
-
-
-
             $this->db->where('b.user_id', $dataValues['user_id']);
             $this->db->where('b.match_id', $dataValues['match_id']);
             $this->db->where('b.status', 'Open');
-
-
-
-            if ($match_id == '98790' || $match_id == '56767' || $match_id == '56967' || $match_id == '87564' || $match_id == '56768' || $match_id == '98791') {
-                $this->db->where('mbs.status', 'OPEN');
-            }
+            // $this->db->where('b.is_delete', 'No');
 
             $this->db->order_by('b.created_at', 'asc');
 
@@ -189,10 +175,6 @@ class Betting_model extends My_Model
                 $this->db->where('b.market_id', $dataValues['market_id']);
             }
 
-            if (!empty($dataValues['selection_id'])) {
-                $this->db->where('b.selection_id', $dataValues['selection_id']);
-            }
-
             if (!empty($dataValues['status'])) {
                 $this->db->where('b.status', $dataValues['status']);
             }
@@ -221,6 +203,13 @@ class Betting_model extends My_Model
                 $this->db->or_like('b.betting_type',  $dataValues['search']);
                 $this->db->or_like('b.betting_id',  $dataValues['search']);
                 $this->db->or_like('b.ip_address',  $dataValues['search']);
+
+
+
+
+
+
+
 
                 $this->db->group_end();
             }
@@ -369,12 +358,12 @@ class Betting_model extends My_Model
 
     public function get_bettings_markets($user_id)
     {
-        $this->db->select('b.*');
+        $this->db->select('b.*,le.event_name,mbo.status as market_status,mt.market_start_time,et.name as sport_name,mt.market_name market_name,b.created_at');
         $this->db->from('betting as b');
-        // $this->db->join('list_events as le', 'le.event_id = b.match_id');
-        // $this->db->join('market_book_odds as mbo', 'mbo.market_id = b.market_id');
-        // $this->db->join('market_types as mt', 'mt.market_id = b.market_id');
-        // $this->db->join('event_types as et', 'et.event_type = le.event_type');
+        $this->db->join('list_events as le', 'le.event_id = b.match_id');
+        $this->db->join('market_book_odds as mbo', 'mbo.market_id = b.market_id');
+        $this->db->join('market_types as mt', 'mt.market_id = b.market_id');
+        $this->db->join('event_types as et', 'et.event_type = le.event_type');
 
 
         $this->db->where('user_id', $user_id);
@@ -522,11 +511,15 @@ class Betting_model extends My_Model
         }
     }
 
+
+
     public function delete_bet_by_id($betting_id)
     {
         if (!empty($betting_id)) {
             $this->db->where('betting_id', $betting_id);
             $this->db->delete('masters_betting_settings');
+
+
             $this->db->where('betting_id', $betting_id);
             $this->db->delete('betting');
         }
@@ -540,7 +533,6 @@ class Betting_model extends My_Model
             $this->db->from('betting');
             $this->db->where($dataValues);
             $this->db->where('is_delete', 'No');
-
 
 
 
@@ -588,7 +580,6 @@ class Betting_model extends My_Model
             $this->db->where($dataValues);
             $this->db->where('is_delete', 'No');
 
-
             if (!empty($usersArr)) {
                 $this->db->group_start();
 
@@ -597,21 +588,6 @@ class Betting_model extends My_Model
                 }
                 $this->db->group_end();
             }
-
-
-            if (!empty($usersArr)) {
-                $this->db->group_start();
-
-                foreach ($usersArr as $user) {
-                    $this->db->or_where('user_id', $user);
-                }
-                $this->db->group_end();
-            }
-
-            // $this->db->or_where('unmatch_bet', 'No');
-
-
-
             $this->db->order_by('betting_id', 'asc');
             $return = $this->db->get()->result();
 
@@ -643,7 +619,7 @@ class Betting_model extends My_Model
 
 
     public function get_open_markets($dataValues)
-    {    
+    {
         $this->db->select('b.*,le.event_name,mbo.status as market_status,mt.market_start_time,et.name as sport_name, mt.market_name market_name,b.created_at');
         $this->db->from('betting as b');
         $this->db->join('list_events as le', 'le.event_id = b.match_id');
@@ -653,10 +629,7 @@ class Betting_model extends My_Model
 
         $this->db->where('betting_type', 'Match');
         $this->db->where('b.status', 'Open');
-        $this->db->group_start();
         $this->db->where('mt.market_name', 'Match Odds');
-        $this->db->or_where('mt.market_name', 'Toss');
-        $this->db->group_end();
         // $this->db->where('b.is_delete', 'No');
 
 
@@ -1116,19 +1089,6 @@ class Betting_model extends My_Model
         $this->db->where('is_delete', 'No');
 
         $return = $this->db->get()->row_array();
-        return $return;
-    }
-
-    public function get_betting_by_runner_id($dataArray)
-    {
-        $this->db->select('*');
-        $this->db->from('betting');
-        $this->db->where('match_id', $dataArray['match_id']);
-        $this->db->where('market_id', $dataArray['market_id']);
-        $this->db->where('selection_id', $dataArray['selection_id']);
-        $this->db->where('is_delete', 'No');
-
-        $return = $this->db->get()->result_array();
         return $return;
     }
 
@@ -1773,7 +1733,6 @@ class Betting_model extends My_Model
             $this->db->where('selection_id', $dataValues['selection_id']);
 
             $this->db->where('match_id', $dataValues['match_id']);
-
             // $this->db->where('b.is_delete', 'No');
 
             $this->db->where('mbs.user_id', $dataValues['user_id']);
@@ -1872,27 +1831,14 @@ class Betting_model extends My_Model
     public function get_event_wise_profit_loss($dataValues)
     {
 
-        if(empty($dataValues['market_id']))
-        {
-            $query = $this->db->query("select b.match_id,b.market_id,b.event_name,(CASE WHEN b.betting_type = 'Fancy' THEN 'Fancy'  ELSE b.market_name END) AS market_name,
-            SUM(CASE WHEN l.`is_commission` = 'No'  AND b.bet_result = 'Plus' THEN b.profit  ELSE 0 END) AS profit,
-            SUM(CASE WHEN l.`is_commission` = 'No' AND b.bet_result = 'Minus' THEN b.loss  ELSE 0 END) AS loss,SUM(CASE WHEN l.`is_commission` = 'Yes'  AND l.`transaction_type` = 'Credit' THEN l.amount  ELSE 0 END) AS plus_commission,
-            SUM(CASE WHEN l.`is_commission` = 'Yes'  AND l.`transaction_type` = 'Debit'  THEN l.amount   ELSE 0 END) AS minus_commission,b.created_at FROM `betting` AS b LEFT JOIN `ledger`
-             AS l ON l.betting_id = b.`betting_id`  WHERE b.user_id = '" . $dataValues['user_id'] . "' AND b.match_id = '" . $dataValues['event_id'] . "' and b.status = 'Settled' GROUP BY b.market_name,b.betting_type");
-    
-            $results = $query->result_array();
-        }
-        else
-        {
-            $query = $this->db->query("select b.match_id,b.market_id,b.event_name,(CASE WHEN b.betting_type = 'Fancy' THEN 'Fancy'  ELSE b.market_name END) AS market_name,
-            SUM(CASE WHEN l.`is_commission` = 'No'  AND b.bet_result = 'Plus' THEN b.profit  ELSE 0 END) AS profit,
-            SUM(CASE WHEN l.`is_commission` = 'No' AND b.bet_result = 'Minus' THEN b.loss  ELSE 0 END) AS loss,SUM(CASE WHEN l.`is_commission` = 'Yes'  AND l.`transaction_type` = 'Credit' THEN l.amount  ELSE 0 END) AS plus_commission,
-            SUM(CASE WHEN l.`is_commission` = 'Yes'  AND l.`transaction_type` = 'Debit'  THEN l.amount   ELSE 0 END) AS minus_commission,b.created_at FROM `betting` AS b LEFT JOIN `ledger`
-             AS l ON l.betting_id = b.`betting_id`  WHERE b.user_id = '" . $dataValues['user_id'] . "' AND b.match_id = '" . $dataValues['event_id'] . "' and b.status = 'Settled' and b.market_id = '".$dataValues['market_id']."'  GROUP BY b.market_name,b.betting_type");
-    
-            $results = $query->result_array();
-        }
-       
+
+        $query = $this->db->query("select b.match_id,b.market_id,b.event_name,(CASE WHEN b.betting_type = 'Fancy' THEN 'Fancy'  ELSE b.market_name END) AS market_name,
+        SUM(CASE WHEN l.`is_commission` = 'No'  AND b.bet_result = 'Plus' THEN b.profit  ELSE 0 END) AS profit,
+        SUM(CASE WHEN l.`is_commission` = 'No' AND b.bet_result = 'Minus' THEN b.loss  ELSE 0 END) AS loss,SUM(CASE WHEN l.`is_commission` = 'Yes'  AND l.`transaction_type` = 'Credit' THEN l.amount  ELSE 0 END) AS plus_commission,
+        SUM(CASE WHEN l.`is_commission` = 'Yes'  AND l.`transaction_type` = 'Debit'  THEN l.amount   ELSE 0 END) AS minus_commission,b.created_at FROM `betting` AS b LEFT JOIN `ledger`
+         AS l ON l.betting_id = b.`betting_id`  WHERE b.user_id = '" . $dataValues['user_id'] . "' AND b.match_id = '" . $dataValues['event_id'] . "' and b.status = 'Settled' GROUP BY b.market_name,b.betting_type");
+
+        $results = $query->result_array();
 
         return $results;
     }
@@ -1902,12 +1848,7 @@ class Betting_model extends My_Model
     {
 
 
-    
-
-        $query = $this->db->query("select * from 
-        
-        (
-        select 'No' AS is_casino,market_id,market_name,match_id,event_name,created_at , SUM(profit - loss) AS total_p_l ,SUM(plus_commission - minus_commission) AS total_commission_pl FROM (
+        $query = $this->db->query("select match_id,event_name,created_at , SUM(profit - loss) AS total_p_l ,SUM(plus_commission - minus_commission) AS total_commission_pl FROM (
         
         SELECT b.match_id,b.market_id,b.event_name,(CASE WHEN b.betting_type = 'Fancy' THEN 'Fancy'  ELSE b.market_name END) AS market_name,
         SUM(CASE WHEN l.`is_commission` = 'No'  AND b.bet_result = 'Plus' THEN b.profit  ELSE 0 END) AS profit,
@@ -1917,34 +1858,15 @@ class Betting_model extends My_Model
         SUM(CASE WHEN l.`is_commission` = 'Yes'  AND l.`transaction_type` = 'Debit'  THEN l.amount  ELSE 0 END) AS minus_commission,
         b.`created_at`
         FROM `betting` AS b LEFT JOIN `ledger`
-        AS l ON l.betting_id = b.`betting_id`  WHERE b.user_id = '" . $dataValues['user_id'] . "'    and b.status = 'Settled' and b.event_type IN (4,2,1,7) AND b.updated_at >= '" . $dataValues['fromDate'] . "' AND b.updated_at <= '" . $dataValues['toDate'] . "'  GROUP BY b.match_id, b.market_name,b.betting_type ) AS ut  GROUP BY match_id
-        
-
-        union all
-
-
-        select 'Yes' AS is_casino,market_id,market_name,match_id,event_name,created_at , SUM(profit - loss) AS total_p_l ,SUM(plus_commission - minus_commission) AS total_commission_pl FROM (
-        
-            SELECT b.match_id,b.market_id,b.event_name,(CASE WHEN b.betting_type = 'Fancy' THEN 'Fancy'  ELSE b.market_name END) AS market_name,
-            SUM(CASE WHEN l.`is_commission` = 'No'  AND b.bet_result = 'Plus' THEN b.profit  ELSE 0 END) AS profit,
-            SUM(CASE WHEN l.`is_commission` = 'No' AND b.bet_result = 'Minus' THEN b.loss  ELSE 0 END) AS loss,
-            
-            SUM(CASE WHEN l.`is_commission` = 'Yes'  AND l.`transaction_type` = 'Credit' THEN l.amount  ELSE 0 END) AS plus_commission,
-            SUM(CASE WHEN l.`is_commission` = 'Yes'  AND l.`transaction_type` = 'Debit'  THEN l.amount  ELSE 0 END) AS minus_commission,
-            b.`created_at`
-            FROM `betting` AS b LEFT JOIN `ledger`
-            AS l ON l.betting_id = b.`betting_id`  WHERE b.user_id = '" . $dataValues['user_id'] . "'    and b.status = 'Settled' and b.event_type NOT IN (4,2,1,7)  AND b.updated_at >= '" . $dataValues['fromDate'] . "' AND b.updated_at <= '" . $dataValues['toDate'] . "'  GROUP BY b.match_id,b.market_id, b.market_name,b.betting_type ) AS ut  GROUP BY match_id,market_id
-        
-        ) as lis ORDER BY created_at ASC");
+        AS l ON l.betting_id = b.`betting_id`  WHERE b.user_id = '".$dataValues['user_id']."'    and b.status = 'Settled' GROUP BY b.match_id, b.market_name,b.betting_type ) AS ut  GROUP BY match_id ORDER BY ut.created_at ASC");
 
         $results = $query->result_array();
 
-            // p($this->db->last_query());
         return $results;
     }
 
 
-    public function get_masters_event_wise_profit_loss($dataValues)
+     public function get_masters_event_wise_profit_loss($dataValues)
     {
 
 
@@ -1957,243 +1879,7 @@ class Betting_model extends My_Model
         $results = $query->result_array();
 
 
-         return $results;
-    }
-
-
-    public function get_manual_bettings_markets($user_id)
-    {
-        $site_code = getCustomConfigItem('site_code');
-        $this->db->select('b.*,le.event_name,mbo.status as market_status,mt.market_start_time,et.name as sport_name,mt.market_name market_name,b.created_at');
-        $this->db->from('betting as b');
-        $this->db->join('manual_list_events as le', 'le.event_id = b.match_id');
-        $this->db->join('manual_market_book_odds as mbo', 'mbo.market_id = b.market_id');
-        $this->db->join('manual_market_types as mt', 'mt.market_id = b.market_id');
-        $this->db->join('event_types as et', 'et.event_type = le.event_type');
-
-
-        $this->db->where('user_id', $user_id);
-        $this->db->where('betting_type', 'Match');
-        $this->db->where('b.status', 'Open');
-        $this->db->where('le.site_code', $site_code);
-
-        $this->db->group_by('market_id');
-
-        $return = $this->db->get()->result();
-        return $return;
-    }
-
-
-    public function get_manual_open_markets($dataValues)
-    {
-        $this->db->select('b.*,le.event_name,mbo.status as market_status,mt.market_start_time,et.name as sport_name, mt.market_name market_name,b.created_at');
-        $this->db->from('betting as b');
-        $this->db->join('manual_list_events as le', 'le.event_id = b.match_id');
-        $this->db->join('manual_market_book_odds as mbo', 'mbo.market_id = b.market_id');
-        $this->db->join('manual_market_types as mt', 'mt.market_id = b.market_id');
-        $this->db->join('event_types as et', 'et.event_type = le.event_type');
-
-        $this->db->where('betting_type', 'Match');
-        $this->db->where('b.status', 'Open');
-        $this->db->where('mt.market_name', 'Match Odds');
-        // $this->db->where('b.is_delete', 'No');
-
-
-        $this->db->group_by('market_id');
-        $return = $this->db->get()->result();
-
-        return $return;
-    }
-
-    public function cancel_bet_by_id($betting_id)
-    {
-        if (!empty($betting_id)) {
-
-
-
-            $dataValues = array(
-                'is_cancel' => 'Yes',
-
-                'profit' => '0',
-                'loss' => '0',
-                'updated_at' => date("Y-m-d H:i:s")
-
-            );
-
-            $this->db->where('betting_id', $betting_id);
-            $this->db->update('masters_betting_settings', $dataValues);
-
-
-
-            $dataValues = array(
-                'is_cancel' => 'Yes',
-                'status' => 'Settled',
-
-                'profit' => '0',
-                'loss' => '0',
-                'bet_cancel_by' => $_SESSION['my_userdata']['user_name'],
-                'updated_at' => date("Y-m-d H:i:s")
-
-            );
-
-            $this->db->where('betting_id', $betting_id);
-            $this->db->update('betting', $dataValues);
-        }
-    }
-
-
-    public function count_match_wise_masters_commission($dataValues = array())
-    {
-
-
-        $query = $this->db->query("select  ut.total_pl,ut.master_commission ,SUM(CASE WHEN ut.total_pl > 0 THEN ((ut.total_pl * ut.master_commission) / 100)  ELSE 0 END) AS total_commission FROM  (
-            SELECT b1.user_id,b1.event_name,b1.market_id,mbs1.master_commission,
-            SUM(CASE WHEN b1.bet_result = 'Plus' THEN b1.profit ELSE b1.loss * -1 END) AS total_pl 
-            FROM `masters_betting_settings`  AS mbs1 LEFT JOIN betting AS b1 ON b1.betting_id = mbs1.betting_id WHERE  (b1.betting_id IN (
-            SELECT b.betting_id FROM `masters_betting_settings` as mbs left join betting as b on b.betting_id = mbs.betting_id  WHERE   mbs.user_id = '".$dataValues['user_id']."'  and b.match_id = '".$dataValues['match_id']."' and b.betting_type = 'Match'    
-            )) AND mbs1.user_type  = '".$dataValues['user_type']."' GROUP BY b1.user_id,b1.match_id,b1.market_id
-            ) AS ut");
-        $result = $query->row();
-
-
-        // p($this->db->last_query());
-        return $result;
-    }
-
-    public function count_masters_commission($dataValues = array())
-    {
-
-
-        $query = $this->db->query("select  ut.total_pl,ut.master_commission ,SUM(CASE WHEN ut.total_pl > 0 THEN ((ut.total_pl * ut.master_commission) / 100)  ELSE 0 END) AS total_commission FROM  (
-            SELECT b1.user_id,b1.event_name,b1.market_id,mbs1.master_commission,
-            SUM(CASE WHEN b1.bet_result = 'Plus' THEN b1.profit ELSE b1.loss * -1 END) AS total_pl 
-            FROM `masters_betting_settings`  AS mbs1 LEFT JOIN betting AS b1 ON b1.betting_id = mbs1.betting_id WHERE  (b1.betting_id IN (
-            SELECT b.betting_id FROM `masters_betting_settings` as mbs left join betting as b on b.betting_id = mbs.betting_id  WHERE   mbs.user_id = '".$dataValues['user_id']."'and  b.event_type IN (1,4,2) and betting_type = 'Match' 
-            )) AND mbs1.user_type  = '".$dataValues['user_type']."' and b1.betting_type = 'Match' GROUP BY b1.user_id,b1.match_id,b1.market_id
-            ) AS ut");
-        $result = $query->row();
-
-
-         return $result;
-    }
-
-
-
-    public function count_total_unmatch_exposure($user_id)
-    {
-        $query = $this->db->query("select SUM(loss * -1) AS total_exposure  FROM `betting` WHERE user_id = '".$user_id."' AND STATUS = 'Open' AND unmatch_bet = 'Yes'");
-        $result = $query->row();
-
-
-        // p($this->db->last_query());
-        return $result;
-    }
-
-    public function count_total_unmatch_market_exposure($dataArray = array())
-    {
-        $query = $this->db->query("select SUM(loss * -1) AS total_exposure  FROM `betting` WHERE user_id = '".$dataArray['user_id']."' and match_id = '".$dataArray['match_id']."' and market_id = '".$dataArray['market_id']."'   AND STATUS = 'Open' AND unmatch_bet = 'Yes'");
-        $result = $query->row();
-
-
-        // p($this->db->last_query());
-        return $result;
-    }
-
-    public function count_masters_market_exposure($dataValues = array())
-    {
-
-        // p("select selection_id,runner_name,(SELECT SUM( 
-        //     CASE WHEN is_back = 1 AND selection_id = mbos.`selection_id` THEN mbs.loss * -1  
-        //     WHEN is_back = 1 AND selection_id <> mbos.`selection_id` THEN mbs.profit
-        //     WHEN is_back = 0 AND selection_id = mbos.`selection_id` THEN mbs.loss 
-        //     WHEN is_back = 0 AND selection_id <> mbos.`selection_id` THEN mbs.profit * -1
-        //     ELSE 0 END
-        //     ) FROM masters_betting_settings AS mbs LEFT JOIN betting AS b ON b.betting_id = mbs.betting_id 
-        //     WHERE mbs.user_id = '".$dataValues['user_id']."' AND b.market_id = '".$dataValues['market_id']."' and b.match_id = '".$dataValues['match_id']."' AND b.status = 'Open' AND b.is_cancel = 'No' AND b.unmatch_bet = 'No') 
-        //      AS exposure  
-        //      FROM  `market_book_odds_runner`  AS mbos WHERE market_id = '".$dataValues['market_id']."' and event_id = '".$dataValues['match_id']."'
-        //     ",0);
-        $query1 = $this->db->query("select selection_id,runner_name,(SELECT SUM( 
-        CASE WHEN is_back = 1 AND selection_id = mbos.`selection_id` THEN mbs.loss * -1  
-        WHEN is_back = 1 AND selection_id <> mbos.`selection_id` THEN mbs.profit
-        WHEN is_back = 0 AND selection_id = mbos.`selection_id` THEN mbs.loss 
-        WHEN is_back = 0 AND selection_id <> mbos.`selection_id` THEN mbs.profit * -1
-        ELSE 0 END
-        ) FROM masters_betting_settings AS mbs LEFT JOIN betting AS b ON b.betting_id = mbs.betting_id 
-        WHERE mbs.user_id = '".$dataValues['user_id']."' AND b.market_id = '".$dataValues['market_id']."' and b.match_id = '".$dataValues['match_id']."' AND b.status = 'Open' AND b.is_cancel = 'No' AND b.unmatch_bet = 'No') 
-         AS exposure  
-         FROM  `market_book_odds_runner`  AS mbos WHERE market_id = '".$dataValues['market_id']."' and event_id = '".$dataValues['match_id']."'
-        ");
-
-        $return = $query1->result_array();
-        return $return;
-    }
-
-
-    public function get_open_markets_new($dataValues)
-    {    
-
- 
-        $this->db->select('b.*');
-        $this->db->from('betting as b');
-        $this->db->join('masters_betting_settings as mbs', 'mbs.betting_id = b.betting_id');
-        $this->db->where('betting_type', 'Match');
-        $this->db->where('b.status', 'Open');
-        $this->db->where('mbs.user_id', $dataValues['user_id']);
-
-        $this->db->group_start();
-        $this->db->where('b.market_name', 'Match Odds');
-        $this->db->or_where('b.market_name', 'Toss');
-        $this->db->group_end();
-        // $this->db->where('b.is_delete', 'No');
-
-        $this->db->group_by('match_id');
-        $this->db->group_by('market_id');
-        $return = $this->db->get()->result();
-
-
- 
-
-        return $return;
-    }
-
-
-    public function count_match_market_wise_masters_commission($dataValues = array())
-    {
-        $query = $this->db->query("select  ut.total_pl,ut.master_commission ,SUM(CASE WHEN ut.total_pl > 0 THEN ((ut.total_pl * ut.master_commission) / 100)  ELSE 0 END) AS total_commission FROM  (
-            SELECT b1.user_id,b1.event_name,b1.market_id,mbs1.master_commission,
-            SUM(CASE WHEN b1.bet_result = 'Plus' THEN b1.profit ELSE b1.loss * -1 END) AS total_pl 
-            FROM `masters_betting_settings`  AS mbs1 LEFT JOIN betting AS b1 ON b1.betting_id = mbs1.betting_id WHERE  (b1.betting_id IN (
-            SELECT b.betting_id FROM `masters_betting_settings` as mbs left join betting as b on b.betting_id = mbs.betting_id  WHERE   mbs.user_id = '".$dataValues['user_id']."'  and b.match_id = '".$dataValues['match_id']."' and b.market_id = '".$dataValues['market_id']."'  AND b.`betting_type` = 'Match'    
-            )) AND mbs1.user_type  = '".$dataValues['user_type']."'  GROUP BY b1.user_id,b1.match_id,b1.market_id
-            ) AS ut");
-        $result = $query->row();
-
-
-        // p($this->db->last_query());
-        return $result;
-    }
-
-
-    public function get_unmatch_bettings_by_market_id($dataValues, $usersArr = array())
-    {
-        if (!empty($dataValues)) {
-
-             $this->db->select('*');
-            $this->db->from('betting');
-            $this->db->where($dataValues);
-            $this->db->where('is_delete', 'No');
-
-
-         
-            $this->db->where('unmatch_bet', 'Yes');
-
-
-
-            $this->db->order_by('betting_id', 'asc');
-            $return = $this->db->get()->result();
-
-            return $return;
-        }
+        p($this->db->last_query());
+        return $results;
     }
 }

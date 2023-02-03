@@ -78,7 +78,6 @@ class Masters_betting_settings_model extends My_Model
 
     public function get_open_bettings_list($dataValues = array())
     {
-        
         $return = array();
 
         $this->db->select('*,mbs.profit as profit,mbs.loss as loss,b.created_at,b.profit as client_profit,b.loss as client_loss');
@@ -214,63 +213,14 @@ class Masters_betting_settings_model extends My_Model
         (SELECT mbs.betting_id
         FROM `masters_betting_settings` AS `mbs`
         JOIN `betting` AS `b` ON `b`.`betting_id` = `mbs`.`betting_id`
-        WHERE `b`.`market_id` = '" . $dataValues['market_id'] . "'
-        AND `mbs`.`user_id` = '" . $dataValues['user_id'] . "'
+        WHERE `b`.`market_id` = '".$dataValues['market_id']."'
+        AND `mbs`.`user_id` = '".$dataValues['user_id']."'
         AND `b`.`status` = 'Open'
-        AND `b`.`is_delete` = 'No') AND user_type = '" . $dataValues['user_type'] . "';");
+        AND `b`.`is_delete` = 'No') AND user_type = '".$dataValues['user_type']."';");
         $result = $query->result();
 
 
-
-        return $result;
-    }
-
-
-    public function get_event_open_bettings_list1($dataValues = array())
-    {
-        $return = array();
-
-        $this->db->select('*,ru.user_name as client_name,ru.name as client_user_name,b.created_at');
-        $this->db->from('masters_betting_settings as mbs');
-        $this->db->join('betting as b', 'b.betting_id = mbs.betting_id');
-        $this->db->join('registered_users as ru', 'ru.user_id = b.user_id');
-
-
-
-        //  if (isset($dataValues['type'])) {
-        //     if ($dataValues['type'] == 'Match') {
-        //         if (isset($dataValues['selection_id'])) {
-        //             $this->db->where('b.market_id', $dataValues['selection_id']);
-        //         }
-        //     } else if ($dataValues['type'] == 'Fancy') {
-
-                
-        //         if (isset($dataValues['selection_id'])) {
-        //             $this->db->where('b.selection_id', $dataValues['selection_id']);
-        //         }
-        //     }
-
-            
-        //         $this->db->where('b.betting_type', $dataValues['type']);
-           
-        // }
-
-        if (isset($dataValues['user_id'])) {
-            $this->db->where('mbs.user_id', $dataValues['user_id']);
-        }
-
-        if (isset($dataValues['match_id'])) {
-            $this->db->where('b.match_id', $dataValues['match_id']);
-        }
-
-        $this->db->where('b.status', 'Open');
-        $this->db->where('b.is_delete', 'No');
-        $this->db->where('b.unmatch_bet', $dataValues['unmatch_bet']);
-
-
-
-
-        $return = $this->db->get()->result_array();
-        return $return;
+ 
+         return $result;
     }
 }

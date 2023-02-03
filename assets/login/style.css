@@ -37,7 +37,7 @@ ul {
     height: 100vh;
     margin: 0px;
     position: relative;
-    /* display: flex; */
+    display: flex;
     align-items: center;
     justify-content: center;
 }
@@ -63,7 +63,7 @@ ul {
 .rllogin-header {
     width: 100%;
     align-items: center;
-    /* padding: 10px; */
+    padding: 10px;
     background: #000;
     border-radius: 8px 8px 0 0;
     text-align: center;
@@ -74,8 +74,7 @@ ul {
 }
 
 .rllogin-header img {
-    width: 79%;
-    padding: 19px;
+    width: 60%;
 }
 
 .login_wrapper {
@@ -840,8 +839,8 @@ span.rules a {
 
 .btn-success {
     color: #fff;
-    background-color: #2e203a!important;
-    border-color: #2e203a!important;
+    background-color: #000!important;
+    border-color: #000!important;
     font-weight: 500;
 }
 
@@ -4992,7 +4991,7 @@ footer {
         display: block !important;
     }
     .lazy-container-login {
-        width: 87% !important;
+        width: 95% !important;
     }
     .partner_logo {
         display: inherit;
@@ -5657,20 +5656,4 @@ select:-webkit-autofill:focus {
     -webkit-text-fill-color: black;
     -webkit-box-shadow: 0 0 0px 1000px lightgrey inset;
     /* transition: background-color 5000s ease-in-out 0s; */
-}
-
-.error {
-    color: red;
-}
-
-.d-flex {
-    display: flex;
-}
-
-.modal-dialog-centered {
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-align: center;
-    align-items: center;
-    min-height: calc(100% - 1rem);
 }

@@ -14,10 +14,10 @@
                         <input type="hidden" name="ajaxUrl" id="ajaxUrl" value="profitloss">
                         <form method="get" id="formSubmit" class="form-horizontal form-label-left input_mask">
                             <div class="col-md-2 col-xs-6">
-                                <input type="text" name="from_date" value="<?php echo get_yesterday_datetime(); ?>" id="from-date" class="form-control col-md-7 col-xs-12 has-feedback-left" placeholder="From date" autocomplete="off">
+                                <input type="text" name="from_date" value="<?php echo date('Y-m-d') ?>" id="from-date" class="form-control col-md-7 col-xs-12 has-feedback-left" placeholder="From date" autocomplete="off">
                             </div>
                             <div class="col-md-2 col-xs-6">
-                                <input type="text" name="to_date" value="<?php echo get_today_end_datetime(); ?>" id="to-date" class="form-control col-md-7 col-xs-12 has-feedback-left" placeholder="To date" autocomplete="off">
+                                <input type="text" name="to_date" value="<?php echo date('Y-m-d') ?>" id="to-date" class="form-control col-md-7 col-xs-12 has-feedback-left" placeholder="To date" autocomplete="off">
                             </div>
                             <div class="col-md-3 col-xs-6">
                                 <input type="hidden" name="user_id" value="47978">
@@ -90,19 +90,16 @@
 
 
 <script>
-     $('#from-date').daterangepicker({
+    $('#from-date').daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
-        format: 'YYYY-MM-DD H:mm:ss',
-        timePicker: true,
+        format: 'YYYY-MM-DD'
     });
     $('#to-date').daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
-        format: 'YYYY-MM-DD H:mm:ss',
-        timePicker: true,
+        format: 'YYYY-MM-DD'
     });
-
 
     function blockUI() {
         $.blockUI({

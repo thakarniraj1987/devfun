@@ -342,26 +342,16 @@ $config['custom']['casino_games'] =  array(
 );
 
 
-// $config['custom']['casino_games_video'] =  array(
-//     '7ud' => 'https://route53.casinovid.in/dvideo/lucky7a/',
-//     'ab' => 'https://route53.casinovid.in/dvideo/andarbahar/',
-//     'ltp' => 'https://shroute.casinovid.in/diamondvideo/dot.php?id=3031',
-//     // 't20' => 'https://route53.casinovid.in/dvideo/teen20/',
-//     't20' => 'https://shroute.casinovid.in/diamondvideo/dot.php?id=3030',
-//     'dt20' => 'https://route53.casinovid.in/dvideo/dragontiger20/',
-//     'aaa' => 'https://route53.casinovid.in/dvideo/amar/',
-//     '32c' => 'https://route53.casinovid.in/dvideo/32b/',
-// );
 $config['custom']['casino_games_video'] =  array(
-    '7ud' => 'https://shroute.casinovid.in/diamondvideo/dot.php?id=3032',
+    '7ud' => 'https://route53.casinovid.in/dvideo/lucky7a/',
     'ab' => 'https://route53.casinovid.in/dvideo/andarbahar/',
-    'ltp' => 'https://shroute.casinovid.in/diamondvideo/dot.php?id=3031',
-    // 't20' => 'https://route53.casinovid.in/dvideo/teen20/',
-    't20' => 'https://shroute.casinovid.in/diamondvideo/dot.php?id=3030',
-    'dt20' => 'https://shroute.casinovid.in/diamondvideo/dot.php?id=3035',
-    'aaa' => 'https://shroute.casinovid.in/diamondvideo/dot.php?id=3056',
-    '32c' => 'https://shroute.casinovid.in/diamondvideo/dot.php?id=3034',
+    'ltp' => 'https://route53.casinovid.in/dvideo/onedaytp/',
+    't20' => 'https://route53.casinovid.in/dvideo/teen20',
+    'dt20' => 'https://route53.casinovid.in/dvideo/dragontiger20/',
+    'aaa' => 'https://route53.casinovid.in/dvideo/amar',
+    '32c' => 'https://route53.casinovid.in/dvideo/32b/',
 );
+
 
 $config['custom']['casino_event_type'] =  array(
     '7ud' => '1001',
@@ -373,80 +363,12 @@ $config['custom']['casino_event_type'] =  array(
     '32c' => '1007',
 );
 
-$config['custom']['casino_event_type_chk'] =  array(
-    '1001' => '7ud',
-    '1002' => 'ab',
-    '1003' => 'ltp',
-    '1004' =>  't20',
-    '1005' => 'dt20',
-    '1006' =>  'aaa',
-    '1007' => '32c',
-);
+$config['custom']['site_code'] =  'P20';
 
-$config['custom']['site_code'] =  'P35';
-
-// note 
-// 32222 is masters id all the signup users are created under this master 
-$config['custom']['super_admin'] =  32222;
-//note end
-
-
-// $config['custom']['ws_endpoint'] =  'https://ws.operator.games:3000/';
-$config['custom']['ws_endpoint'] =  'https://nginx.operator.games:8080/';
-
-
+$config['custom']['super_admin_id'] =  11344;
+$config['custom']['ws_endpoint'] =  'https://ws.operator.games:3000/';
 // $config['custom']['ws_endpoint'] =  'http://localhost:3000/';
-// $config['custom']['sms'] = array(
-//     'apikey' =>   '1e7cd25e-15ba-48ba-899a-ca5f51077809',
-//     'username' => 'hackerjeetHP',
-//     'sender_id' => 'DVYTRP',
-//     'sendername' => 'DVYTRP',
-//     'smstype' => 'TRANS',
-// );
-
-// $config['custom']['sms_format'] = "Hello, Your OTP For verfication is otp_placeholder DVYTRP";
 
 
-$config['custom']['sms'] = array(
-    'apikey' =>   '1e7cd25e-15ba-48ba-899a-ca5f51077809',
-    'username' => 'hackerjeetHP',
-    'sender_id' => 'BETSET',
-    'sendername' => 'BETSET',
-    'smstype' => 'TRANS',
-);
 
 
-// $config['custom']['deposit']="limitededitionfloors otp_placeholder DLFLELL";
-$config['custom']['sms_format'] = "You have recieved {OTP is otp_placeholder} Request from {#var#} for site {#var#} Click on link {#var#} BETSET";
-
-
-$config['custom']['account_type'] = array(
-    '' => '--SELECT TYPE--',
-    'UPI' => 'UPI',
-    'Bank' => 'Bank',
-    'Phonepe' => 'Phonepe',
-    'Gpay' => 'Gpay',
-    'Paytm' => 'Paytm',
-);
-$config['custom']['account_type_withdraw'] = array(
-    '' => '--SELECT TYPE--',
-    // 'UPI' => 'UPI',
-    'Bank' => 'Bank',
-    // 'Phonepe' => 'Phonepe',
-    // 'Gpay' => 'Gpay',
-    'Paytm' => 'Paytm',
-);
-
-
-// $config['custom']['sms'] = array(
-//     'apikey' =>   '1e7cd25e-15ba-48ba-899a-ca5f51077809',
-//     'username' => 'hackerjeetHP',
-//     'sender_id' => 'DVYTRP',
-//     'sendername' => 'DVYTRP',
-//     'smstype' => 'TRANS',
-// );
-
-// $config['custom']['deposit_notification_format'] = "Hello, You have request_message,please check it in below link https://realbets.in/deposit-requests DVYTRP";
-// $config['custom']['withdraw_notification_format'] = "Hello, You have request_message,please check it in below link https://realbets.in/withdraw-requests DVYTRP";
-
-$config['custom']['admin_mobile_number'] = "9530201155";

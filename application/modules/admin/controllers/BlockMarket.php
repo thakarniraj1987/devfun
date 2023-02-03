@@ -317,14 +317,6 @@ class BlockMarket extends My_Controller
     public function block_market_update()
     {
 
-        if ($_SESSION['my_userdata']['is_spectator'] == 'Yes') {
-            $data = array(
-                'success' => false,
-                'message' => 'Sorry Spectator has no right'
-            );
-            echo json_encode($data);
-            exit;
-        }
         $sportId = $this->input->post('sportId');
         $userId = $this->input->post('userId');
         $matchId = $this->input->post('matchId');

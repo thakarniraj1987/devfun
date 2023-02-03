@@ -11,7 +11,7 @@
     <div class="fullrow tile_count">
         <div class="col-md-7">
             <div id="videoContainer" style="position:relative;">
-                <iframe src="<?php echo $videoLink; ?>" style="border-radius: 1px;width:100%;height:202px;overflow:hidden !important;"></iframe>
+                <iframe src="<?php echo $videoLink; ?>" style="border-radius: 1px;width:100%;height:230px;overflow:hidden !important;"></iframe>
                 <div data-v-91269fe6="" class="video-overlay">
 
                 </div>
@@ -23,357 +23,360 @@
 
                 </div>
             </div>
-            <div id="casino-detail-parent">
-                <div id="casino-detail">
-                    <span class="round_id_wrapper">Round Id: <span id="round_id" class="round_id">
-                        </span></span>
 
-                    <!-- 
+            <div id="casino-detail" style="color:white">
+                <span class="round_id_wrapper">Round Id: <span id="round_id" class="round_id">
+                    </span></span>
+
+                <!-- 
                 <span class="winner_wrapper">Winner: <span id="winner" class="winner">
                     </span></span> -->
 
 
-                    <span class="winner_wrapper"><a style="float:right;color:white" href="javascript:void(0);" onclick="getLastResult()">View Result</a></span>
+                <span class="winner_wrapper"><a style="float:right;color:white" href="javascript:void(0);" onclick="getLastResult()">View Result</a></span>
+            </div>
+
+
+            <div class="row">
+                <div class="col-md-12">
+                <div id="MatchOddInfo">
+                <!------------------Exchange Response Show here----------------->
+                <?php // echo $marketExchangeHtml; 
+                ?>
+                <!------------------Exchange Response Show here----------------->
+            </div>
                 </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div data-v-3e1a64f3="" class="modal-header mod-header">
 
 
-                <div class="row">
-                    <div class="col-md-12">
-                        <div id="MatchOddInfo">
-                            <!------------------Exchange Response Show here----------------->
-                            <?php // echo $marketExchangeHtml; 
-                            ?>
-                            <!------------------Exchange Response Show here----------------->
-                        </div>
+                        <h5 data-v-3e1a64f3="">Last Result
+                            <!-- <a data-v-3e1a64f3="" href="/casinoresults/teen" class="result-view-all">View All</a> -->
+                        </h5>
+                    </div>
+                    <div data-v-3e1a64f3="" class="m-b-10">
+                        <p data-v-3e1a64f3="" id="last-result" class="text-right">
+                        </p>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div data-v-3e1a64f3="" class="modal-header mod-header">
-
-
-                            <h5 data-v-3e1a64f3="">Last Result
-                                <!-- <a data-v-3e1a64f3="" href="/casinoresults/teen" class="result-view-all">View All</a> -->
-                            </h5>
+            </div>
+            <div id="card-result" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header mod-header"><button type="button" class="close" data-dismiss="modal">×</button>
+                            <h4 class="modal-title" id="result-modal-header">20-20 Teenpatti Result</h4>
                         </div>
-                        <div data-v-3e1a64f3="" class="m-b-10" style="    float: right;
-">
-                            <p data-v-3e1a64f3="" id="last-result" class="text-right">
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div id="card-result" class="modal fade" role="dialog">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header mod-header"><button type="button" class="close" data-dismiss="modal">×</button>
-                                <h4 class="modal-title" id="result-modal-header" >20-20 Teenpatti Result</h4>
-                            </div>
-                            <div class="modal-body card-result-body">
+                        <div class="modal-body card-result-body">
 
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
             <!-----------------Fancy API Response show here------------------->
         </div>
         <div class="col-md-5 col-xs-12 matchBox">
 
 
 
-            <div class="betSlipBox" style="">
-                <div class="betBox bet-slip-box" style="display: none;">
-                    <span id="msg_error"></span><span id="errmsg"></span>
-                    <div class="lds-dual-ring  loader" style="display:none"></div>
-                    <audio id="myAudio">
-                        <source src="<?php echo base_url(); ?>assets/images/beep.mp3" type="audio/mpeg">
-                    </audio>
-                    <form method="POST" id="placeBetSilp"><input type="hidden" name="compute" value="715c2e46276cee429d5de10eca9b3ccb">
-                        <div class="bet-box_inner">
-                            <div class="profit_loss-head">
-                                <div class="items">
-                                    <span class="stake_label">Bet for</span>
-                                    <div id="ShowRunnderName" style="font-weight:bold;">
-                                        <span class="close_btn"><i class="fas fa-times-circle"></i></span>
-                                    </div>
-                                </div>
-                                <div class="items profit" id=" ">
-                                    <span class="stake_label">Profit</span>
-                                    <div class="stack_input_field">
-                                        <span id="profitData" style="color:rgb(0, 124, 14);font-weight:bold"> 0.00</span>
-                                    </div>
-                                </div>
-                                <div class="items profit" id=" ">
-                                    <span class="stake_label">Loss</span>
-                                    <div class="stack_input_field">
-                                        <span id="LossData" style="color:rgb(255, 0, 0);font-weight:bold"> 0.00</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="inner-bet-section">
-                                <div class="oddds-stake-box">
-                                    <div class="items odds">
-                                        <div class="stack_input_field numbers-row">
-                                            <input type="number" step="0.01" id="ShowBetPrice" class="calProfitLoss odds-input form-control  CommanBtn">
+        <div class="betSlipBox" style="">
+                    <div class="betBox bet-slip-box" style="display: none;">
+                        <span id="msg_error"></span><span id="errmsg"></span>
+                        <div class="lds-dual-ring  loader" style="display:none"></div>
+                        <audio id="myAudio">
+                            <source src="<?php echo base_url(); ?>assets/images/beep.mp3" type="audio/mpeg">
+                        </audio>
+                        <form method="POST" id="placeBetSilp"><input type="hidden" name="compute" value="715c2e46276cee429d5de10eca9b3ccb">
+                            <div class="bet-box_inner">
+                                <div class="profit_loss-head">
+                                    <div class="items">
+                                        <span class="stake_label">Bet for</span>
+                                        <div id="ShowRunnderName" style="font-weight:bold;">
+                                            <span class="close_btn"><i class="fas fa-times-circle"></i></span>
                                         </div>
                                     </div>
-                                    <div class="items stake" id=" ">
-                                        <div class="stack_input_field numbers-row">
-                                            <input type="number" pattern="[0-9]*" step=1 id="stakeValue" class="calProfitLoss stake-input form-control  CommanBtn">
-                                            <input type="hidden" name="selectionId" id="selectionId" value="" class="form-control">
-                                            <input type="hidden" name="matchId" id="matchId" value="" class="form-control">
-                                            <input type="hidden" name="isback" id="isback" value="" class="form-control">
-                                            <input type="hidden" name="MarketId" id="MarketId" value="" class="form-control">
-                                            <input type="hidden" name="betting_type" id="betting_type" value="" class="form-control">
-                                            <input type="hidden" name="event_type" id="event_type" value="<?php echo $event_type; ?>" class="form-control">
-                                            <input type="hidden" name="placeName" id="placeName" value="" class="form-control">
-                                            <input type="hidden" name="text" id="stackcount" value="0" class="form-control">
-                                            <input type="hidden" name="text" id="isfancy" value="0" class="form-control">
+                                    <div class="items profit" id=" ">
+                                        <span class="stake_label">Profit</span>
+                                        <div class="stack_input_field">
+                                            <span id="profitData" style="color:rgb(0, 124, 14);font-weight:bold"> 0.00</span>
+                                        </div>
+                                    </div>
+                                    <div class="items profit" id=" ">
+                                        <span class="stake_label">Loss</span>
+                                        <div class="stack_input_field">
+                                            <span id="LossData" style="color:rgb(255, 0, 0);font-weight:bold"> 0.00</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="bet-btns">
-                                    <?php
+                                <div class="inner-bet-section">
+                                    <div class="oddds-stake-box">
+                                        <div class="items odds">
+                                            <div class="stack_input_field numbers-row">
+                                                <input type="number" step="0.01" id="ShowBetPrice" class="calProfitLoss odds-input form-control  CommanBtn">
+                                            </div>
+                                        </div>
+                                        <div class="items stake" id=" ">
+                                            <div class="stack_input_field numbers-row">
+                                                <input type="number" pattern="[0-9]*" step="1" id="stakeValue" class="calProfitLoss stake-input form-control  CommanBtn">
+                                                <input type="hidden" name="userId" id="userId" class="form-control" value="2106">
+                                                <input type="hidden" name="ParantId" id="ParantId" class="form-control" value="">
+                                                <input type="hidden" name="loginId" id="loginId" class="form-control" value="2106 ">
+                                                <input type="hidden" name="selectionId" id="selectionId" value=" " class="form-control">
+                                                <input type="hidden" name="matchId" id="matchId" value="" class="form-control">
+                                                <input type="hidden" name="isback" id="isback" value=" " class="form-control">
+                                                <input type="hidden" name="MarketId" id="MarketId" value="" class="form-control">
+                                                <input type="hidden" name="placeName" id="placeName" value="" class="form-control">
+                                                <input type="hidden" name="text" id="stackcount" value="0" class="form-control">
+                                                <input type="hidden" name="text" id="mfancyid" value="0" class="form-control">
+                                                <input type="hidden" name="text" id="pointDiff" value="0" class="form-control">
+                                                <input type="hidden" name="text" id="isfancy" value="0" class="form-control">
+                                                <input type="hidden" name="text" id="fancykey" value="0" class="form-control">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bet-btns">
+                                        <?php
 
-                                    if (!empty($chips)) {
-                                        foreach ($chips as $key => $chip) { ?>
-                                            <div class="btn brt_btn"><button class=" chipName7" type="button" value="<?php echo $chip['chip_value']; ?>" onclick="StaKeAmount(this);"><?php echo $chip['chip_name']; ?></button></div>
-                                    <?php }
-                                    }
-                                    ?>
+                                        if (!empty($chips)) {
+                                            foreach ($chips as $key => $chip) { ?>
+                                                <div class="btn brt_btn"><button class=" chipName7" type="button" value="<?php echo $chip['chip_value']; ?>" onclick="StaKeAmount(this);"><?php echo $chip['chip_name']; ?></button></div>
+                                        <?php }
+                                        }
+                                        ?>
 
-                                    <div class="btn brt_btn"><button class=" " type="button" onclick="ClearStack( );">Clear</button></div>
+                                        <div class="btn brt_btn"><button class=" " type="button" onclick="ClearStack( );">Clear</button></div>
+                                    </div>
+                                    <div class="bet-box-footer">
+                                        <button class="btn cancle-bet" type="button" onclick="ClearAllSelection();"> Reset Bet</button>
+                                        <button class="btn place-bet" type="button" onclick="PlaceBet();"> Place Bet</button>
+                                        <!-- <button class="btn multi-bet" type="button" onclick="PlaceMultiBet();"> Place Multiple Bet</button> -->
+                                        <button class="btn btn-success CommanBtn placefancy" type="button" onclick="PlaceBet();" style="display:none"> Place Bet</button>
+                                    </div>
                                 </div>
-                                <div class="bet-box-footer">
-                                    <button class="btn cancle-bet" type="button" onclick="ClearAllSelection();"> Cancel</button>
-                                    <button class="btn place-bet" type="button" onclick="PlaceBet();"> Place Bet</button>
-                                    <!-- <button class="btn multi-bet" type="button" onclick="PlaceMultiBet();"> Place Multiple Bet</button> -->
-                                    <button class="btn btn-success CommanBtn placefancy" type="button" onclick="PlaceBet();" style="display:none"> Place Bet</button>
-                                </div>
+
                             </div>
-
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
-            </div>
             <!--- Match UnMatch data --->
 
 
-            <div class="mod-header tab_bets betsheading" style="">
-                <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-                    <li class="nav-item betdata all-bet-tab-menu active">
-                        <a class="allbet" href="javascript:void(0);" onclick="getDataByType('all','all-bet-tab-menu');"><span class="bet-label">All Bet</span>
-                            <span class="bat_counter" id="cnt_row">(0)</span></a>
-                    </li>
-                    <!-- <li class="nav-item betdata">
+<div class="mod-header tab_bets betsheading" style="">
+                    <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                        <li class="nav-item betdata all-bet-tab-menu active">
+                            <a class="allbet" href="javascript:void(0);" onclick="getDataByType('all','all-bet-tab-menu');"><span class="bet-label">All Bet</span>
+                                <span class="bat_counter" id="cnt_row">(0)</span></a>
+                        </li>
+                        <!-- <li class="nav-item betdata">
                             <a class="unmatchbet" href="javascript:void(0);" onclick="getDataByType(this,'2');"><span class="bet-label">UnMatch Bet</span>
                                 <span class="bat_counter" id="cnt_row1">(0)</span> </a>
                         </li> -->
+                       
+                        <li class="nav-item full-screen">
 
-                    <li class="nav-item full-screen">
-
-                        <a class="btn full-btn" onclick="viewAllMatch()" href="javascript:void(0);"><i class="fas fa-compress"></i></a>
-                    </li>
-                </ul>
-            </div>
+                            <a class="btn full-btn" onclick="viewAllMatch()" href="javascript:void(0);"><i class="fas fa-compress"></i></a>
+                        </li>
+                    </ul>
+                </div>
 
 
 
             <div class="" id="MatchUnMatchBetaData">
-                <script>
-                    $(document).ready(function() {
-                        // $('.UnMachShowHide').hide();
-                        //  $('.MachShowHide').hide();
-                    });
-                    $(".MatchBetHide").click(function() {
-                        $(".MachShowHide").slideToggle("fast");
-                        $(this).find(".matchbetupdown").toggleClass("down up");
-                    });
-                    $(".UnMatchBetHide").click(function() {
-                        $(".UnMachShowHide").slideToggle("fast");
-                        $(this).find(".unmatchbetupdown").toggleClass("down up");
-                    });
-                </script>
+                    <script>
+                        $(document).ready(function() {
+                            // $('.UnMachShowHide').hide();
+                            //  $('.MachShowHide').hide();
+                        });
+                        $(".MatchBetHide").click(function() {
+                            $(".MachShowHide").slideToggle("fast");
+                            $(this).find(".matchbetupdown").toggleClass("down up");
+                        });
+                        $(".UnMatchBetHide").click(function() {
+                            $(".UnMachShowHide").slideToggle("fast");
+                            $(this).find(".unmatchbetupdown").toggleClass("down up");
+                        });
+                    </script>
 
 
-                <div id="accountView" class="tableid2 accountViewcls" role="main" style="display: none;">
-                    <span id="msg_error"></span><span id="errmsg"></span>
-                    <div class="balance-panel-body">
-                        <div class="table-responsive sports-tabel" id="UnMatchBets">
-                            <table class="table table-bordered table-hover">
-                                <thead>
-                                    <tr class="heading_user_table">
-                                        <td> Actions</td>
-                                        <td>Runner </td>
-                                        <td>Bet type</td>
+                    <div id="accountView" class="tableid2 accountViewcls" role="main" style="display: none;">
+                        <span id="msg_error"></span><span id="errmsg"></span>
+                        <div class="balance-panel-body">
+                            <div class="table-responsive sports-tabel" id="UnMatchBets">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr class="heading_user_table">
+                                            <td> Actions</td>
+                                            <td>Runner </td>
+                                            <td>Bet type</td>
 
-                                        <td> Client</td>
-                                        <td> Odds</td>
-                                        <td> Stack</td>
+                                            <td> Client</td>
+                                            <td> Odds</td>
+                                            <td> Stack</td>
 
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr></tr>
-                                </tbody>
-                            </table>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr></tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
 
 
-                <div id="accountView" class="tableid3 accountViewcls" role="main" style="display: none;">
-                    <span id="msg_error"></span><span id="errmsg"></span>
-                    <div class="balance-panel-body">
-                        <div class="table-responsive sports-tabel">
-                            <table class="table table-bordered table-hover ">
-                                <thead>
-                                    <tr class="heading_user_table">
+                    <div id="accountView" class="tableid3 accountViewcls" role="main" style="display: none;">
+                        <span id="msg_error"></span><span id="errmsg"></span>
+                        <div class="balance-panel-body">
+                            <div class="table-responsive sports-tabel">
+                                <table class="table table-bordered table-hover ">
+                                    <thead>
+                                        <tr class="heading_user_table">
 
-                                        <td>No.</td>
-                                        <td>Runner</td>
-                                        <td>Bet Type</td>
+                                            <td>No.</td>
+                                            <td>Runner</td>
+                                            <td>Bet Type</td>
 
-                                        <td> Client</td>
-                                        <td>Odds</td>
-                                        <td>Stack</td>
+                                            <td> Client</td>
+                                            <td>Odds</td>
+                                            <td>Stack</td>
 
 
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr></tr>
-                                </tbody>
-                            </table>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr></tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
 
 
-                <div id="accountView" class="tableid4 accountViewcls" role="main" style="display: block;">
-                    <span id="msg_error"></span><span id="errmsg"></span>
-                    <div class="balance-panel-body">
-                        <div class="table-responsive sports-tabel">
-                            <table class="table table-striped jambo_table bulk_action">
-                                <thead>
-                                    <tr class="headings">
-                                        <td>No.</td>
+                    <div id="accountView" class="tableid4 accountViewcls" role="main" style="display: block;">
+                        <span id="msg_error"></span><span id="errmsg"></span>
+                        <div class="balance-panel-body">
+                            <div class="table-responsive sports-tabel">
+                                <table class="table table-striped jambo_table bulk_action">
+                                    <thead>
+                                        <tr class="headings">
+                                            <td>No.</td>
 
-                                        <?php
-                                        $user_type = $_SESSION['my_userdata']['user_type'];
-                                        if ($user_type != 'User') { ?>
-                                            <td>User</td>
-                                        <?php }
-                                        ?>
-                                        <td>Runner</td>
-                                        <td>Bhaw</td>
-                                        <td>Amount</td>
-                                        <td>P_L</td>
+                                            <?php
+                                            $user_type = $_SESSION['my_userdata']['user_type'];
+                                            if ($user_type != 'User') { ?>
+                                                <td>User</td>
+                                            <?php }
+                                            ?>
+                                            <td>Runner</td>
+                                            <td>Bhaw</td>
+                                            <td>Amount</td>
+                                            <td>P_L</td>
 
-                                        <td>Bet Type</td>
-                                        <!--td>P&L</td-->
-                                        <td>Time</td>
-                                        <td>ID</td>
-                                        <td> IP</td>
-                                    </tr>
-                                </thead>
-                                <tbody id="all-betting-data">
+                                            <td>Bet Type</td>
+                                            <!--td>P&L</td-->
+                                            <td>Time</td>
+                                            <td>ID</td>
+                                            <td> IP</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="all-betting-data">
 
-                                </tbody>
-                            </table>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
 
 
 
 
-                <script>
-                    function deleteAllMatchOdds(MstCode, UserId, code, remark) {
-                        $.ajax({
-                            url: site_url + 'useraction/deleteAllbettingMatch',
-                            data: {
-                                MstCode: MstCode,
-                                UserId: UserId,
-                                code: code,
-                                remark: remark
-                            },
-                            type: 'get',
-                            dataType: 'json',
-                            success: function(output) {
-                                if (output.error == '0') {
-                                    var arrayMstCode = MstCode.split(',');
-                                    $.each(arrayMstCode, function(keyNew, valueNew) {
-                                        var mstID = valueNew;
-                                        jQuery("#user_row_" + mstID).remove(); //Deleted Successfully ...											 
-                                    });
-                                    new PNotify({
-                                        title: 'Success',
-                                        text: output.message,
-                                        type: 'success',
-                                        styling: 'bootstrap3',
-                                        delay: 3000
-                                    });
-                                    $('#fancyposition').modal('hide');
-                                } else {
+                    <script>
+                        function deleteAllMatchOdds(MstCode, UserId, code, remark) {
+                            $.ajax({
+                                url: site_url + 'useraction/deleteAllbettingMatch',
+                                data: {
+                                    MstCode: MstCode,
+                                    UserId: UserId,
+                                    code: code,
+                                    remark: remark
+                                },
+                                type: 'get',
+                                dataType: 'json',
+                                success: function(output) {
+                                    if (output.error == '0') {
+                                        var arrayMstCode = MstCode.split(',');
+                                        $.each(arrayMstCode, function(keyNew, valueNew) {
+                                            var mstID = valueNew;
+                                            jQuery("#user_row_" + mstID).remove(); //Deleted Successfully ...											 
+                                        });
+                                        new PNotify({
+                                            title: 'Success',
+                                            text: output.message,
+                                            type: 'success',
+                                            styling: 'bootstrap3',
+                                            delay: 3000
+                                        });
+                                        $('#fancyposition').modal('hide');
+                                    } else {
 
-                                    new PNotify({
-                                        title: 'Error',
-                                        text: output.message,
-                                        type: 'error',
-                                        styling: 'bootstrap3',
-                                        delay: 3000
-                                    });
+                                        new PNotify({
+                                            title: 'Error',
+                                            text: output.message,
+                                            type: 'error',
+                                            styling: 'bootstrap3',
+                                            delay: 3000
+                                        });
+                                    }
                                 }
-                            }
-                        });
+                            });
 
-                    }
+                        }
 
-                    function filterBets(MatchId, MarketId) {
-                        var searchId = $('#searchId').val();
-                        $.ajax({
-                            url: site_url + 'Application/GatBetData',
-                            data: {
-                                marketId: MarketId,
-                                matchId: MatchId,
-                                searchId: searchId
-                            },
-                            type: 'get',
-                            dataType: 'html',
-                            success: function(output) {
-                                //console.log("viewMAtchUnMAtch"+output);
-                                //alert("reset")
-                                //console.log(output);
-                                $("#MatchUnMatchBetaData").show();
-                                $("#MatchUnMatchBetaData").html(output);
-                            }
-                        });
-                    }
+                        function filterBets(MatchId, MarketId) {
+                            var searchId = $('#searchId').val();
+                            $.ajax({
+                                url: site_url + 'Application/GatBetData',
+                                data: {
+                                    marketId: MarketId,
+                                    matchId: MatchId,
+                                    searchId: searchId
+                                },
+                                type: 'get',
+                                dataType: 'html',
+                                success: function(output) {
+                                    //console.log("viewMAtchUnMAtch"+output);
+                                    //alert("reset")
+                                    //console.log(output);
+                                    $("#MatchUnMatchBetaData").show();
+                                    $("#MatchUnMatchBetaData").html(output);
+                                }
+                            });
+                        }
 
-                    function filterReset(MatchId, MarketId) {
-                        var searchId = '';
-                        $.ajax({
-                            url: site_url + 'Application/GatBetData',
-                            data: {
-                                marketId: MarketId,
-                                matchId: MatchId,
-                                searchId: searchId
-                            },
-                            type: 'get',
-                            dataType: 'html',
-                            success: function(output) {
-                                //console.log(output);
-                                //alert("reset")
-                                $("#MatchUnMatchBetaData").show();
-                                $("#MatchUnMatchBetaData").html(output);
+                        function filterReset(MatchId, MarketId) {
+                            var searchId = '';
+                            $.ajax({
+                                url: site_url + 'Application/GatBetData',
+                                data: {
+                                    marketId: MarketId,
+                                    matchId: MatchId,
+                                    searchId: searchId
+                                },
+                                type: 'get',
+                                dataType: 'html',
+                                success: function(output) {
+                                    //console.log(output);
+                                    //alert("reset")
+                                    $("#MatchUnMatchBetaData").show();
+                                    $("#MatchUnMatchBetaData").html(output);
 
-                            }
-                        });
-                    }
-                </script>
-            </div>
+                                }
+                            });
+                        }
+                    </script>
+                </div>
             <!--- User Current Position  --->
             <div class="" id="getUserPosition">
             </div>
@@ -441,7 +444,51 @@
     </div>
 </div>
 
+<div id="addUser" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header mod-header"><button type="button" class="close" data-dismiss="modal">×</button>
+                <h4 class="modal-title">Chip Setting</h4>
+            </div>
+            <div class="modal-body">
+                <div id="addUserMsg"></div>
+                <form id="stockez_add" method="post" class="form-inline">
+                    <input type="hidden" name="user_id" class="form-control" required value="<?php echo get_user_id(); ?>" />
+                    <div class="modal-body" id="chip-moddal-body">
+                        <?php
+                        if (!empty($chips)) {
+                            $i = 0;
+                            foreach ($chips as $chip) {
+                                $i++;
+                        ?>
+                                <div class="fullrow">
+                                    <input type="hidden" name="user_chip_id[]" class="form-control" required value="<?php echo $chip['user_chip_id']; ?>" />
+                                    <div class="col-md-6 col-sm-6col-xs-6">
+                                        <div class="form-group"><label for="email">Chips Name <?php echo $i; ?>:</label><input type="text" name="chip_name[]" class="form-control" required value="<?php echo $chip['chip_name']; ?>"></div>
+                                    </div>
+                                    <div class=" col-md-6 col-sm-6col-xs-6">
+                                        <div class="form-group"><label for="pwd">Chip Value <?php echo $i; ?>:</label><input type="number" name="chip_value[]" class="form-control" required value="<?php echo $chip['chip_value']; ?>"></div>
+                                    </div>
+                                </div>
+                        <?php }
+                        }
+                        ?>
 
+                    </div>
+                    <div class="modal-footer">
+                        <div class="text-center" id="button_change">
+                            <div class="text-center" id="button_change">
+                                <button type="button" class="btn btn-success" id="updateUserChip" onclick="add_new_chip()" style="margin-bottom:10px;">Add New Chip </button>
+                                <button type="button" style="margin-bottom:10px;" class="btn btn-success" id="updateUserChip" onclick="submit_update_chip()"> Update Chip Setting </button>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 
@@ -538,9 +585,6 @@
         fetchBttingList();
     }
 
-    // <li>
-    //                                 <a class="btn-pin 31057636">Match Odds</a>
-    //                             </li>
     function generateMarketStructure(market, market_type) {
         var exchangeHtml = '';
         var exposure = 0;
@@ -553,8 +597,10 @@
                         <div class="game-head">
                         <ul class="match-btn">
 
-                            
-                                <li> <a class="btn-pin-user" onclick="getUserPosition(31057636,'1.190470587')"><i class="fas fa-boxes"></i> ${market.event_name}</a>
+                                <li>
+                                    <a class="btn-pin 31057636">Match Odds</a>
+                                </li>
+                                <li> <a class="btn-refresh" onclick="getUserPosition(31057636,'1.190470587')"><i class="fas fa-boxes"></i> ${market.event_name}</a>
                                 </li>
 
                             </ul>
@@ -584,7 +630,7 @@
                                                 <i class="fas fa-caret-right"></i> 0 </small>
                                         </div>
                                         <div class="valuename">
-                                        <span class="runner_amount" style="color:${exposure < 0?'tomato':'green'};" id="${runner.selection_id +'_maxprofit_loss_runner_'+market_type.market_id.replace('.', '')}">${Math.abs(exposure)}</span>
+                                        <span class="runner_amount" style="color:${exposure < 0?'tomato':'green'};" id="${runner.selection_id +'_maxprofit_loss_runner_'+market_type.market_id.replace('.', '')}>${Math.abs(exposure)}</span>
                                         <input type="hidden" class="position_${market_type.market_id.replace('.', '')}" id="selection_0" data-id="${runner.selection_id}" value="${exposure}">   
                                         
 
@@ -714,10 +760,6 @@
     function getOddValue(matchId, marketId, back_layStatus, placeName, elementId, selectionId, MarketTypes = '', target) {
 
         var priceVal = $('#' + elementId).text();
-        // if (matchId == '56767') {
-        //     priceVal = parseFloat(((priceVal / 100) + 1));
-
-        // }
         $('#betting_type').val('Match');
         <?php
         $user_type = $_SESSION['my_userdata']['user_type'];
@@ -727,7 +769,7 @@
         <?php }
         ?>
         $("#stakeValue").blur();
-        if (back_layStatus != 0) {
+        if (back_layStatus == 0) {
             $("#placeBetSilp").css("background-color", "#a7d8fd");
         } else {
             $("#placeBetSilp").css("background-color", "#f9c9d4");
@@ -765,12 +807,11 @@
         if ($(window).width() < 780) {
             $('.betSlipBox .mod-header').insertBefore('#placeBetSilp');
             $(".betSlipBox .mod-header").show();
-            $(".betBox").insertAfter('.matchBoxMain');
-            // $(".betBox").insertAfter('.matchOpenBox_' + MId + '_' + selectionId);
+            $(".betBox").insertAfter('.matchOpenBox_' + MId+'_'+selectionId);
             // if (gameType != 'market') {
             //    $("#betslip").insertAfter('.teenpatti-row');
             // } else {
-            // $(".betBox").insertAfter('.matchOpenBox_' + MId + '_' + selectionId);
+            $(".betBox").insertAfter('.matchOpenBox_' + MId+'_'+selectionId);
             // $(".betBox").insertAfter('#MatchOddInfo');
 
             // }
@@ -838,10 +879,10 @@
         if (isfancy == 0) {
             // if (gameType == 'market') {
             //    if (MatchMarketTypes == 'M') {
-            var pl = ((priceVal * t_stake) / 100);
+            var pl = Math.round((priceVal * t_stake) / 100);
 
             //    } else {
-            var pl = ((priceVal * t_stake) - t_stake);
+            var pl = Math.round((priceVal * t_stake) - t_stake);
             //    }
             // } else {
             // var pl = Math.round((priceVal * t_stake) / 100);
@@ -922,7 +963,7 @@
                     curr = winloss + stake;
                 }
             }
-            var currV = (curr);
+            var currV = Math.round(curr);
 
             $("#" + selecid + "_maxprofit_loss_runner_" + MId).attr('data-val', currV)
 
@@ -949,12 +990,8 @@
             $(".betBox").show();
         }
     }
-    function showloader() {
-        $(".loader").css('display', "");
-    }
 
     function PlaceBet() {
-        showloader();
         clearTimeout(betSlip);
 
         var stake = parseFloat($("#stakeValue").val());
@@ -1039,7 +1076,7 @@
             setTimeout(function() {
                 $.ajax({
                     method: 'POST',
-                    url: '<?php echo base_url(); ?>admin/Events/saveCasinoBet',
+                    url: '<?php echo base_url(); ?>admin/Events/savebet',
                     data: formData,
                     dataType: 'json',
                     async: false,
@@ -1051,9 +1088,6 @@
                     },
                     success: function(data) {
                         $(".loader").hide();
-
-                        getEventsMarketExpsure(<?php echo $event_id; ?>);
-
                         var selectionId = $("#selectionId").val();
 
                         $(".CommanBtn").attr("disabled", false);
@@ -1134,7 +1168,7 @@
         var userType1 = 4;
 
         if (userType1 == 4) {
-            if (isback != 1) {
+            if (isback == 1) {
                 $("#placeBetSilp").css("background-color", "#a7d8fd");
             } else {
                 $("#placeBetSilp").css("background-color", "#f9c9d4");
@@ -1341,13 +1375,10 @@
 </script>
 
 <script>
-    var clock = new FlipClock($(".clock"), {
-        clockFace: "Counter"
-    });
-
-
     $(document).ready(function() {
-
+        var clock = new FlipClock($(".clock"), {
+            clockFace: "Counter"
+        });
 
         // var clock = '';
         <?php
@@ -1359,12 +1390,14 @@
 
 
         var casino_market_id = '';
+        // alert(<?php echo $event_id; ?>);
         //Teenpati T20 Casino
 
 
         <?php
         if ($event_id == 56768) { ?>
             socket.on('casino_t20_market_update', function(data) {
+                console.log('data', data);
 
                 var MarketId = $('#MarketId').val();
                 var matchId = "<?php echo $event_id; ?>";
@@ -1375,15 +1408,9 @@
                     if (market.market_types.length > 0) {
                         $.each(market.market_types, function(marketTypeIndex, market_type) {
 
-
-                            if (market_type.market_id == 0) {
-                                return false;
-                            }
-
-
                             if (market_type.market_name == 'Match Odds') {
 
-                                let cardsInfo = market.additional_info;
+                                let cardsInfo = JSON.parse(market_type.additional_info);
                                 showT20Cards(cardsInfo);
 
                                 $.each(market_type.runners, function(index, runner) {
@@ -1394,7 +1421,7 @@
 
                                     var round_id = tmp_round_id.split('.');
 
-                                    clock.setValue(cardsInfo.autotime);
+                                    clock.setValue(market_type.timer);
                                     // $('#timer').text(market_type.timer);
 
 
@@ -1410,7 +1437,7 @@
 
                                         if (casino_market_id_1 != casino_market_id) {
 
-                                            getLastResult(matchId, casino_market_id)
+                                            // getLastResult(matchId, casino_market_id)
                                             $('.matchBoxMain').remove();
                                             fetchBttingList();
                                             showLastResult();
@@ -1421,31 +1448,14 @@
 
                                         // $('#round_id').text(roundId);
 
-                                        $('#availableToLay1_price_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().parent().find('h6').remove();
-                                            $('#availableToBack1_price_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().parent().find('h6').remove();
-                        
-                                        if (cardsInfo.autotime >= 5) {
-                                            if (runner.back_1_price == 0) {                                               
-                                                $('#availableToBack1_price_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().parent().append('<h6 class="lock_back_overlay"><i class="fa fa-lock" aria-hidden="true"></i></h6>');
-                                            } else {
-                                                $('#availableToBack1_price_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().parent().find('h6').remove();
-                                            }
-                                            if (runner.lay_1_price == 0) {
-                                               
-                                                $('#availableToLay1_price_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().parent().append('<h6 class="lock_lay_overlay"><i class="fa fa-lock" aria-hidden="true"></i></h6>');
-                                            } else {
-                                                $('#availableToLay1_price_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().parent().find('h6').remove();
-                                            }
 
-                                        }
-                                        
-                                        if (cardsInfo.autotime < 5) {
+                                        if (market_type.timer < 5) {
                                             // ClearAllSelection(1);
                                             $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent().append("<h6>SUSPENDED</h6>");
                                             $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
                                             // $('.overlay_matchBoxs_' + market_type.market_id.replace('.', '')).fadeIn();
                                         } else {
-
+                                           
                                             $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().removeClass('overlay');
                                             $('.overlay_matchBoxs_' + market_type.market_id.replace('.', '')).fadeOut();
                                         }
@@ -1465,8 +1475,8 @@
                                         //     generateMarketStructure(market, market_type);
                                         // }
 
-
-
+                               
+                                    
                                         if ($('.market_box_' + market_type.market_id).length) {
                                             $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
                                             // $('.overlay_matchBoxs_' + market_type.market_id.replace('.', '')).fadeIn();
@@ -1615,15 +1625,11 @@
 
                     if (market.market_types.length > 0) {
                         $.each(market.market_types, function(index, market_type) {
-                            if (market_type.market_id == 0) {
-                                return false;
-                            }
+
                             if (market_type.market_name == 'Match Odds') {
-                                let cardsInfo = market.additional_info;
+                                let cardsInfo = JSON.parse(market_type.additional_info);
                                 showLiveTeenCards(cardsInfo);
                                 $.each(market_type.runners, function(index, runner) {
-
-
 
                                     var tmp_round_id = market_type.market_id.replace('__', '.').split('_')
 
@@ -1632,9 +1638,9 @@
                                     var round_id = tmp_round_id.split('.');
 
 
-                                    clock.setValue(cardsInfo.autotime);
+                                    // clock.setValue(market_type.timer);
                                     // $('#timer').text(market_type.timer);
-                                    // clock.setValue(cardsInfo.autotime);
+                                    clock.setValue(market_type.timer);
 
 
 
@@ -1650,7 +1656,7 @@
 
                                         if (casino_market_id_1 != casino_market_id) {
 
-                                            getLastResult(matchId, casino_market_id)
+                                            // getLastResult(matchId, casino_market_id)
                                             $('.matchBoxMain').remove();
                                             fetchBttingList();
                                             showLastResult();
@@ -1660,31 +1666,15 @@
                                         }
 
                                         // $('#round_id').text(roundId);
-                                        $('#availableToLay1_price_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().parent().find('h6').remove();
-                                            $('#availableToBack1_price_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().parent().find('h6').remove();
-                        
-                                        if (cardsInfo.autotime >= 5) {
-                                            if (runner.back_1_price == 0) {                                               
-                                                $('#availableToBack1_price_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().parent().append('<h6 class="lock_back_overlay"><i class="fa fa-lock" aria-hidden="true"></i></h6>');
-                                            } else {
-                                                $('#availableToBack1_price_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().parent().find('h6').remove();
-                                            }
-                                            if (runner.lay_1_price == 0) {
-                                               
-                                                $('#availableToLay1_price_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().parent().append('<h6 class="lock_lay_overlay"><i class="fa fa-lock" aria-hidden="true"></i></h6>');
-                                            } else {
-                                                $('#availableToLay1_price_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().parent().find('h6').remove();
-                                            }
+                                      
 
-                                        }
-
-                                        if (cardsInfo.autotime < 5) {
+                                        if (market_type.timer < 5) {
                                             // ClearAllSelection(1);
                                             $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent().append("<h6>SUSPENDED</h6>");
                                             $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
                                             // $('.overlay_matchBoxs_' + market_type.market_id.replace('.', '')).fadeIn();
                                         } else {
-
+                                            
                                             $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().removeClass('overlay');
                                             $('.overlay_matchBoxs_' + market_type.market_id.replace('.', '')).fadeOut();
                                         }
@@ -1839,7 +1829,7 @@
 
                             if (market_type.market_name == 'Match Odds') {
 
-                                let cardsInfo = market.additional_info;
+                                let cardsInfo = JSON.parse(market_type.additional_info);
                                 dragonTigerCards(cardsInfo)
                                 $.each(market_type.runners, function(index, runner) {
 
@@ -1850,16 +1840,16 @@
                                     var round_id = tmp_round_id.split('.');
 
 
-                                    clock.setValue(cardsInfo.autotime);
+                                    // clock.setValue(market_type.timer);
                                     // $('#timer').text(market_type.timer);
-                                    // clock.setValue(cardsInfo.autotime);
+                                    clock.setValue(market_type.timer);
 
 
 
                                     $('#round_id').text(round_id[1]);
 
                                     $('#market_countdown_' + market_type.market_id.replace('.', '')).text(market_type.timer)
-
+                                   
                                     $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent().find("h6").remove();
                                     if (market_type.status == 'OPEN') {
                                         var tmp_casino_market_id = market_type.market_id.replace('__', '.').split('_')
@@ -1869,7 +1859,7 @@
 
                                         if (casino_market_id_1 != casino_market_id) {
 
-                                            getLastResult(matchId, casino_market_id)
+                                            // getLastResult(matchId, casino_market_id)
                                             $('.matchBoxMain').remove();
                                             fetchBttingList();
                                             showLastResult();
@@ -1881,7 +1871,7 @@
                                         // $('#round_id').text(roundId);
 
 
-                                        if (cardsInfo.autotime < 5) {
+                                        if (market_type.timer < 5) {
                                             // ClearAllSelection(1);
                                             $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent().append("<h6>SUSPENDED</h6>");
                                             $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
@@ -1899,7 +1889,7 @@
                                             }
                                         }
                                     } else if (runner.status == 'SUSPENDED') {
-
+                                       
                                         // runner.status == 'SUSPENDED'
                                         // if (!$('.market_box_' + market_type.market_id).length) {
                                         //     generateMarketStructure(market, market_type);
@@ -2042,12 +2032,8 @@
                     if (market.market_types.length > 0) {
                         $.each(market.market_types, function(index, market_type) {
 
-                             if(market_type.market_id.substr(0, 1) == 0)
-                            {
-                                return false;
-                            }
                             if (market_type.market_name == 'Match Odds') {
-                                let cardsInfo = market.additional_info;
+                                let cardsInfo = JSON.parse(market_type.additional_info);
                                 sevenUpDownCards(cardsInfo)
                                 $.each(market_type.runners, function(index, runner) {
 
@@ -2058,26 +2044,15 @@
                                     var round_id = tmp_round_id.split('.');
 
 
-                                    // clock.setValue(cardsInfo.autotime);
+                                    // clock.setValue(market_type.timer);
                                     // $('#timer').text(market_type.timer);
-                                    clock.setValue(cardsInfo.autotime);
+                                    clock.setValue(market_type.timer);
 
 
                                     $('#round_id').text(round_id[1]);
 
-
-
                                     $('#market_countdown_' + market_type.market_id.replace('.', '')).text(market_type.timer)
-                                    $('#availableToBack1_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().removeClass('overlay');
-                                  
-
-
-                                    console.log('market_type.status', market_type.status);
-
-
-
                                     if (market_type.status == 'OPEN') {
-
                                         var tmp_casino_market_id = market_type.market_id.replace('__', '.').split('_')
 
                                         var casino_market_id_1 = tmp_casino_market_id[0] ? tmp_casino_market_id[0] : '';
@@ -2085,7 +2060,7 @@
 
                                         if (casino_market_id_1 != casino_market_id) {
 
-                                            getLastResult(matchId, casino_market_id)
+                                            // getLastResult(matchId, casino_market_id)
                                             $('.matchBoxMain').remove();
                                             fetchBttingList();
                                             showLastResult();
@@ -2096,49 +2071,25 @@
 
                                         // $('#round_id').text(roundId);
 
-                                        console.log('cardsInfo.autotime',cardsInfo.autotime);
-                                        $(`#availableToLay1_price_${runner.market_id.replace('.', '')}_${runner.selection_id}`).parent().find('h6').remove();
-                                        if (cardsInfo.autotime < 2) {
+
+                                        if (market_type.timer < 5) {
                                             // ClearAllSelection(1);
-
-
-                                            $('#availableToBack1_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().append('<h6>SUSPENDED</h6>');
-                                            $('#availableToBack1_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
+                                            console.log($('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent());
+                                          
+                                            $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().append('<h6>SUSPENDED</h6>');
+                                            $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
                                             // $('.overlay_matchBoxs_' + market_type.market_id.replace('.', '')).fadeIn();
                                         } else {
 
-                                            $('#availableToBack1_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().removeClass('overlay');
+                                            $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().removeClass('overlay');
                                             $('.overlay_matchBoxs_' + market_type.market_id.replace('.', '')).fadeOut();
-                                            $(`#availableToLay1_price_${runner.market_id.replace('.', '')}_${runner.selection_id}`).parent().find('h6').remove();
                                         }
 
 
 
                                         if (!$('.market_box_' + market_type.market_id).length) {
-                                            if (market_type.runners.length > 1) {
-                                                generateMarketStructure(market, market_type);
-                                            }
-
+                                            generateMarketStructure(market, market_type);
                                         }
-                                    }
-
-                                
-
-                                    if (runner.status == 'OPEN') {
-
-                                        console.log('classs :::::::::',`.matchOpenBox_${runner.market_id.replace('.', '')}_${runner.selection_id}`);
-
-                                        $(`.matchOpenBox_${runner.market_id.replace('.', '')}_${runner.selection_id}`).find('h6').remove()
-                                        // $(`#availableToLay1_price_${runner.market_id.replace('.', '')}_${runner.selection_id}`).parent().find('h6').remove();
-
-                                        console.log('RUnner is active');
-                                        $('#availableToBack1_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().removeClass('overlay');
-                                        $('.overlay_matchBoxs_' + market_type.market_id.replace('.', '')).fadeOut();
-
-
-                                        // $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent().append("<h6>SUSPENDED</h6>");
-
-
                                     } else if (runner.status == 'SUSPENDED') {
                                         // runner.status == 'SUSPENDED'
                                         // if (!$('.market_box_' + market_type.market_id).length) {
@@ -2146,21 +2097,17 @@
                                         // }
 
                                         if ($('.market_box_' + market_type.market_id).length) {
-                                            // $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent().append("<h6>SUSPENDED</h6>");
-                                            $('#availableToBack1_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
-                                            // $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
-                                            // $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().append('<h6>SUSPENDED</h6>');
+                                            $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
+                                            $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().append('<h6>SUSPENDED</h6>');
 
-
+                                           
                                             // $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).closest('.betting-pink').append('<h6>SUSPENDED</h6>');
                                             // $('.overlay_matchBoxs_' + market_type.market_id.replace('.', '')).fadeIn();
 
 
                                             // $('.status_matchBoxs_' + market_type.market_id.replace('.', '')).text(market_type.status);
                                         }
-                                    } else if (runner.status == 'CLOSED') {
-                                        $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent().append("<h6>CLOSED</h6>");
-                                        $('#availableToBack1_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
+                                    } else if (market_type.status == 'CLOSED') {
                                         if ($('.market_box_' + market_type.market_id).length) {
 
                                             $('.market_box_' + market_type.market_id).remove();
@@ -2289,7 +2236,7 @@
 
                             if (market_type.market_name == 'Match Odds') {
 
-                                let cardsInfo = market.additional_info;
+                                let cardsInfo = JSON.parse(market_type.additional_info);
                                 // console.log("cardsInfo", cardsInfo);
                                 ttCards(cardsInfo);
 
@@ -2302,9 +2249,9 @@
                                     var round_id = tmp_round_id.split('.');
 
 
-                                    clock.setValue(cardsInfo.autotime);
+                                    // clock.setValue(market_type.timer);
                                     // $('#timer').text(market_type.timer);
-                                    // clock.setValue(cardsInfo.autotime);
+                                    clock.setValue(market_type.timer);
 
 
 
@@ -2320,7 +2267,7 @@
 
                                         if (casino_market_id_1 != casino_market_id) {
 
-                                            getLastResult(matchId, casino_market_id)
+                                            // getLastResult(matchId, casino_market_id)
                                             $('.matchBoxMain').remove();
                                             fetchBttingList();
                                             casino_market_id = casino_market_id_1;
@@ -2331,7 +2278,7 @@
                                         // $('#round_id').text(roundId);
 
 
-                                        if (cardsInfo.autotime < 5) {
+                                        if (market_type.timer < 5) {
                                             // ClearAllSelection(1);
                                             $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent().append("<h6>SUSPENDED</h6>");
                                             $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
@@ -2497,7 +2444,7 @@
                         $.each(market.market_types, function(index, market_type) {
 
                             if (market_type.market_name == 'Match Odds') {
-                                let cardsInfo = market.additional_info;
+                                let cardsInfo = JSON.parse(market_type.additional_info);
 
                                 amarAkbarAnthonyCards(cardsInfo);
 
@@ -2510,9 +2457,9 @@
                                     var round_id = tmp_round_id.split('.');
 
 
-                                    clock.setValue(cardsInfo.autotime);
+                                    // clock.setValue(market_type.timer);
                                     // $('#timer').text(market_type.timer);
-                                    // clock.setValue(cardsInfo.autotime);
+                                    clock.setValue(market_type.timer);
 
 
 
@@ -2528,7 +2475,7 @@
 
                                         if (casino_market_id_1 != casino_market_id) {
 
-                                            getLastResult(matchId, casino_market_id)
+                                            // getLastResult(matchId, casino_market_id)
                                             $('.matchBoxMain').remove();
                                             fetchBttingList();
                                             showLastResult();
@@ -2540,7 +2487,7 @@
                                         // $('#round_id').text(roundId);
 
 
-                                        if (cardsInfo.autotime < 5) {
+                                        if (market_type.timer < 5) {
                                             // ClearAllSelection(1);
                                             $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent().append("<h6>SUSPENDED</h6>");
                                             $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
@@ -2711,9 +2658,9 @@
                                     var round_id = tmp_round_id.split('.');
 
 
-                                    // clock.setValue(cardsInfo.autotime);
+                                    // clock.setValue(market_type.timer);
                                     // $('#timer').text(market_type.timer);
-                                    clock.setValue(cardsInfo.autotime);
+                                    clock.setValue(market_type.timer);
 
 
 
@@ -2728,7 +2675,7 @@
 
                                         if (casino_market_id_1 != casino_market_id) {
 
-                                            getLastResult(matchId, casino_market_id)
+                                            // getLastResult(matchId, casino_market_id)
                                             $('.matchBoxMain').remove();
                                             fetchBttingList();
                                             casino_market_id = casino_market_id_1;
@@ -2739,7 +2686,7 @@
                                         // $('#round_id').text(roundId);
 
 
-                                        if (cardsInfo.autotime < 5) {
+                                        if (market_type.timer < 5) {
                                             // ClearAllSelection(1);
 
                                             $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
@@ -2908,7 +2855,7 @@
                                 var round_id = tmp_round_id.split('.');
 
 
-                                clock.setValue(cardsInfo.autotime);
+                                clock.setValue(market_type.timer);
                                 // $('#timer').text(market_type.timer);
 
 
@@ -2923,7 +2870,7 @@
 
                                     if (casino_market_id_1 != casino_market_id) {
 
-                                        getLastResult(matchId, casino_market_id)
+                                        // getLastResult(matchId, casino_market_id)
                                         $('.matchBoxMain').remove();
                                         fetchBttingList();
                                         casino_market_id = casino_market_id_1;
@@ -2934,7 +2881,7 @@
                                     // $('#round_id').text(roundId);
 
 
-                                    if (cardsInfo.autotime < 5) {
+                                    if (market_type.timer < 5) {
                                         // ClearAllSelection(1);
 
                                         $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
@@ -3079,11 +3026,7 @@
 
 
         socket.on('betting_placed', function(data) {
-            setTimeout(function() {
-                getEventsMarketExpsure(<?php echo $event_id; ?>);
-
-            }, 2000);
-            fetchBttingList();
+            // fetchBttingList();
         });
 
         socket.on('betting_settle', function(data) {
@@ -3251,8 +3194,6 @@
 
 
     function getLastResult(match_id) {
-        showLastResult();
-        return false;
         $.ajax({
             url: '<?php echo base_url(); ?>admin/Events/getCasinoLastResult',
             data: {
@@ -3297,15 +3238,15 @@
                             <h3 data-v-91269fe6="" class="text-white">PLAYER A</h3>
                             <div data-v-91269fe6="" id="player-a-cards">
                                <img data-v-91269fe6="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${cardsInfo.C1}.png">
+                                <img data-v-91269fe6="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${cardsInfo.C2}.png">
                                 <img data-v-91269fe6="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${cardsInfo.C3}.png">
-                                <img data-v-91269fe6="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${cardsInfo.C5}.png">
                             </div>
                         </div>
                         <div data-v-91269fe6="">
                             <h3 data-v-91269fe6="" class="text-white">PLAYER B</h3>
                             <div data-v-91269fe6="" id="player-b-cards">
-                               <img data-v-91269fe6="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${cardsInfo.C2}.png">
-                                <img data-v-91269fe6="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${cardsInfo.C4}.png">
+                               <img data-v-91269fe6="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${cardsInfo.C4}.png">
+                                <img data-v-91269fe6="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${cardsInfo.C5}.png">
                                 <img data-v-91269fe6="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${cardsInfo.C6}.png">
                             </div>
                         </div>
@@ -3315,7 +3256,6 @@
     }
 
     function sevenUpDownCards(cardsInfo) {
-        console.log("cardsInfo",cardsInfo);
         let html = `		<div data-v-91269fe6="" class="videoCards">
                         <div data-v-91269fe6="">
                             <h3 data-v-91269fe6="" class="text-white">CARD</h3>
@@ -3362,62 +3302,59 @@
     }
 
     function ttCards(cardsInfo) {
-        $(".videoCards p").css('font-size', '8px');
-        // $(".video-overlay").css('background-color','#000');
-        // $("#casino-detail-parent").css('top','76px');
-        // $("#casino-detail-parent").css('position','relative');
+        $("iframe").height(333);
         const myArrayname = cardsInfo.desc.split(",");
         const allEqual = myArrayname.every(v => v == 1);
         let html = `<div data-v-91269fe6="" class="videoCards">
                     
                                 <div data-v-3bb6c088="">
-                        <p data-v-3bb6c088="" class="m-b-0 text-white" style="font-size:10px">
+                        <p data-v-3bb6c088="" class="m-b-0 text-white">
                             <b data-v-3bb6c088="">
                             <span data-v-3bb6c088="" class="">Player 8</span>
                             : <span data-v-3bb6c088="" class="text-warning">${cardsInfo.C1}</span>
                             </b>
                         </p>
                         <div data-v-3bb6c088="">
-                            <img data-v-3bb6c088="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${myArrayname[0]}.png" style="width:15px">
+                            <img data-v-3bb6c088="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${myArrayname[0]}.png">
                         </div>
                         </div>
 
 
                         <div data-v-3bb6c088="">
-                        <p data-v-3bb6c088="" class="m-b-0 text-white" style="font-size:10px">
+                        <p data-v-3bb6c088="" class="m-b-0 text-white">
                             <b data-v-3bb6c088="">
                             <span data-v-3bb6c088="" class="">Player 9</span>
                             : <span data-v-3bb6c088="" class="text-warning">${cardsInfo.C2}</span>
                             </b>
                         </p>
-                        <div data-v-3bb6c088="" >
-                            <img data-v-3bb6c088="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${myArrayname[1]}.png" style="width:15px">
+                        <div data-v-3bb6c088="">
+                            <img data-v-3bb6c088="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${myArrayname[1]}.png">
                         </div>
                         </div>
 
 
                         <div data-v-3bb6c088="">
-                        <p data-v-3bb6c088="" class="m-b-0 text-white" style="font-size:10px">
+                        <p data-v-3bb6c088="" class="m-b-0 text-white">
                             <b data-v-3bb6c088="">
                             <span data-v-3bb6c088="" class="">Player 10</span>
                             : <span data-v-3bb6c088="" class="text-warning">${cardsInfo.C3}</span>
                             </b>
                         </p>
                         <div data-v-3bb6c088="">
-                            <img data-v-3bb6c088="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${myArrayname[2]}.png" style="width:15px">
+                            <img data-v-3bb6c088="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${myArrayname[2]}.png">
                         </div>
                         </div>
 
 
                         <div data-v-3bb6c088="">
-                        <p data-v-3bb6c088="" class="m-b-0 text-white" style="font-size:10px">
+                        <p data-v-3bb6c088="" class="m-b-0 text-white">
                             <b data-v-3bb6c088="">
                             <span data-v-3bb6c088="" class="">Player 11</span>
                             : <span data-v-3bb6c088="" class="text-warning">${cardsInfo.C4}</span>
                             </b>
                         </p>
                         <div data-v-3bb6c088="">
-                            <img data-v-3bb6c088="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${myArrayname[3]}.png" style="width:15px">
+                            <img data-v-3bb6c088="" src="https://dzm0kbaskt4pv.cloudfront.net/v2/static/front/img/cards/${myArrayname[3]}.png">
                         </div>
                         </div>
              
@@ -3478,16 +3415,16 @@
                     } else if ("<?php echo $event_id ?>" == 56768) {
                         if (val.player == "Player A") {
                             // console.log(val.player);
-                            rList += `<span onclick="showCardOfResult('${val.market_id}','Player A','${val.selection_id}')" data-v-3e1a64f3="" class="ball-runs playera last-result">A</span>`;
+                            rList += `<span onclick="showCardOfResult('11.${val.market_id}','Player A','${val.selection_id}')" data-v-3e1a64f3="" class="ball-runs playera last-result">A</span>`;
                         } else {
-                            rList += `<span onclick="showCardOfResult('${val.market_id}','Player B','${val.selection_id}')" data-v-3e1a64f3="" class="ball-runs playerb last-result">B</span>`;
+                            rList += `<span onclick="showCardOfResult('11.${val.market_id}','Player B','${val.selection_id}')" data-v-3e1a64f3="" class="ball-runs playerb last-result">B</span>`;
                         }
                     } else if ("<?php echo $event_id ?>" == 56767) {
                         if (val.player == "Player A") {
                             // console.log(val.player);
-                            rList += `<span onclick="showCardOfResult('${val.market_id}','Player A','${val.selection_id}')" data-v-3e1a64f3="" class="ball-runs playera last-result">A</span>`;
+                            rList += `<span onclick="showCardOfResult('9.${val.market_id}','Player A','${val.selection_id}')" data-v-3e1a64f3="" class="ball-runs playera last-result">A</span>`;
                         } else {
-                            rList += `<span onclick="showCardOfResult('${val.market_id}','Player B','${val.selection_id}')" data-v-3e1a64f3="" class="ball-runs playerb last-result">B</span>`;
+                            rList += `<span onclick="showCardOfResult('9.${val.market_id}','Player B','${val.selection_id}')" data-v-3e1a64f3="" class="ball-runs playerb last-result">B</span>`;
                         }
                     } else if ("<?php echo $event_id ?>" == 98791) {
 
@@ -3507,7 +3444,7 @@
 
                     }
                 })
-
+    
 
                 $("#last-result").html(rList);
             }
@@ -3535,18 +3472,12 @@
     }
 
     function cardResultHtml(data, mid, pname, selection_id) {
+        // console.log("data", data)
         let html;
+        let round_id = mid.split(".")[1];
+        let cardArr = data[0].cards.split(",");
+        let sid = data[0].sid.split(",");
         if ("<?php echo $event_id ?>" == 56767 || "<?php echo $event_id ?>" == 56768) {
-            var round_id = mid.split("_")[0];
-            var cardArr = data.t1.card.split(",");
-        } else {
-            var round_id = mid.split(".")[1];
-            var cardArr = data[0].cards.split(",");
-            var sid = data[0].sid.split(",");
-        }
-
-        if ("<?php echo $event_id ?>" == 56767 || "<?php echo $event_id ?>" == 56768) {
-
 
             if ("<?php echo $event_id ?>" == 56767) {
                 $("#result-modal-header").text("Teenpatti 1 Day  Result");
@@ -3554,7 +3485,7 @@
 
             let onewinicon = "";
             let twowinicon = "";
-            if (data.t1.win == selection_id) {
+            if (data[0].win == selection_id) {
 
 
                 if (pname == "Player A") {
@@ -3730,75 +3661,8 @@
                 <div class="mb-1">
                 <span class="text-success">Result:</span> <span>${data[0].desc}</span></div></div></div></div></div>`;
         }
+        // console.log(cardArr);
         $(".card-result-body").html(html);
         $("#card-result").modal('show');
-    }
-
-
-
-    setTimeout(function() {
-        getEventsMarketExpsure(<?php echo $event_id; ?>);
-
-    }, 2000);
-
-    function getEventsMarketExpsure(MatchId) {
-        $.ajax({
-            url: '<?php echo base_url(); ?>dashboard/getEventsMarketExpsure/' + MatchId,
-
-            type: 'get',
-            dataType: 'json',
-            success: function(output) {
-
-                var markets = output;
-                $.each(markets, function(marketKey, marketsRunner) {
-                    $.each(marketsRunner, function(runner_key, runner_value) {
-
-
-
-
-                        if (runner_value < 0) {
-                            $('#' + runner_key + '_maxprofit_loss_runner_' + marketKey).text(Math.abs(runner_value)).css("color", "red");
-                        } else {
-
-                            $('#' + runner_key + '_maxprofit_loss_runner_' + marketKey).text(Math.abs(runner_value)).css("color", "green");
-                        }
-
-
-                    });
-                })
-
-
-            }
-        });
-    }
-
-    setInterval(function() {
-        // getEventTimer();
-    }, 900)
-
-
-
-
-
-
-    // var clock = new FlipClock($(".clock"), {
-    //         clockFace: "Counter"
-    //     });
-
-
-    function getEventTimer() {
-        $.ajax({
-            url: '<?php echo base_url(); ?>admin/Events/getEventTimer',
-            data: {
-                event_id: "<?php echo $event_id; ?>"
-            },
-            dataType: "json",
-            type: "POST",
-            success: function success(output) {
-
-                clock.setValue(output.timer);
-
-            }
-        });
     }
 </script>

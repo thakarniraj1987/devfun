@@ -16,7 +16,7 @@
         <section class="match-content">
             <div class="table_tittle">
                 <span class="lable-user-name">
-                    BET HISTORY
+                    CLIENT LIVE BETS REPORT
                 </span>
                 <button class="btn btn-xs btn-primary" onclick="goBack()">Back</button>
             </div>

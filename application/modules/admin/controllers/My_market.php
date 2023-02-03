@@ -27,19 +27,14 @@ class My_market extends My_Controller
     public function index($type = null)
     {
         $dataArray = array();
+        if (get_user_type() == 'User') {
+            $list_events = get_running_markets_masters();
+        } else {
+            $list_events = get_running_markets_masters();
+        }
 
-        $data['list_events'] = get_running_markets_masters();
-        $dataArray['my_market_table'] = $this->load->viewPartial('my_market-html', $data);
+        $dataArray['list_events'] = $list_events;
 
         $this->load->view('my_market', $dataArray);
-    }
-
-    function refreshMarketAnalysis()
-    {
-        
-        $data['list_events'] = get_running_markets_masters();
-        $my_market_table = $this->load->viewPartial('my_market-html', $data);
-          
-        echo  $my_market_table;
     }
 }

@@ -18,40 +18,25 @@
 
             if (!empty($reports)) {
 
-                
-
-            
+                $user_id_url =  $user_id != $_SESSION['my_userdata']['user_id'] ? '/' . $user_id : null;
                 // p($reports);
-                $tmpReport = $reports;
+                $tmpReport = array();
                 // p($reports);
-                // foreach ($reports as $report) {
+                foreach ($reports as $report) {
 
-                //     $event_id = $report['match_id'];
+                    $event_id = $report['match_id'];
 
-                //     if (isset($tmpReport[$event_id])) {
-                //         $tmpReport[$event_id]['p_l'] += $report["p_l"];
-                //     } else {
-                //         $tmpReport[$event_id] = $report;
-                //     }
-                // }
+                    if (isset($tmpReport[$event_id])) {
+                        $tmpReport[$event_id]['p_l'] += $report["p_l"];
+                    } else {
+                        $tmpReport[$event_id] = $report;
+                    }
+                }
 
                 // p($tmpReport);
 
                 foreach ($tmpReport as $report) {
 
-
-                    if($report['is_casino'] == 'Yes')
-                    {
-                        $user_id_url =  $user_id != $_SESSION['my_userdata']['user_id'] ? '/' . $user_id : '/'.$_SESSION['my_userdata']['user_id'];
-
-                        $user_id_url .= '/'.$report['market_id'];
-
-                    }
-                    else{
-                        $user_id_url =  $user_id != $_SESSION['my_userdata']['user_id'] ? '/' . $user_id : '/'.$_SESSION['my_userdata']['user_id'];
-
-                    }
-                  
                     $user_type = $_SESSION['my_userdata']['user_type'];
                     if ($user_type == 'User') {
                         // $comm= get_commission($report['master_id'],'Master');
@@ -83,13 +68,9 @@
                         <td><?php echo date('d-m-Y', strtotime($report['created_at'])); ?></td>
 
                         <td>
-
-                        
- <a href="<?php echo  base_url() ?>admin/Reports/profitLossDetail/<?php echo $report['match_id'] . $user_id_url; ?>">
+                            <a href="<?php echo  base_url() ?>admin/Reports/profitLossDetail/<?php echo $report['match_id'] . $user_id_url; ?>">
                             <?php echo $report['event_name'] ?>
                             </a>
-                           
-                           
 
                         </td>
                         <?php

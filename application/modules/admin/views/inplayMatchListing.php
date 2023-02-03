@@ -171,7 +171,7 @@
                             <div class="match_names">
 
 
-                                <a class="event-name" href="javascript:;" onclick="MarketSelection(`<?php echo $market_type['market_id']; ?>`,<?php echo $cricket['event_id']; ?>,<?php echo $cricket['event_type']; ?>);" title="Match OODS">
+                                <a class="event-name" href="javascript:;" onclick="MarketSelection(<?php echo $market_type['market_id']; ?>,<?php echo $cricket['event_id']; ?>,<?php echo $cricket['event_type']; ?>);" title="Match OODS">
                                     <?php echo $cricket['event_name'] ?> <br>
                                 </a>
 
@@ -206,8 +206,8 @@
 
 
                                 <div class="backlay_box">
-                                    <div class="back betting-blue"><strong class="odds ng-binding"><?php echo isset($market_type['runners'][2]['back_1_price']) ? $market_type['runners'][2]['back_1_price'] : '0'; ?></strong></div>
-                                    <div class="lay betting-pink"><strong class="odds ng-binding"><?php echo isset($market_type['runners'][2]['lay_1_price']) ? $market_type['runners'][2]['lay_1_price'] : '0'; ?></strong></div>
+                                    <div class="back betting-blue"><strong class="odds ng-binding">0</strong></div>
+                                    <div class="lay betting-pink"><strong class="odds ng-binding">0</strong></div>
 
                                 </div>
 

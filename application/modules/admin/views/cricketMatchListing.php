@@ -162,9 +162,6 @@
                         if ($i > 1) {
                             continue;
                         }
-
-
-
         ?>
                         <div class="matchtime">
                             <time class="ng-binding"><?php echo date('d M Y H:i:s', strtotime($cricket['open_date'])); ?> </time>
@@ -174,26 +171,26 @@
                             <div class="match_names">
 
 
-                                <a class="event-name" href="javascript:;" onclick="MarketSelection(`<?php echo $market_type['market_id']; ?>`,<?php echo $cricket['event_id']; ?>,<?php echo $cricket['event_type']; ?>);" title="Match OODS">
+                                <a class="event-name" href="javascript:;" onclick="MarketSelection(<?php echo $market_type['market_id']; ?>,<?php echo $cricket['event_id']; ?>,<?php echo $cricket['event_type']; ?>);" title="Match OODS">
                                     <?php echo $cricket['event_name'] ?> <br>
                                 </a>
-
+                              
 
                                 <div class="inplay-fancy-name">
-                                    <?php
-                                    if ($cricket['is_bm'] == 'True') { ?>
-                                        <span class="round-status">M</span>
-                                    <?php } ?>
+                                <?php
+                                if ($cricket['is_bm'] == 'Yes') { ?>
+                                    <span class="round-status">M</span>
+                                <?php } ?>
+
+
+                                <?php
+                                if ($cricket['is_fancy'] == 'Yes') { ?>
+                                    <span class="round-status">F</span>
+                                <?php } ?>
 
 
                                     <?php
-                                    if ($cricket['is_fancy'] == 'True') { ?>
-                                        <span class="round-status">F</span>
-                                    <?php } ?>
-
-
-                                    <?php
-                                    if ($cricket['is_inplay'] == 'True' || $market_type['inplay'] == '1') { ?>
+                                    if ($cricket['is_inplay'] == 'Yes') { ?>
                                         <span class="in_play">Inplay</span>
                                     <?php } ?>
 
@@ -209,8 +206,8 @@
 
 
                                 <div class="backlay_box">
-                                    <div class="back betting-blue"><strong class="odds ng-binding"><?php echo isset($market_type['runners'][2]['back_1_price']) ? $market_type['runners'][2]['back_1_price'] : '0'; ?></strong></div>
-                                    <div class="lay betting-pink"><strong class="odds ng-binding"><?php echo isset($market_type['runners'][2]['lay_1_price']) ? $market_type['runners'][2]['lay_1_price'] : '0'; ?></strong></div>
+                                    <div class="back betting-blue"><strong class="odds ng-binding">0</strong></div>
+                                    <div class="lay betting-pink"><strong class="odds ng-binding">0</strong></div>
 
                                 </div>
 

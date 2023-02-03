@@ -1,14 +1,3 @@
-<style>
-   body {
-      padding-bottom: 0px !important;
-   }
-
-   @media (pointer:coarse) {
-      .modal-mt50 {
-         margin-top: 21%;
-      }
-   }
-</style>
 <div id="onoffModal" class="modal fade" role="dialog">
    <div class="modal-dialog">
       <div class="modal-content">
@@ -35,8 +24,6 @@
       </div>
    </div>
 </div>
-<!-- <audio id="myAudio" src="<?php echo isIosDevice() ? base_url() . 'assets/welcome.aiff' : base_url() . 'assets/welcome.mp3' ?>" autoPlay muted>
-</audio> -->
 <script>
    function openNav() {
       document.getElementById("lefttSidenav").style.width = "250px";
@@ -103,31 +90,49 @@
                <!-- Indicators -->
                <ol class="carousel-indicators">
                   <li data-target="#carousel-example-generic" data-slide-to="0" class=""></li>
-                  <li data-target="#carousel-example-generic" data-slide-to="1" class="active"></li>
+                  <li data-target="#carousel-example-generic" data-slide-to="1" class=""></li>
                   <li data-target="#carousel-example-generic" data-slide-to="2" class=""></li>
                   <li data-target="#carousel-example-generic" data-slide-to="3" class=""></li>
-
+                  <li data-target="#carousel-example-generic" data-slide-to="4" class=""></li>
+                  <li data-target="#carousel-example-generic" data-slide-to="5" class=""></li>
+                  <li data-target="#carousel-example-generic" data-slide-to="6" class=""></li>
+                  <li data-target="#carousel-example-generic" data-slide-to="7" class=""></li>
+                  <li data-target="#carousel-example-generic" data-slide-to="8" class="active"></li>
+                  <li data-target="#carousel-example-generic" data-slide-to="9" class=""></li>
+                  <li data-target="#carousel-example-generic" data-slide-to="10" class=""></li>
                </ol>
                <!-- Wrapper for slides -->
                <div class="carousel-inner" role="listbox">
-                  <?php
-                  if (!empty($header_banners)) {
-                     $i = 2;
-                     foreach ($header_banners as $banner) {
-                        if ($i == 2) {
-                           $status = "active";
-                        } else {
-                           $status = "";
-                        }
-                        $i++;
-                  ?>
-                        <div class="item <?php echo $status ?>">
-                           <img src="<?php echo base_url('assets/banner/' . $banner->header_banner_name); ?>">
-                        </div>
-                  <?php
-                     }
-                  }
-                  ?>
+                  <div class="item">
+                     <img src="<?php echo base_url(); ?>assets/app/b1.png">
+                  </div>
+                  <div class="item">
+                     <img src="<?php echo base_url(); ?>assets/app/1.jpg">
+                  </div>
+                  <div class="item">
+                     <img src="<?php echo base_url(); ?>assets/app/2.jpg">
+                  </div>
+                  <div class="item">
+                     <img src="<?php echo base_url(); ?>assets/app/3.jpg">
+                  </div>
+                  <div class="item">
+                     <img src="<?php echo base_url(); ?>assets/app/4.jpg">
+                  </div>
+                  <div class="item">
+                     <img src="<?php echo base_url(); ?>assets/app/5.jpg">
+                  </div>
+                  <div class="item">
+                     <img src="<?php echo base_url(); ?>assets/app/6.jpg">
+                  </div>
+                  <div class="item">
+                     <img src="<?php echo base_url(); ?>assets/app/7.jpg">
+                  </div>
+                  <div class="item active">
+                     <img src="<?php echo base_url(); ?>assets/app/8.jpg">
+                  </div>
+                  <div class="item">
+                     <img src="<?php echo base_url(); ?>assets/app/9.jpg">
+                  </div>
                  
                </div>
             </div>
@@ -169,10 +174,7 @@
                </div>
             </div>
             <ul class="second_tab  nav nav-tabs">
-
-
-
-               <!-- <li class="active"><a data-toggle="tab" href="#all"><span class="tabicon"><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 477.867 477.867" style="enable-background:new 0 0 477.867 477.867;" xml:space="preserve">
+               <li class="active"><a data-toggle="tab" href="#all"><span class="tabicon"><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 477.867 477.867" style="enable-background:new 0 0 477.867 477.867;" xml:space="preserve">
                            <g>
                               <g>
                                  <path d="M238.933,0C106.974,0,0,106.974,0,238.933s106.974,238.933,238.933,238.933s238.933-106.974,238.933-238.933
@@ -197,9 +199,9 @@ c2.651-0.001,5.266,0.615,7.637,1.8l136.533,68.267C340.331,227.863,343.762,238.11
                            <g></g>
                            <g></g>
                         </svg>
-                     </span>In-play</a></li> -->
+                     </span>In-play</a></li>
 
-               <li class="active"><a data-toggle="tab" href="#sport4 ">
+               <li><a data-toggle="tab" href="#sport4 ">
 
                      <span class="tabicon">
                         <svg height="382pt" viewBox="0 0 382.04857 382" width="382pt" xmlns="http://www.w3.org/2000/svg">
@@ -338,59 +340,18 @@ c2.651-0.001,5.266,0.615,7.637,1.8l136.533,68.267C340.331,227.863,343.762,238.11
                            </g>
                         </svg>
                      </span>Soccer </a></li>
-               <li><a data-toggle="tab" href="#sport7 ">
 
-                     <span class="tabicon">
-                        <img src="<?php echo base_url(); ?>assets/images/horse.svg" height="21" />&nbsp;
-                     </span>Horse </a></li>
-               <li class="">
-                  <a data-toggle="tab" href="#livetvtab ">
-
-                     <span class="tabicon">
-                        <svg onclick="showTv(31057636,'112.196.188.58',1038);" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 445.44 445.44" style="enable-background:new 0 0 445.44 445.44;" xml:space="preserve">
-                           <g>
-                              <g>
-                                 <path d="M404.48,108.288H247.808l79.36-78.336l-14.336-14.336L230.4,96.512l-82.432-81.408L133.632,29.44l79.36,78.336H40.96
-c-22.528,0-40.96,18.432-40.96,40.96v240.64c0,22.528,18.432,40.96,40.96,40.96h363.52c22.528,0,40.96-18.432,40.96-40.96v-240.64
-C445.44,126.72,427.008,108.288,404.48,108.288z M276.48,336.64c0,16.896-13.824,30.72-30.72,30.72H87.04
-c-16.896,0-30.72-13.824-30.72-30.72V203.52c0-16.896,13.824-30.72,30.72-30.72h158.72c16.896,0,30.72,13.824,30.72,30.72V336.64z
-M353.28,355.072c-19.968,0-35.84-15.872-35.84-35.84c0-19.968,15.872-35.84,35.84-35.84s35.84,15.872,35.84,35.84
-C389.12,339.2,373.248,355.072,353.28,355.072z M394.24,251.136h-81.92v-20.48h81.92V251.136z M394.24,199.936h-81.92v-20.48
-h81.92V199.936z"></path>
-                              </g>
-                           </g>
-                           <g></g>
-                           <g></g>
-                           <g></g>
-                           <g></g>
-                           <g></g>
-                           <g></g>
-                           <g></g>
-                           <g></g>
-                           <g></g>
-                           <g></g>
-                           <g></g>
-                           <g></g>
-                           <g></g>
-                           <g></g>
-                           <g></g>
-                        </svg>
-                     </span>Live TV </a>
-               </li>
-
-
-
-
+   
 
             </ul>
             <div class="match-tabs">
 
                <div class="tab-content">
-                  <div id="all" class="tab-pane fade ">
+                  <div id="all" class="tab-pane fade in active">
                      <?php echo $inplayListingHtml; ?>
                   </div>
 
-                  <div id="sport4" class="tab-pane fade active in ">
+                  <div id="sport4" class="tab-pane fade">
                      <?php echo $cricketListingHtml; ?>
                   </div>
                   <div id="sport2" class="tab-pane fade">
@@ -403,75 +364,11 @@ h81.92V199.936z"></path>
                   </div>
 
 
-                  <div id="livetvtab" class="tab-pane fade">
-                     <?php echo $liveTvListingHtml; ?>
-
-                  </div>
-
-                  <div id="sport7" class="tab-pane fade">
-                     <?php echo $horseListingHtml; ?>
-
-                  </div>
-
                </div>
             </div>
          </div>
          <div id="MatchOddInfo"></div>
          <div id="footerimg" style="margin-bottom: 30px;width: 100%; float: left; margin-top: 10px;">
-            <!-- <div class="col-md-2 sol-sm-2 col-lg-2 col-xs-4">
-               <a href="<?php echo base_url() ?>casino/ltp"> <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/3PT.jpg">
-
-               </a>
-            </div> -->
-            <?php if (!empty($casino_events['32c'])) { ?>
-               <div class="col-md-2 sol-sm-2 col-lg-2 col-xs-4">
-               <a onclick="CreateJwtAndLaunchCasino('card32a')"> <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/32C.jpg">
-
-                  </a>
-               </div>
-            <?php } ?>
-            <!-- <div class="col-md-2 sol-sm-2 col-lg-2 col-xs-4">
-            <a href="<?php echo base_url() ?>casino/aaa"> <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/aaa.jpg">
-
-</a>
-            </div> -->
-            <?php if (!empty($casino_events['t20'])) { ?>
-               <div class="col-md-2 sol-sm-2 col-lg-2 col-xs-4">
-               <a onclick="CreateJwtAndLaunchCasino('teenpatti/t20')"> <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/TT20.jpg">
-                  </a>
-               </div>
-            <?php } ?>
-            <?php if (!empty($casino_events['ltp'])) { ?>
-               <div class="col-md-2 sol-sm-2 col-lg-2 col-xs-4">
-               <a onclick="CreateJwtAndLaunchCasino('teenpatti/oneday')"> <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/3PT.jpg">
-
-                  </a>
-               </div>
-            <?php } ?>
-            <!-- <div class="col-md-2 sol-sm-2 col-lg-2 col-xs-4">
-            <a href="<?php echo base_url() ?>casino/aaa"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/3CD.jpg"></a>
-            </div> -->
-            <?php if (!empty($casino_events['7ud'])) { ?>
-               <div class="col-md-2 sol-sm-2 col-lg-2 col-xs-4">
-               <a onclick="CreateJwtAndLaunchCasino('lucky7')"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/7U7D.jpg"></a>
-               </div>
-            <?php } ?>
-
-
-            <?php if (!empty($casino_events['dt20'])) { ?>
-               <div class="col-md-2 sol-sm-2 col-lg-2 col-xs-4">
-               <a onclick="CreateJwtAndLaunchCasino('dt20')"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/dt.jpg"></a>
-               </div>
-            <?php } ?>
-
-
-            <?php if (!empty($casino_events['aaa'])) { ?>
-               <div class="col-md-2 sol-sm-2 col-lg-2 col-xs-4">
-               <a onclick="CreateJwtAndLaunchCasino('aaa')"><img style="width: 100%;  padding-bottom: 6rem;" src="<?php echo base_url(); ?>assets/app/aaa.jpg"></a>
-               </div>
-            <?php } ?>
-
-
             <!-- <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
                <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/footer01.jpg">
 
@@ -482,13 +379,26 @@ h81.92V199.936z"></path>
 
 
             </div> -->
+            <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+            <a href="<?php echo base_url() ?>casino/ltp">   <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/3PT.jpg">
 
+</a>
+            </div>
             <!-- <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
             <a href="javascript:void(0)">  <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/7U7D.jpg">
 </a>
 
             </div> -->
+            <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+            <a href="<?php echo base_url() ?>casino/32c">  <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/32C.jpg">
 
+</a>
+            </div>
+            <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+            <a href="<?php echo base_url() ?>casino/aaa">  <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/aaa.jpg">
+
+</a>
+            </div>
             <!-- <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
             <a href="javascript:void(0)">  <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/AB.jpg">
 </a>
@@ -514,13 +424,21 @@ h81.92V199.936z"></path>
 
 
             </div> -->
+            <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+            <a href="<?php echo base_url() ?>casino/t20">   <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/TT20.jpg">
+</a>
 
+            </div>
             <!-- <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
                <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/WM.jpg">
 
 
             </div> -->
+            <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+               <a href="<?php echo base_url() ?>casino/aaa"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/3CD.jpg"></a>
 
+
+            </div>
             <!-- <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
                <a href="http://pdmexch.bet/dashboard"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/AR.jpg"></a>
 
@@ -600,15 +518,15 @@ h81.92V199.936z"></path>
                </div>
                <div class="MatchLiveTvHideShow"></div>
             </div>
-
+           
             <div class="betSlipBox" style="display: none;">
-
+              
             </div>
 
 
 
 
-
+          
             <div class="overlay_mobile in"></div>
 
             <div class="mod-header tab_bets betsheading" style="display: none;">
@@ -659,30 +577,6 @@ h81.92V199.936z"></path>
       </div>
    </div>
 </div>
-<?php
-if (get_user_type() == "User") {
-   if (!empty($_SESSION['welcome_banner_show'])) {
-      if (!empty($welcome_banner)) {
-?>
-         <div id="welcome_banner" class="modal fade" role="dialog">
-            <div class="modal-dialog modal-mt50">
-               <div class="modal-content">
-                  <div class="modal-body">
-                     <img src="<?php echo base_url('assets/welcome_note_banner/' . $welcome_banner['welcome_note_banner_name']) ?>" style="    height: auto; width: -webkit-fill-available;">
-                     <button type="button" class="btn btn-secondary" data-dismiss="modal" style="float:right">Close</button>
-                  </div>
-                  <!-- <div class="modal-footer">
-         
-        </div> -->
-               </div>
-            </div>
-
-         </div>
-<?php
-      }
-   }
-}
-?>
 <script>
    /*function changetv(id,sr){
    	
@@ -733,99 +627,46 @@ if (get_user_type() == "User") {
 </script>
 
 <script>
-   $(document).ready(function() {
-      <?php
-      if (get_user_type() == "User") {
-         if (!empty($_SESSION['welcome_banner_show'])) {
-            if (!empty($welcome_banner)) {
-      ?>
-               setTimeout(function() {
-                  $('#welcome_banner').modal('show');
-               }, 500)
-      <?php
-            }
-         }
-      }
-      ?>
+	$(document).ready(function() {
+
+	 
+ 
+		socket.on('dashboard_market_update', function(data) {
+			//events
+
+			console.log('heree');
+			$.each(data.marketodds, function(index, events) {
+
+				//market types
+				var j = 0;
+				if (events.market_types) {
+					$.each(events.market_types, function(index, market_type) {
+						if (j == 0) {
+							var i = 0;
+
+							$.each(market_type.runners, function(index, runner) {
+								// console.log('RUNNER', runner);
+								// console.log(index);
+
+								if (i == 0) {
+									// console.log('#back-cell-' + runner.event_id + '-' + runner.selection_id);
+									$('#back-cell-' + runner.event_id + '-' + runner.selection_id).text(runner.back_1_price);
+									$('#lay-cell-' + runner.event_id + '-' + runner.selection_id).text(runner.lay_1_price);
+								} else if (i == 1) {
+									$('#back-cell-' + runner.event_id + '-' + runner.selection_id).text(runner.back_1_price);
+									$('#lay-cell-' + runner.event_id + '-' + runner.selection_id).text(runner.lay_1_price);
+								}
+								i++;
+							});
+						}
+						j++;
+					});
+				}
+
+			});
+		});
 
 
-      socket.on('dashboard_market_update', function(data) {
-         //events
-
-         console.log('heree');
-         $.each(data.marketodds, function(index, events) {
-
-            //market types
-            var j = 0;
-            if (events.market_types) {
-               $.each(events.market_types, function(index, market_type) {
-                  if (j == 0) {
-                     var i = 0;
-
-                     $.each(market_type.runners, function(index, runner) {
-                        // console.log('RUNNER', runner);
-                        // console.log(index);
-
-                        if (i == 0) {
-                           // console.log('#back-cell-' + runner.event_id + '-' + runner.selection_id);
-                           $('#back-cell-' + runner.event_id + '-' + runner.selection_id).text(runner.back_1_price);
-                           $('#lay-cell-' + runner.event_id + '-' + runner.selection_id).text(runner.lay_1_price);
-                        } else if (i == 1) {
-                           $('#back-cell-' + runner.event_id + '-' + runner.selection_id).text(runner.back_1_price);
-                           $('#lay-cell-' + runner.event_id + '-' + runner.selection_id).text(runner.lay_1_price);
-                        }
-                        i++;
-                     });
-                  }
-                  j++;
-               });
-            }
-
-         });
-      });
-
-
-
-   });
-
-   window.onload = function() {
-      console.log("<?php echo $_SESSION['wcaudio']; ?>")
-      <?php if (empty($_SESSION['wcaudio'])) { ?>
-         document.getElementById('myAudio').muted = false;
-         $("#myAudio").trigger("play");
-
-      <?php
-         $_SESSION['wcaudio'] = "Played";
-      }
-      ?>
-   }
-</script>
-<script>
-   function CreateJwtAndLaunchCasino(game, admin = null) {
-
-      var folder = "admin";
-      if (admin != null) {
-         folder = "dealer";
-      }
-      $.ajax({
-         url: base_url + folder + '/Casino/CreateJwtAndLaunchCasino',
-         data: {
-            game: game
-         },
-         type: "POST",
-         dataType: "JSON",
-         success: function success(response) {
-
-            console.log('output', response);
-            response = JSON.parse(JSON.stringify(response));
-
-            if (response.message == "Casino Blocked") {
-               location.reload();
-            } else if (response.casino_link) {
-               window.open(response.casino_link, "_self");
-            }
-         }
-      });
-
-   }
+	 
+	});
 </script>

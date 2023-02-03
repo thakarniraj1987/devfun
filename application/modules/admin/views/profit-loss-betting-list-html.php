@@ -35,15 +35,12 @@
             if (!empty($bettings)) {
                 foreach ($bettings as $betting) {
 
-
-
                     if ($user_type != 'User') {
-
                         if ($betting['bet_result'] == 'Plus') {
                             $pl =  0;
-                            $loss =  '-' . $betting['profit'];
+                            $loss =  '-' . $betting['loss'];
                         } elseif ($betting['bet_result'] == 'Minus') {
-                            $pl = $betting['loss'];
+                            $pl = $betting['profit'];
                             $loss = 0;
                         }
                     } else {
@@ -103,11 +100,11 @@
 
                                                                 ?></td>
                             <td class="mark-back"><?php
-                                                    if ($betting['betting_type'] == 'Fancy') { ?>
-                                    Yes
-                                <?php     } else { ?>
-                                    Lagai
-                                <?php } ?></td>
+                                                                              if ($betting['betting_type'] == 'Fancy') { ?>
+                                                            Yes
+                                                         <?php     } else { ?>
+                                                            Lagai
+                                                         <?php } ?></td>
                             <td class="mark-back"><?php echo $betting['price_val']; ?></td>
                             <td class="mark-back"><?php echo abs($betting['stake']); ?></td>
                             <td class="mark-back"><?php echo abs($betting['profit']); ?></td>
@@ -166,9 +163,9 @@
                             <td class="mark-lay">
                                 <?php
                                 if ($betting['betting_type'] == 'Fancy') { ?>
-                                    No
+                                No
                                 <?php     } else { ?>
-                                    Khai
+                                Khai
                                 <?php } ?>
                             </td>
                             <td class="mark-lay"><?php echo $betting['price_val']; ?></td>

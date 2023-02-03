@@ -146,7 +146,7 @@ class Report_model extends My_Model
         $this->db->from('betting as b');
         $this->db->join('registered_users as ru', 'ru.user_id=b.user_id', 'left');
         if (!empty($user_id->master_id)) {
-            $this->db->where('ru.master_id', $dataValues['user_id']);
+            $this->db->where('ru.master_id', $user_id->master_id);
         }
         //        $this->db->where('b.status','Settled');
         $this->db->group_by('b.user_id');
@@ -161,7 +161,7 @@ class Report_model extends My_Model
         }
 
         $return = $this->db->get()->result_array();
-               p($this->db->last_query());
+        //        p($this->db->last_query());
         return $return;
     }
     public function get_market_pl($dataValues)

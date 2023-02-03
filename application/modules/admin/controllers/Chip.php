@@ -67,14 +67,6 @@ class Chip extends My_Controller
 
     function addchip()
     {
-        if ($_SESSION['my_userdata']['is_spectator'] == 'Yes') {
-            $data = array(
-                'success' => false,
-                'message' => 'Sorry Spectator has no right'
-            );
-            echo json_encode($data);
-            exit;
-        }
         $this->load->library('form_validation');
         $this->form_validation->set_rules('chip_name', 'Chip Name', 'required|trim');
         $this->form_validation->set_rules('chip_value', 'Chip Value', 'required|trim');
@@ -167,8 +159,6 @@ class Chip extends My_Controller
         $chip_name = $this->input->post('chip_name');
         $chip_value = $this->input->post('chip_value');
 
-
-        // p($this->input->post());
         if (sizeof($user_chip_id) > 0  && sizeof($chip_value) > 0 && sizeof($chip_name) > 0) {
             $total = sizeof($user_chip_id);
 
@@ -204,47 +194,24 @@ class Chip extends My_Controller
 
     public function upadateChipsForAll()
     {
-        if ($_SESSION['my_userdata']['is_spectator'] == 'Yes') {
-            $data = array(
-                'success' => false,
-                'message' => 'Sorry Spectator has no right'
-            );
-            echo json_encode($data);
-            exit;
-        }
-
         $user_id = get_user_id();
         $user_type = get_user_type();
 
         $site_code = getCustomConfigItem('site_code');
-        $users = $this->User_model->getUserIdsBySiteCode($site_code);
+        $users = $this->User_model->getUserBySiteCode($site_code);
         $chips = $this->Chip_model->get_all_chips($site_code);
 
 
 
-
-        $deleteArr = array();
-        $insertArr = array();
-
-
-
-
-
-        if ($user_type == 'Admin' || $user_type == 'Super Admin') {
-
-
+        if ($user_type == 'Admin') {
             if (!empty($users)) {
-                foreach ($users as $user) {
-                    $deleteArr[] = $user->user_id;
-                }
-            }
 
-
-            if (!empty($users)) {
                 foreach ($users as $user) {
+                    $result = $this->User_chip_model->deleteUserChips($user->user_id);
+                    $chipsData = array();
                     if (!empty($chips)) {
                         foreach ($chips as $chip) {
-                            $insertArr[] = array(
+                            $chipsData[] = array(
                                 'user_id' => $user->user_id,
                                 "chip_name" => $chip['chip_name'],
                                 "chip_id" => $chip['chip_id'],
@@ -253,16 +220,14 @@ class Chip extends My_Controller
 
                             );
                         }
-                        // $result = $this->User_chip_model->addChipBatch($chipsData);
-                    }
+                        $result = $this->User_chip_model->addChipBatch($chipsData);
+                     }
                 }
             }
-
-            $this->User_chip_model->delete_multiple_chips_entrys($deleteArr);
-
-            $this->User_chip_model->addChipBatch($insertArr);
         }
 
         echo json_encode(array('success' => true));
     }
+
+    
 }

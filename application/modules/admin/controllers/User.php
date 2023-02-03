@@ -29,9 +29,8 @@ class User extends My_Controller
         $this->load->model('User_info_model');
         $this->load->model('Ledger_model');
         $this->load->model('View_info_model');
-        $this->load->model('Withdraw_request_model');
-        $this->load->model('Deposit_request_model');
-        $this->load->model('Refer_model');
+
+
 
 
         $this->load->library('commonlibrary');
@@ -48,16 +47,7 @@ class User extends My_Controller
 
     public function addUser($user_id = null)
     {
-
-        if ($_SESSION['my_userdata']['is_spectator'] == 'Yes') {
-            $data = array(
-                'success' => false,
-                'message' => 'Sorry Spectator has no right'
-            );
-            echo json_encode($data);
-            exit;
-        }
-
+     
         $userdata = $_SESSION['my_userdata'];
 
         $this->load->library('form_validation');
@@ -89,7 +79,7 @@ class User extends My_Controller
             $partnership = $this->input->post('partnership');
             $casino_partnership = $this->input->post('casino_partnership');
             $teenpati_partnership = $this->input->post('teenpati_partnership');
-            $balance = $this->input->post('deposite_bal');
+	   $balance = $this->input->post('deposite_bal');
 
 
             if (empty($user_id)) {
@@ -128,7 +118,7 @@ class User extends My_Controller
                 "casino_partnership" => $casino_partnership,
                 'teenpati_partnership' => $teenpati_partnership,
                 'site_code' => $site_code,
-                'balance' => $balance,
+		'balance' => $balance,
             );
 
 
@@ -137,10 +127,8 @@ class User extends My_Controller
                 $dataArray['password'] = md5($password);
             }
 
-
+		 
             $return_user_id = $this->User_model->addUser($dataArray);
-
-
 
             if (empty($this->input->post('user_id'))) {
                 /************************Chip Insert*******************/
@@ -199,18 +187,6 @@ class User extends My_Controller
             }
 
 
-            if (!empty($balance)) {
-                /************************Chip leger create*******************/
-                $data = array(
-                    'user_id' => $return_user_id,
-                    'type' => 'D',
-                    'ChipsValue' => $balance,
-                    'chip_master_id' => $master_id,
-                );
-
-                $this->chip_update_new($data);
-            }
-
 
             $array = array(
                 'success' => true,
@@ -227,15 +203,6 @@ class User extends My_Controller
 
     public function changePassword($user_id = null)
     {
-
-        if ($_SESSION['my_userdata']['is_spectator'] == 'Yes') {
-            $data = array(
-                'success' => false,
-                'message' => 'Sorry Spectator has no right'
-            );
-            echo json_encode($data);
-            exit;
-        }
         $userdata = $_SESSION['my_userdata'];
         $this->load->library('form_validation');
         $this->form_validation->set_rules('password', 'Password', 'required|trim');
@@ -695,7 +662,7 @@ class User extends My_Controller
                 $dataArray['masters'] = $masterUserIdList;
             }
         }
-        // p($dataArray);
+
 
         $this->load->view('/user-list', $dataArray);
     }
@@ -715,205 +682,15 @@ class User extends My_Controller
         echo json_encode($dataArray);
     }
 
-
-    public function chip_update_new($data_arr = null)
-    {
-
-        if (empty($data_arr)) {
-            $user_id = $this->input->post('user_id');
-            $type = $this->input->post('type');
-            $ChipsValue = $this->input->post('ChipsValue');
-            $chip_master_id = $this->input->post('chip_master_id');
-        } else {
-            $user_id = $data_arr['user_id'];
-            $type = $data_arr['type'];
-            $ChipsValue = $data_arr['ChipsValue'];
-            $chip_master_id = $data_arr['chip_master_id'];
-        }
-
-        $user = $this->User_model->getUserById($user_id);
-        $user_name = $user->user_name;
-        $chip_master_id = $chip_master_id != '' ? $chip_master_id : $_SESSION['my_userdata']['user_id'];
-
-
-        if ($ChipsValue < 0) {
-            echo json_encode(array('errorMessage' => 'Invalid amount enter', 'success' => false));
-            exit;
-        }
-
-
-        $admin_chip = count_total_balance_without_exposure($chip_master_id);
-        $user_chip = count_total_balance_without_exposure($user_id);
-
-
-        if ($type == 'D') {
-            $admin_new_chip = $admin_chip - $ChipsValue;
-            $user_new_chip = $user_chip + $ChipsValue;
-        } else {
-            $admin_new_chip = $admin_chip + $ChipsValue;
-            $user_new_chip = $user_chip - $ChipsValue;
-        }
-
-
-        $userDetail = $this->User_model->getUserById($user_id);
-
-
-        $masterDetail = $this->User_model->getUserById($chip_master_id);
-
-
-        // if ($userDetail->is_balance_update == 'Yes') {
-        //     echo json_encode(array('success' => false));
-        //     exit;
-        // }
-
-        // if ($masterDetail->is_balance_update == 'Yes') {
-        //     echo json_encode(array('success' => false));
-        //     exit;
-        // }
-
-
-        if ($type == 'D') {
-
-            if ($admin_chip <= 0) {
-                echo json_encode(array('errorMessage' => 'Insufficient Balance in master', 'success' => false));
-                exit;
-            }
-
-            if ($admin_new_chip <= 0) {
-                echo json_encode(array('errorMessage' => 'Insufficient new Balance in master', 'success' => false));
-                exit;
-            }
-            $dataArray = array(
-                'user_id' => $user_id,
-                'remarks' => 'Free Chip Deposit By ' . $_SESSION['my_userdata']['user_name'],
-                'transaction_type' => 'credit',
-                'amount' => $ChipsValue,
-                'balance' =>  $user_new_chip,
-                'role' => 'Parent'
-            );
-            $this->Ledger_model->addLedger($dataArray);
-
-            $userDetail = $this->User_model->getUserById($user_id);
-
-            if (empty($data_arr)) {
-                if (!empty($userDetail)) {
-                    $balance = $userDetail->balance + $ChipsValue;
-                    $credit_limit = $userDetail->credit_limit + $ChipsValue;
-
-                    $data = array(
-                        'user_id' => $user_id,
-                        'is_balance_update' =>  'Yes',
-                        'is_credit_limit_update' => 'Yes',
-                    );
-                    $user_id = $this->User_model->addUser($data);
-                }
-            }
-
-            $dataArray = array(
-                'user_id' => $chip_master_id,
-                'remarks' => 'Free Chip Deposit To ' . $user_name,
-                'transaction_type' => 'debit',
-                'amount' => $ChipsValue,
-                'balance' =>  $admin_new_chip
-            );
-            $this->Ledger_model->addLedger($dataArray);
-
-            $userDetail = $this->User_model->getUserById($chip_master_id);
-
-            if (!empty($userDetail)) {
-                $balance = $userDetail->balance - $ChipsValue;
-                $credit_limit = $userDetail->credit_limit - $ChipsValue;
-
-
-                $data = array(
-                    'user_id' => $chip_master_id,
-                    'is_balance_update' =>  'Yes',
-                    'is_credit_limit_update' => 'Yes',
-                );
-                $user_id = $this->User_model->addUser($data);
-            }
-        } else {
-
-            if ($user_chip < 0) {
-                echo json_encode(array('errorMessage' => 'Insufficient Balance in user', 'success' => false));
-                exit;
-            }
-
-            if ($user_new_chip < 0) {
-                echo json_encode(array('errorMessage' => 'Insufficient new Balance in user', 'success' => false));
-                exit;
-            }
-            $dataArray = array(
-                'user_id' => $user_id,
-                'remarks' => 'Free Chip Withdrawl By ' . $_SESSION['my_userdata']['user_name'],
-                'transaction_type' => 'debit',
-                'amount' => $ChipsValue,
-                'balance' =>  $user_new_chip,
-                'role' => 'Parent'
-            );
-            $this->Ledger_model->addLedger($dataArray);
-
-            $userDetail = $this->User_model->getUserById($user_id);
-
-            if (!empty($userDetail)) {
-                $balance = $userDetail->balance - $ChipsValue;
-                $credit_limit = $userDetail->credit_limit - $ChipsValue;
-
-                $data = array(
-                    'user_id' => $user_id,
-                    'is_balance_update' =>  'Yes',
-                    'is_credit_limit_update' => 'Yes',
-                );
-                $user_id = $this->User_model->addUser($data);
-            }
-
-
-            $dataArray = array(
-                'user_id' => $chip_master_id,
-                'remarks' => 'Free Chip Withdrawl from ' . $user_name,
-                'transaction_type' => 'credit',
-                'amount' => $ChipsValue,
-                'balance' =>  $admin_new_chip
-            );
-            $this->Ledger_model->addLedger($dataArray);
-
-
-            $userDetail = $this->User_model->getUserById($chip_master_id);
-
-            if (!empty($userDetail)) {
-                $data = array(
-                    'user_id' => $chip_master_id,
-                    'is_balance_update' =>  'Yes',
-                    'is_credit_limit_update' => 'Yes',
-                );
-                $user_id = $this->User_model->addUser($data);
-            }
-        }
-
-        if (empty($data_arr)) {
-            echo json_encode(array('success' => true));
-        }
-    }
-
     public function chip_update()
     {
-
-        if ($_SESSION['my_userdata']['is_spectator'] == 'Yes') {
-            $data = array(
-                'success' => false,
-                'message' => 'Sorry Spectator has no right'
-            );
-            echo json_encode($data);
-            exit;
-        }
-        $remarks = $this->input->post('remarks');
         $user_id = $this->input->post('user_id');
         $user = $this->User_model->getUserById($user_id);
 
         $user_name = $user->user_name;
 
         $type = $this->input->post('type');
-        $ChipsValue = $this->input->post('ChipsValue');
+         $ChipsValue = $this->input->post('ChipsValue');
         $chip_master_id = $this->input->post('chip_master_id');
         $chip_master_id = $chip_master_id != '' ? $chip_master_id : $_SESSION['my_userdata']['user_id'];
 
@@ -949,126 +726,128 @@ class User extends My_Controller
         //     exit;
         // }
 
+      
+            if ($type == 'D') {
 
-        if ($type == 'D') {
+                if ($admin_chip <= 0) {
+                    echo json_encode(array('success' => false));
+                    exit;
+                }
 
-            if ($admin_chip < 0) {
-                echo json_encode(array('success' => false));
-                exit;
-            }
-
-            if ($admin_new_chip < 0) {
-                echo json_encode(array('success' => false));
-                exit;
-            }
-            $dataArray = array(
-                'user_id' => $user_id,
-                'remarks' => 'Free Chip Deposit By ' . $_SESSION['my_userdata']['user_name'] . ' / ' . $remarks,
-                'transaction_type' => 'credit',
-                'amount' => $ChipsValue,
-                'balance' =>  $user_new_chip,
-                'role' => 'Parent'
-            );
-            $this->Ledger_model->addLedger($dataArray);
-
-            $userDetail = $this->User_model->getUserById($user_id);
-
-            if (!empty($userDetail)) {
-                $balance = $userDetail->balance + $ChipsValue;
-                $credit_limit = $userDetail->credit_limit + $ChipsValue;
-
-                $data = array(
+                if ($admin_new_chip <= 0) {
+                    echo json_encode(array('success' => false));
+                    exit;
+                }
+                $dataArray = array(
                     'user_id' => $user_id,
-                    'is_balance_update' =>  'Yes',
-                    'is_credit_limit_update' => 'Yes',
+                    'remarks' => 'Free Chip Deposit By ' . $_SESSION['my_userdata']['user_name'],
+                    'transaction_type' => 'credit',
+                    'amount' => $ChipsValue,
+                    'balance' =>  $user_new_chip
                 );
-                $user_id = $this->User_model->addUser($data);
-            }
+                $this->Ledger_model->addLedger($dataArray);
+
+                $userDetail = $this->User_model->getUserById($user_id);
+
+                if (!empty($userDetail)) {
+                    $balance = $userDetail->balance + $ChipsValue;
+                    $credit_limit = $userDetail->credit_limit + $ChipsValue;
+
+                    $data = array(
+                        'user_id' => $user_id,
+                        'is_balance_update' =>  'Yes',
+                        'is_credit_limit_update' => 'Yes',
+                    );
+                    $user_id = $this->User_model->addUser($data);
+                }
 
 
-            $dataArray = array(
-                'user_id' => $chip_master_id,
-                'remarks' => 'Free Chip Deposit To ' . $user_name . ' / ' . $remarks,
-                'transaction_type' => 'debit',
-                'amount' => $ChipsValue,
-                'balance' =>  $admin_new_chip
-            );
-            $this->Ledger_model->addLedger($dataArray);
-
-            $userDetail = $this->User_model->getUserById($chip_master_id);
-
-            if (!empty($userDetail)) {
-                $balance = $userDetail->balance - $ChipsValue;
-                $credit_limit = $userDetail->credit_limit - $ChipsValue;
-
-
-                $data = array(
+                $dataArray = array(
                     'user_id' => $chip_master_id,
-                    'is_balance_update' =>  'Yes',
-                    'is_credit_limit_update' => 'Yes',
+                    'remarks' => 'Free Chip Deposit To ' . $user_name,
+                    'transaction_type' => 'debit',
+                    'amount' => $ChipsValue,
+                    'balance' =>  $admin_new_chip
                 );
-                $user_id = $this->User_model->addUser($data);
-            }
-        } else {
+                $this->Ledger_model->addLedger($dataArray);
 
-            if ($user_chip < 0) {
-                echo json_encode(array('success' => false));
-                exit;
-            }
+                $userDetail = $this->User_model->getUserById($chip_master_id);
 
-            if ($user_new_chip < 0) {
-                echo json_encode(array('success' => false));
-                exit;
-            }
-            $dataArray = array(
-                'user_id' => $user_id,
-                'remarks' => 'Free Chip Withdrawl By ' . $_SESSION['my_userdata']['user_name'] . ' / ' . $remarks,
-                'transaction_type' => 'debit',
-                'amount' => $ChipsValue,
-                'balance' =>  $user_new_chip,
-                'role' => 'Parent'
+                if (!empty($userDetail)) {
+                    $balance = $userDetail->balance - $ChipsValue;
+                    $credit_limit = $userDetail->credit_limit - $ChipsValue;
 
-            );
-            $this->Ledger_model->addLedger($dataArray);
 
-            $userDetail = $this->User_model->getUserById($user_id);
+                    $data = array(
+                        'user_id' => $chip_master_id,
+                        'is_balance_update' =>  'Yes',
+                        'is_credit_limit_update' => 'Yes',
+                    );
+                    $user_id = $this->User_model->addUser($data);
+                }
+            } else {
 
-            if (!empty($userDetail)) {
-                $balance = $userDetail->balance - $ChipsValue;
-                $credit_limit = $userDetail->credit_limit - $ChipsValue;
+                if ($user_chip < 0) {
+                    echo json_encode(array('success' => false));
+                    exit;
+                }
 
-                $data = array(
+                if ($user_new_chip < 0) {
+                    echo json_encode(array('success' => false));
+                    exit;
+                }
+                $dataArray = array(
                     'user_id' => $user_id,
-                    'is_balance_update' =>  'Yes',
-                    'is_credit_limit_update' => 'Yes',
+                    'remarks' => 'Free Chip Withdrawl By ' . $_SESSION['my_userdata']['user_name'],
+                    'transaction_type' => 'debit',
+                    'amount' => $ChipsValue,
+                    'balance' =>  $user_new_chip
                 );
-                $user_id = $this->User_model->addUser($data);
-            }
+                $this->Ledger_model->addLedger($dataArray);
+
+                $userDetail = $this->User_model->getUserById($user_id);
+
+                if (!empty($userDetail)) {
+                    $balance = $userDetail->balance - $ChipsValue;
+                    $credit_limit = $userDetail->credit_limit - $ChipsValue;
+
+                    $data = array(
+                        'user_id' => $user_id,
+                        'is_balance_update' =>  'Yes',
+                        'is_credit_limit_update' => 'Yes',
+                    );
+                    $user_id = $this->User_model->addUser($data);
+                }
 
 
-            $dataArray = array(
-                'user_id' => $chip_master_id,
-                'remarks' => 'Free Chip Withdrawl from ' . $user_name . ' / ' . $remarks,
-                'transaction_type' => 'credit',
-                'amount' => $ChipsValue,
-                'balance' =>  $admin_new_chip
-            );
-            $this->Ledger_model->addLedger($dataArray);
-
-
-            $userDetail = $this->User_model->getUserById($chip_master_id);
-
-            if (!empty($userDetail)) {
-                $data = array(
+                $dataArray = array(
                     'user_id' => $chip_master_id,
-                    'is_balance_update' =>  'Yes',
-                    'is_credit_limit_update' => 'Yes',
+                    'remarks' => 'Free Chip Withdrawl from ' . $user_name,
+                    'transaction_type' => 'credit',
+                    'amount' => $ChipsValue,
+                    'balance' =>  $admin_new_chip
                 );
-                $user_id = $this->User_model->addUser($data);
-            }
-        }
+                $this->Ledger_model->addLedger($dataArray);
 
-        echo json_encode(array('success' => true));
+
+                $userDetail = $this->User_model->getUserById($chip_master_id);
+
+                if (!empty($userDetail)) {
+                    $data = array(
+                        'user_id' => $chip_master_id,
+                        'is_balance_update' =>  'Yes',
+                        'is_credit_limit_update' => 'Yes',
+                    );
+                    $user_id = $this->User_model->addUser($data);
+                }
+            }
+
+
+
+
+
+            echo json_encode(array('success' => true));
+        
     }
 
     public function viewinfo($user_id = null)
@@ -1096,6 +875,10 @@ class User extends My_Controller
 
 
                 $viewInfoMasterRecords = $this->View_info_model->getViewInfoByUserId($viewUserRecords->master_id);
+
+
+
+
 
 
                 if (!empty($viewInfoRecords)) {
@@ -1127,6 +910,8 @@ class User extends My_Controller
 
             $dataArray['user_id'] = $user_id;
 
+
+            // p("Hello");
 
             $this->load->view('/view-info-form', $dataArray);
         } else {
@@ -1193,387 +978,14 @@ class User extends My_Controller
         }
     }
 
-    // public function updateviewinfo()
-    // {
-
-
-    //     $dataValues = array(
-    //         'info_id' => $this->input->post('info_id'),
-    //         'sport_id' => $this->input->post('sport_id'),
-    //         'min_stake' => $this->input->post('min_stake'),
-    //         'max_stake' => $this->input->post('max_stake'),
-    //         'max_profit' => $this->input->post('max_profit'),
-    //         'max_loss' => $this->input->post('max_loss'),
-    //         'bet_delay' => $this->input->post('bet_delay'),
-    //         'pre_inplay_profit' => $this->input->post('pre_inplay_profit'),
-    //         'pre_inplay_stake' => $this->input->post('pre_inplay_stake'),
-    //         'min_odds' => $this->input->post('min_odds'),
-    //         'max_odds' => $this->input->post('max_odds'),
-    //         'unmatch_bet' => $this->input->post('unmatch_bet')  == 'Yes' ? 'Yes' : 'No',
-    //         'lock_bet' => $this->input->post('lock_bet') == 'Yes' ? 'Yes' : 'No',
-    //         'is_odds_active' => $this->input->post('is_odds_active') == 'Yes' ? 'Yes' : 'No',
-    //         'is_fancy_active' => $this->input->post('is_fancy_active') == 'Yes' ? 'Yes' : 'No',
-    //         'is_bookmaker_active' => $this->input->post('is_bookmaker_active') == 'Yes' ? 'Yes' : 'No',
-
-
-
-    //     );
-    //     $info_id = $this->View_info_model->saveUserInfo($dataValues);
-
-
-    //     $user_id = $this->input->post('user_id');
-
-
-    //     $userDetail = $this->User_model->getUserById($user_id);
-    //     $user_type = $userDetail->user_type;
-    //     $user_id = $userDetail->user_id;
-
-
-
-    //     if ($user_type == 'Admin') {
-    //         $hyperUsers =  $this->User_model->getInnerUserById($user_id);
-
-
-    //         if (!empty($hyperUsers)) {
-    //             foreach ($hyperUsers as $hyperUser) {
-    //                 $user_id = $hyperUser->user_id;
-
-    //                 $dataValues = array(
-    //                     'setting_id' => $this->input->post('setting_id'),
-    //                     'user_id' => $user_id,
-    //                     'sport_id' => $this->input->post('sport_id'),
-    //                     'min_stake' => $this->input->post('min_stake'),
-    //                     'max_stake' => $this->input->post('max_stake'),
-    //                     'max_profit' => $this->input->post('max_profit'),
-    //                     'max_loss' => $this->input->post('max_loss'),
-    //                     'bet_delay' => $this->input->post('bet_delay'),
-    //                     'pre_inplay_profit' => $this->input->post('pre_inplay_profit'),
-    //                     'pre_inplay_stake' => $this->input->post('pre_inplay_stake'),
-    //                     'min_odds' => $this->input->post('min_odds'),
-    //                     'max_odds' => $this->input->post('max_odds'),
-    //                     'unmatch_bet' => $this->input->post('unmatch_bet')  == 'Yes' ? 'Yes' : 'No',
-    //                     'lock_bet' => $this->input->post('lock_bet') == 'Yes' ? 'Yes' : 'No',
-    //                     'is_odds_active' => $this->input->post('is_odds_active') == 'Yes' ? 'Yes' : 'No',
-    //                     'is_fancy_active' => $this->input->post('is_fancy_active') == 'Yes' ? 'Yes' : 'No',
-    //                     'is_bookmaker_active' => $this->input->post('is_bookmaker_active') == 'Yes' ? 'Yes' : 'No',
-    //                 );
-    //                 $info_id = $this->View_info_model->saveUserInfoAccrdingUpline($dataValues);
-
-
-
-    //                 $superUsers =  $this->User_model->getInnerUserById($user_id);
-
-
-    //                 if (!empty($superUsers)) {
-    //                     foreach ($superUsers as $superUser) {
-
-    //                         $user_id = $superUser->user_id;
-
-    //                         $dataValues = array(
-    //                             'setting_id' => $this->input->post('setting_id'),
-    //                             'user_id' => $user_id,
-    //                             'sport_id' => $this->input->post('sport_id'),
-    //                             'min_stake' => $this->input->post('min_stake'),
-    //                             'max_stake' => $this->input->post('max_stake'),
-    //                             'max_profit' => $this->input->post('max_profit'),
-    //                             'max_loss' => $this->input->post('max_loss'),
-    //                             'bet_delay' => $this->input->post('bet_delay'),
-    //                             'pre_inplay_profit' => $this->input->post('pre_inplay_profit'),
-    //                             'pre_inplay_stake' => $this->input->post('pre_inplay_stake'),
-    //                             'min_odds' => $this->input->post('min_odds'),
-    //                             'max_odds' => $this->input->post('max_odds'),
-    //                             'unmatch_bet' => $this->input->post('unmatch_bet')  == 'Yes' ? 'Yes' : 'No',
-    //                             'lock_bet' => $this->input->post('lock_bet') == 'Yes' ? 'Yes' : 'No',
-    //                             'is_odds_active' => $this->input->post('is_odds_active') == 'Yes' ? 'Yes' : 'No',
-    //                             'is_fancy_active' => $this->input->post('is_fancy_active') == 'Yes' ? 'Yes' : 'No',
-    //                             'is_bookmaker_active' => $this->input->post('is_bookmaker_active') == 'Yes' ? 'Yes' : 'No',
-
-    //                         );
-    //                         $info_id = $this->View_info_model->saveUserInfoAccrdingUpline($dataValues);
-
-    //                         $masterUsers =  $this->User_model->getInnerUserById($user_id);
-    //                         if (!empty($masterUsers)) {
-    //                             foreach ($masterUsers as $masterUser) {
-    //                                 $user_id = $masterUser->user_id;
-
-    //                                 $dataValues = array(
-    //                                     'setting_id' => $this->input->post('setting_id'),
-    //                                     'user_id' => $user_id,
-    //                                     'sport_id' => $this->input->post('sport_id'),
-    //                                     'min_stake' => $this->input->post('min_stake'),
-    //                                     'max_stake' => $this->input->post('max_stake'),
-    //                                     'max_profit' => $this->input->post('max_profit'),
-    //                                     'max_loss' => $this->input->post('max_loss'),
-    //                                     'bet_delay' => $this->input->post('bet_delay'),
-    //                                     'pre_inplay_profit' => $this->input->post('pre_inplay_profit'),
-    //                                     'pre_inplay_stake' => $this->input->post('pre_inplay_stake'),
-    //                                     'min_odds' => $this->input->post('min_odds'),
-    //                                     'max_odds' => $this->input->post('max_odds'),
-    //                                     'unmatch_bet' => $this->input->post('unmatch_bet')  == 'Yes' ? 'Yes' : 'No',
-    //                                     'lock_bet' => $this->input->post('lock_bet') == 'Yes' ? 'Yes' : 'No',
-    //                                     'is_odds_active' => $this->input->post('is_odds_active') == 'Yes' ? 'Yes' : 'No',
-    //                                     'is_fancy_active' => $this->input->post('is_fancy_active') == 'Yes' ? 'Yes' : 'No',
-    //                                     'is_bookmaker_active' => $this->input->post('is_bookmaker_active') == 'Yes' ? 'Yes' : 'No',
-    //                                 );
-    //                                 $info_id = $this->View_info_model->saveUserInfoAccrdingUpline($dataValues);
-
-
-
-    //                                 $users =  $this->User_model->getInnerUserById($user_id);
-    //                                 if (!empty($users)) {
-    //                                     foreach ($users as $user) {
-    //                                         $user_id = $user->user_id;
-
-
-    //                                         $dataValues = array(
-    //                                             'setting_id' => $this->input->post('setting_id'),
-    //                                             'user_id' => $user_id,
-    //                                             'sport_id' => $this->input->post('sport_id'),
-    //                                             'min_stake' => $this->input->post('min_stake'),
-    //                                             'max_stake' => $this->input->post('max_stake'),
-    //                                             'max_profit' => $this->input->post('max_profit'),
-    //                                             'max_loss' => $this->input->post('max_loss'),
-    //                                             'bet_delay' => $this->input->post('bet_delay'),
-    //                                             'pre_inplay_profit' => $this->input->post('pre_inplay_profit'),
-    //                                             'pre_inplay_stake' => $this->input->post('pre_inplay_stake'),
-    //                                             'min_odds' => $this->input->post('min_odds'),
-    //                                             'max_odds' => $this->input->post('max_odds'),
-    //                                             'unmatch_bet' => $this->input->post('unmatch_bet')  == 'Yes' ? 'Yes' : 'No',
-    //                                             'lock_bet' => $this->input->post('lock_bet') == 'Yes' ? 'Yes' : 'No',
-    //                                             'is_odds_active' => $this->input->post('is_odds_active') == 'Yes' ? 'Yes' : 'No',
-    //                                             'is_fancy_active' => $this->input->post('is_fancy_active') == 'Yes' ? 'Yes' : 'No',
-    //                                             'is_bookmaker_active' => $this->input->post('is_bookmaker_active') == 'Yes' ? 'Yes' : 'No',
-    //                                         );
-    //                                         $info_id = $this->View_info_model->saveUserInfoAccrdingUpline($dataValues);
-    //                                     }
-    //                                 }
-    //                             }
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     } else if ($user_type == 'Hyper Super Master') {
-    //         $superUsers =  $this->User_model->getInnerUserById($user_id);
-
-
-    //         if (!empty($superUsers)) {
-    //             foreach ($superUsers as $superUser) {
-    //                 $user_id = $superUser->user_id;
-
-    //                 $dataValues = array(
-    //                     'setting_id' => $this->input->post('setting_id'),
-    //                     'user_id' => $user_id,
-    //                     'sport_id' => $this->input->post('sport_id'),
-    //                     'min_stake' => $this->input->post('min_stake'),
-    //                     'max_stake' => $this->input->post('max_stake'),
-    //                     'max_profit' => $this->input->post('max_profit'),
-    //                     'max_loss' => $this->input->post('max_loss'),
-    //                     'bet_delay' => $this->input->post('bet_delay'),
-    //                     'pre_inplay_profit' => $this->input->post('pre_inplay_profit'),
-    //                     'pre_inplay_stake' => $this->input->post('pre_inplay_stake'),
-    //                     'min_odds' => $this->input->post('min_odds'),
-    //                     'max_odds' => $this->input->post('max_odds'),
-    //                     'unmatch_bet' => $this->input->post('unmatch_bet')  == 'Yes' ? 'Yes' : 'No',
-    //                     'lock_bet' => $this->input->post('lock_bet') == 'Yes' ? 'Yes' : 'No',
-    //                     'is_odds_active' => $this->input->post('is_odds_active') == 'Yes' ? 'Yes' : 'No',
-    //                     'is_fancy_active' => $this->input->post('is_fancy_active') == 'Yes' ? 'Yes' : 'No',
-    //                     'is_bookmaker_active' => $this->input->post('is_bookmaker_active') == 'Yes' ? 'Yes' : 'No',
-    //                 );
-    //                 $info_id = $this->View_info_model->saveUserInfoAccrdingUpline($dataValues);
-
-
-    //                 $masterUsers =  $this->User_model->getInnerUserById($user_id);
-    //                 if (!empty($masterUsers)) {
-    //                     foreach ($masterUsers as $masterUser) {
-    //                         $user_id = $masterUser->user_id;
-
-    //                         $dataValues = array(
-    //                             'setting_id' => $this->input->post('setting_id'),
-    //                             'user_id' => $user_id,
-    //                             'sport_id' => $this->input->post('sport_id'),
-    //                             'min_stake' => $this->input->post('min_stake'),
-    //                             'max_stake' => $this->input->post('max_stake'),
-    //                             'max_profit' => $this->input->post('max_profit'),
-    //                             'max_loss' => $this->input->post('max_loss'),
-    //                             'bet_delay' => $this->input->post('bet_delay'),
-    //                             'pre_inplay_profit' => $this->input->post('pre_inplay_profit'),
-    //                             'pre_inplay_stake' => $this->input->post('pre_inplay_stake'),
-    //                             'min_odds' => $this->input->post('min_odds'),
-    //                             'max_odds' => $this->input->post('max_odds'),
-    //                             'unmatch_bet' => $this->input->post('unmatch_bet')  == 'Yes' ? 'Yes' : 'No',
-    //                             'lock_bet' => $this->input->post('lock_bet') == 'Yes' ? 'Yes' : 'No',
-    //                             'is_odds_active' => $this->input->post('is_odds_active') == 'Yes' ? 'Yes' : 'No',
-    //                             'is_fancy_active' => $this->input->post('is_fancy_active') == 'Yes' ? 'Yes' : 'No',
-    //                             'is_bookmaker_active' => $this->input->post('is_bookmaker_active') == 'Yes' ? 'Yes' : 'No',
-    //                         );
-    //                         $info_id = $this->View_info_model->saveUserInfoAccrdingUpline($dataValues);
-
-
-    //                         $users =  $this->User_model->getInnerUserById($user_id);
-    //                         if (!empty($users)) {
-    //                             foreach ($users as $user) {
-    //                                 $user_id = $user->user_id;
-
-
-    //                                 $dataValues = array(
-    //                                     'setting_id' => $this->input->post('setting_id'),
-    //                                     'user_id' => $user_id,
-    //                                     'sport_id' => $this->input->post('sport_id'),
-    //                                     'min_stake' => $this->input->post('min_stake'),
-    //                                     'max_stake' => $this->input->post('max_stake'),
-    //                                     'max_profit' => $this->input->post('max_profit'),
-    //                                     'max_loss' => $this->input->post('max_loss'),
-    //                                     'bet_delay' => $this->input->post('bet_delay'),
-    //                                     'pre_inplay_profit' => $this->input->post('pre_inplay_profit'),
-    //                                     'pre_inplay_stake' => $this->input->post('pre_inplay_stake'),
-    //                                     'min_odds' => $this->input->post('min_odds'),
-    //                                     'max_odds' => $this->input->post('max_odds'),
-    //                                     'unmatch_bet' => $this->input->post('unmatch_bet')  == 'Yes' ? 'Yes' : 'No',
-    //                                     'lock_bet' => $this->input->post('lock_bet') == 'Yes' ? 'Yes' : 'No',
-    //                                     'is_odds_active' => $this->input->post('is_odds_active') == 'Yes' ? 'Yes' : 'No',
-    //                                     'is_fancy_active' => $this->input->post('is_fancy_active') == 'Yes' ? 'Yes' : 'No',
-    //                                     'is_bookmaker_active' => $this->input->post('is_bookmaker_active') == 'Yes' ? 'Yes' : 'No',
-    //                                 );
-    //                                 $info_id = $this->View_info_model->saveUserInfoAccrdingUpline($dataValues);
-    //                             }
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     } else if ($user_type == 'Super Master') {
-    //         $superUsers =  $this->User_model->getInnerUserById($user_id);
-
-
-    //         $masterUsers =  $this->User_model->getInnerUserById($user_id);
-    //         if (!empty($masterUsers)) {
-    //             foreach ($masterUsers as $masterUser) {
-    //                 $user_id = $masterUser->user_id;
-
-    //                 $dataValues = array(
-    //                     'setting_id' => $this->input->post('setting_id'),
-    //                     'user_id' => $user_id,
-    //                     'sport_id' => $this->input->post('sport_id'),
-    //                     'min_stake' => $this->input->post('min_stake'),
-    //                     'max_stake' => $this->input->post('max_stake'),
-    //                     'max_profit' => $this->input->post('max_profit'),
-    //                     'max_loss' => $this->input->post('max_loss'),
-    //                     'bet_delay' => $this->input->post('bet_delay'),
-    //                     'pre_inplay_profit' => $this->input->post('pre_inplay_profit'),
-    //                     'pre_inplay_stake' => $this->input->post('pre_inplay_stake'),
-    //                     'min_odds' => $this->input->post('min_odds'),
-    //                     'max_odds' => $this->input->post('max_odds'),
-    //                     'unmatch_bet' => $this->input->post('unmatch_bet')  == 'Yes' ? 'Yes' : 'No',
-    //                     'lock_bet' => $this->input->post('lock_bet') == 'Yes' ? 'Yes' : 'No',
-    //                     'is_odds_active' => $this->input->post('is_odds_active') == 'Yes' ? 'Yes' : 'No',
-    //                     'is_fancy_active' => $this->input->post('is_fancy_active') == 'Yes' ? 'Yes' : 'No',
-    //                     'is_bookmaker_active' => $this->input->post('is_bookmaker_active') == 'Yes' ? 'Yes' : 'No',
-    //                 );
-    //                 $info_id = $this->View_info_model->saveUserInfoAccrdingUpline($dataValues);
-
-    //                 $users =  $this->User_model->getInnerUserById($user_id);
-    //                 if (!empty($users)) {
-    //                     foreach ($users as $user) {
-    //                         $user_id = $user->user_id;
-
-    //                         $dataValues = array(
-    //                             'setting_id' => $this->input->post('setting_id'),
-    //                             'user_id' => $user_id,
-    //                             'sport_id' => $this->input->post('sport_id'),
-    //                             'min_stake' => $this->input->post('min_stake'),
-    //                             'max_stake' => $this->input->post('max_stake'),
-    //                             'max_profit' => $this->input->post('max_profit'),
-    //                             'max_loss' => $this->input->post('max_loss'),
-    //                             'bet_delay' => $this->input->post('bet_delay'),
-    //                             'pre_inplay_profit' => $this->input->post('pre_inplay_profit'),
-    //                             'pre_inplay_stake' => $this->input->post('pre_inplay_stake'),
-    //                             'min_odds' => $this->input->post('min_odds'),
-    //                             'max_odds' => $this->input->post('max_odds'),
-    //                             'unmatch_bet' => $this->input->post('unmatch_bet')  == 'Yes' ? 'Yes' : 'No',
-    //                             'lock_bet' => $this->input->post('lock_bet') == 'Yes' ? 'Yes' : 'No',
-    //                             'is_odds_active' => $this->input->post('is_odds_active') == 'Yes' ? 'Yes' : 'No',
-    //                             'is_fancy_active' => $this->input->post('is_fancy_active') == 'Yes' ? 'Yes' : 'No',
-    //                             'is_bookmaker_active' => $this->input->post('is_bookmaker_active') == 'Yes' ? 'Yes' : 'No',
-    //                         );
-    //                         $info_id = $this->View_info_model->saveUserInfoAccrdingUpline($dataValues);
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     } else if ($user_type == 'Master') {
-
-    //         $users =  $this->User_model->getInnerUserById($user_id);
-    //         if (!empty($users)) {
-    //             foreach ($users as $user) {
-    //                 $user_id = $user->user_id;
-
-    //                 $dataValues = array(
-    //                     'setting_id' => $this->input->post('setting_id'),
-    //                     'user_id' => $user_id,
-    //                     'sport_id' => $this->input->post('sport_id'),
-    //                     'min_stake' => $this->input->post('min_stake'),
-    //                     'max_stake' => $this->input->post('max_stake'),
-    //                     'max_profit' => $this->input->post('max_profit'),
-    //                     'max_loss' => $this->input->post('max_loss'),
-    //                     'bet_delay' => $this->input->post('bet_delay'),
-    //                     'pre_inplay_profit' => $this->input->post('pre_inplay_profit'),
-    //                     'pre_inplay_stake' => $this->input->post('pre_inplay_stake'),
-    //                     'min_odds' => $this->input->post('min_odds'),
-    //                     'max_odds' => $this->input->post('max_odds'),
-    //                     'unmatch_bet' => $this->input->post('unmatch_bet')  == 'Yes' ? 'Yes' : 'No',
-    //                     'lock_bet' => $this->input->post('lock_bet') == 'Yes' ? 'Yes' : 'No',
-    //                     'is_odds_active' => $this->input->post('is_odds_active') == 'Yes' ? 'Yes' : 'No',
-    //                     'is_fancy_active' => $this->input->post('is_fancy_active') == 'Yes' ? 'Yes' : 'No',
-    //                     'is_bookmaker_active' => $this->input->post('is_bookmaker_active') == 'Yes' ? 'Yes' : 'No',
-    //                 );
-
-
-    //                 $info_id = $this->View_info_model->saveUserInfoAccrdingUpline($dataValues);
-    //             }
-    //         }
-    //     }
-
-
-
-
-    //     $data = array(
-    //         'success' => true,
-    //         'message' => 'Setting update successfuly'
-    //     );
-    //     echo json_encode($data);
-    // }
-
-
-
     public function updateviewinfo()
     {
-        $sport_name = '';
-        $sport_id = $this->input->post('sport_id');
 
-
-
-        if ($sport_id == 2) {
-            $sport_name = 'Tennis';
-        } else   if ($sport_id == 1) {
-            $sport_name = 'Soccer';
-        } else if ($sport_id == 999) {
-            $sport_name = 'Fancy';
-        } else if ($sport_id == 1000) {
-            $sport_name = 'Casino';
-        } else if ($sport_id == 2000) {
-            $sport_name = 'Bookmaker';
-        } else if ($sport_id == 7) {
-            $sport_name = 'Horse Racing';
-        } else if ($sport_id == 4) {
-            $sport_name = 'Cricket';
-        }
 
         $dataValues = array(
             'info_id' => $this->input->post('info_id'),
             'sport_id' => $this->input->post('sport_id'),
             'min_stake' => $this->input->post('min_stake'),
-            'sport_name' => $sport_name,
             'max_stake' => $this->input->post('max_stake'),
             'max_profit' => $this->input->post('max_profit'),
             'max_loss' => $this->input->post('max_loss'),
@@ -1602,8 +1014,6 @@ class User extends My_Controller
         $user_id = $userDetail->user_id;
 
 
-        $updateArr = array();
-        $insertArr = array();
 
         if ($user_type == 'Admin') {
             $hyperUsers =  $this->User_model->getInnerUserById($user_id);
@@ -1617,9 +1027,6 @@ class User extends My_Controller
                         'setting_id' => $this->input->post('setting_id'),
                         'user_id' => $user_id,
                         'sport_id' => $this->input->post('sport_id'),
-                        'sport_name' => $sport_name,
-
-
                         'min_stake' => $this->input->post('min_stake'),
                         'max_stake' => $this->input->post('max_stake'),
                         'max_profit' => $this->input->post('max_profit'),
@@ -1651,9 +1058,6 @@ class User extends My_Controller
                                 'setting_id' => $this->input->post('setting_id'),
                                 'user_id' => $user_id,
                                 'sport_id' => $this->input->post('sport_id'),
-                                'sport_name' => $sport_name,
-
-
                                 'min_stake' => $this->input->post('min_stake'),
                                 'max_stake' => $this->input->post('max_stake'),
                                 'max_profit' => $this->input->post('max_profit'),
@@ -1681,9 +1085,6 @@ class User extends My_Controller
                                         'setting_id' => $this->input->post('setting_id'),
                                         'user_id' => $user_id,
                                         'sport_id' => $this->input->post('sport_id'),
-                                        'sport_name' => $sport_name,
-
-
                                         'min_stake' => $this->input->post('min_stake'),
                                         'max_stake' => $this->input->post('max_stake'),
                                         'max_profit' => $this->input->post('max_profit'),
@@ -1713,9 +1114,6 @@ class User extends My_Controller
                                                 'setting_id' => $this->input->post('setting_id'),
                                                 'user_id' => $user_id,
                                                 'sport_id' => $this->input->post('sport_id'),
-                                                'sport_name' => $sport_name,
-
-
                                                 'min_stake' => $this->input->post('min_stake'),
                                                 'max_stake' => $this->input->post('max_stake'),
                                                 'max_profit' => $this->input->post('max_profit'),
@@ -1752,9 +1150,6 @@ class User extends My_Controller
                         'setting_id' => $this->input->post('setting_id'),
                         'user_id' => $user_id,
                         'sport_id' => $this->input->post('sport_id'),
-                        'sport_name' => $sport_name,
-
-
                         'min_stake' => $this->input->post('min_stake'),
                         'max_stake' => $this->input->post('max_stake'),
                         'max_profit' => $this->input->post('max_profit'),
@@ -1782,9 +1177,6 @@ class User extends My_Controller
                                 'setting_id' => $this->input->post('setting_id'),
                                 'user_id' => $user_id,
                                 'sport_id' => $this->input->post('sport_id'),
-                                'sport_name' => $sport_name,
-
-
                                 'min_stake' => $this->input->post('min_stake'),
                                 'max_stake' => $this->input->post('max_stake'),
                                 'max_profit' => $this->input->post('max_profit'),
@@ -1813,9 +1205,6 @@ class User extends My_Controller
                                         'setting_id' => $this->input->post('setting_id'),
                                         'user_id' => $user_id,
                                         'sport_id' => $this->input->post('sport_id'),
-                                        'sport_name' => $sport_name,
-
-
                                         'min_stake' => $this->input->post('min_stake'),
                                         'max_stake' => $this->input->post('max_stake'),
                                         'max_profit' => $this->input->post('max_profit'),
@@ -1851,9 +1240,6 @@ class User extends My_Controller
                         'setting_id' => $this->input->post('setting_id'),
                         'user_id' => $user_id,
                         'sport_id' => $this->input->post('sport_id'),
-                        'sport_name' => $sport_name,
-
-
                         'min_stake' => $this->input->post('min_stake'),
                         'max_stake' => $this->input->post('max_stake'),
                         'max_profit' => $this->input->post('max_profit'),
@@ -1880,9 +1266,6 @@ class User extends My_Controller
                                 'setting_id' => $this->input->post('setting_id'),
                                 'user_id' => $user_id,
                                 'sport_id' => $this->input->post('sport_id'),
-                                'sport_name' => $sport_name,
-
-
                                 'min_stake' => $this->input->post('min_stake'),
                                 'max_stake' => $this->input->post('max_stake'),
                                 'max_profit' => $this->input->post('max_profit'),
@@ -1914,9 +1297,6 @@ class User extends My_Controller
                         'setting_id' => $this->input->post('setting_id'),
                         'user_id' => $user_id,
                         'sport_id' => $this->input->post('sport_id'),
-                        'sport_name' => $sport_name,
-
-
                         'min_stake' => $this->input->post('min_stake'),
                         'max_stake' => $this->input->post('max_stake'),
                         'max_profit' => $this->input->post('max_profit'),
@@ -1949,10 +1329,8 @@ class User extends My_Controller
         echo json_encode($data);
     }
 
-
     public function downline($master_id, $type)
     {
-
         $user_types = get_user_type();
         if (get_user_type() == 'User') {
             redirect('/');
@@ -2044,13 +1422,11 @@ class User extends My_Controller
         $dataArray['users'] = $users;
 
         $master_user_detail = $this->User_model->getUserById($master_id);
-
         $dataArray['master_user_detail'] = $master_user_detail;
         $dataArray['user_type'] = $user_type;
         $dataArray['type'] = $type;
         $dataArray['next_user'] = $next_user;
         $dataArray['master_id']  = $master_id;
-
         $this->load->view('/user-list', $dataArray);
     }
 
@@ -3045,7 +2421,6 @@ class User extends My_Controller
 
 
 
-
             if (!empty($pagingParams['masters']) || !empty($pagingParams['master_id'])) {
                 $users = $this->User_model->getAllUsers($pagingParams);
             } else {
@@ -3150,13 +2525,13 @@ class User extends My_Controller
         $user_id = get_user_id();
         $user_type = get_user_type();
 
-        if (!empty($user_id) && !empty($user_type) && !empty($amount)) {
+
+        if (!empty($user_id) && !empty($user_type) && !empty($amount) && $user_type == 'Admin') {
             $dataArray = array(
                 'user_id' => $user_id,
                 'remarks' => $remark,
                 'transaction_type' => 'credit',
                 'amount' => $amount,
-                'is_self_fund' => 'Yes'
             );
             $this->Ledger_model->addLedger($dataArray);
 
@@ -3175,6 +2550,10 @@ class User extends My_Controller
             echo json_encode(array('success' => false));
         }
     }
+
+
+
+
 
     public function setUserNewInfo()
     {
@@ -3551,14 +2930,6 @@ class User extends My_Controller
     public function updateuser()
     {
 
-        if ($_SESSION['my_userdata']['is_spectator'] == 'Yes') {
-            $data = array(
-                'success' => false,
-                'message' => 'Sorry Spectator has no right'
-            );
-            echo json_encode($data);
-            exit;
-        }
         $user_id = $this->input->post('user_id');
         $master_commision = $this->input->post('master_commision');
         $sessional_commision = $this->input->post('session_commision');
@@ -3589,17 +2960,6 @@ class User extends My_Controller
 
     public function changeMasterPassword($user_id = null)
     {
-
-
-        if ($_SESSION['my_userdata']['is_spectator'] == 'Yes') {
-            $data = array(
-                'success' => false,
-                'message' => 'Sorry Spectator has no right'
-            );
-            echo json_encode($data);
-            exit;
-        }
-
         $userdata = $_SESSION['my_userdata'];
         $this->load->library('form_validation');
         $this->form_validation->set_rules('password', 'Password', 'required|trim');
@@ -3648,13 +3008,6 @@ class User extends My_Controller
 
     function changePasswordForm()
     {
-        $is_demo =  $_SESSION['is_demo'];
-        // p($is_demo);
-
-        if ($is_demo == "Yes") {
-            redirect('/dashboard');
-        }
-
         $message = $this->session->flashdata('login_error_message');
         $resend_activation_success_message = $this->session->flashdata('resend_activation_success_message');
         $resend_activation_error_message = $this->session->flashdata('resend_activation_error_message');
@@ -3664,8 +3017,8 @@ class User extends My_Controller
 
 
         $userdata = $_SESSION['my_userdata'];
-
-
+        
+       
 
 
         $this->load->view('change-password-form', $dataArray);
@@ -3682,218 +3035,6 @@ class User extends My_Controller
         $return_user_id = $this->User_model->addUser($dataArray);
 
         echo json_encode(array('success' => true));
-    }
-
-    function getUserBalance()
-    {
-        $user_id = $this->input->post('user_id');
-        echo get_user_balance($user_id);
-    }
-
-    function register_username_exists()
-    {
-        $user_name = $this->input->post('user_name');
-        if (!empty($user_name)) {
-            if (!empty($this->User_model->check_username_exists($user_name))) {
-                echo json_encode(FALSE);
-            } else {
-                echo json_encode(TRUE);
-            }
-        }
-    }
-
-
-    public function confirm_deposit($id, $user_id, $ChipsValue)
-    {
-
-        $type = "D";
-        $user_id = $user_id;
-        $user = $this->User_model->getUserById($user_id);
-        $user_name = $user->name;
-        $chip_master_id = $user->master_id;
-        $ChipsValue = $ChipsValue;
-
-        if ($ChipsValue <= 0) {
-            $this->session->set_flashdata('operation_msg', 'Amount can not be less than zero');
-            redirect(base_url('deposit-requests'));
-            exit;
-        }
-        $admin_chip = count_total_balance_without_exposure($chip_master_id);
-
-
-        $user_chip = count_total_balance_without_exposure($user_id);
-
-
-        if ($type == 'D') {
-            $admin_new_chip = $admin_chip - $ChipsValue;
-            $user_new_chip = $user_chip + $ChipsValue;
-        } else {
-            $admin_new_chip = $admin_chip + $ChipsValue;
-            $user_new_chip = $user_chip - $ChipsValue;
-        }
-
-        if ($type == 'D') {
-            $dataArray = array(
-                'user_id' => $user_id,
-                'remarks' => 'Free Chip Deposit By ' . $_SESSION['my_userdata']['user_name'],
-                'transaction_type' => 'credit',
-                'amount' => $ChipsValue,
-                'balance' => $user_new_chip,
-                'role' => 'Parent'
-            );
-            $this->Ledger_model->addLedger($dataArray);
-            $userDetail = $this->User_model->getUserById($user_id);
-            if (!empty($userDetail)) {
-
-                $data = array(
-                    'user_id' => $user_id,
-                    'is_balance_update' => 'Yes',
-                    'is_credit_limit_update' => 'Yes',
-                );
-                $x = $this->User_model->addUser($data);
-            }
-            $dataArray = array(
-                'user_id' => $chip_master_id,
-                'remarks' => 'Free Chip Deposit To ' . $user_name,
-                'transaction_type' => 'debit',
-                'amount' => $ChipsValue,
-                'balance' => $admin_new_chip
-            );
-            $this->Ledger_model->addLedger($dataArray);
-            $userDetail = $this->User_model->getUserById($chip_master_id);
-            if (!empty($userDetail)) {
-
-                $data = array(
-                    'user_id' => $chip_master_id,
-                    'is_balance_update' => 'Yes',
-                    'is_credit_limit_update' => 'Yes',
-                );
-                $x = $this->User_model->addUser($data);
-            }
-
-            //bonus start
-            $this->load->library('Bonus_lib');
-            $dataArray = array(
-                'user_id' => $user_id,
-                'deposit_amount' => $ChipsValue,
-            );
-            $this->bonus_lib->give_deposit_bonus($dataArray);
-            //bonus end
-        } else {
-            $dataArray = array(
-                'user_id' => $user_id,
-                'remarks' => 'Free Chip Withdrawl By ' . $_SESSION['my_userdata']['user_name'],
-                'transaction_type' => 'debit',
-                'amount' => $ChipsValue,
-                'balance' => $user_new_chip,
-                'role' => 'Parent'
-
-            );
-            $this->Ledger_model->addLedger($dataArray);
-            $userDetail = $this->User_model->getUserById($user_id);
-            if (!empty($userDetail)) {
-
-                $data = array(
-                    'user_id' => $user_id,
-                    'is_balance_update' => 'Yes',
-                    'is_credit_limit_update' => 'Yes',
-                );
-                $user_id = $this->User_model->addUser($data);
-            }
-            $dataArray = array(
-                'user_id' => $chip_master_id,
-                'remarks' => 'Free Chip Withdrawl from ' . $user_name,
-                'transaction_type' => 'credit',
-                'amount' => $ChipsValue,
-                'balance' => $admin_new_chip
-            );
-            $this->Ledger_model->addLedger($dataArray);
-            $userDetail = $this->User_model->getUserById($chip_master_id);
-            if (!empty($userDetail)) {
-                $data = array(
-                    'user_id' => $chip_master_id,
-                    'is_balance_update' => 'Yes',
-                    'is_credit_limit_update' => 'Yes',
-                );
-                $user_id = $this->User_model->addUser($data);
-            }
-        }
-
-        $dataArray = array(
-            'id' => $id,
-            'status' => "Confirm"
-        );
-        $user_id = $this->Deposit_request_model->addDepositRequest($dataArray);
-
-        $this->session->set_flashdata('operation_msg', 'Request Confimed successfully');
-        redirect(base_url('deposit-requests'));
-    }
-
-    public function confirm_withdraw($id, $user_id, $ChipsValue)
-    {
-
-
-        $user_id = $user_id;
-        $user = $this->User_model->getUserById($user_id);
-        $user_name = $user->name;
-        $master_id = $user->master_id;
-        $withdraw = $ChipsValue;
-
-        if ($withdraw > count_total_balance($user_id)) {
-            $this->session->set_flashdata('operation_error_msg', 'Withdraw amount can not be greater than user balance');
-            redirect(base_url('withdraw-requests'));
-        }
-        $dataArray = array(
-            'user_id' => $user_id,
-
-            'transaction_type' => 'debit',
-            'amount' => $withdraw,
-            'sender_id' => $user_id,
-            'receiver_id' => $master_id
-        );
-        $this->Ledger_model->addLedger($dataArray);
-
-        $dataArray = array(
-            'user_id' => $master_id,
-            'transaction_type' => 'credit',
-            'amount' => $withdraw,
-            'sender_id' => $master_id,
-            'receiver_id' => $user_id
-        );
-        $this->Ledger_model->addLedger($dataArray);
-
-        $dataArray = array(
-            'id' => $id,
-            'status' => 'Confirm'
-        );
-
-        $user_id = $this->Withdraw_request_model->addWithdrawRequest($dataArray);
-
-        $this->session->set_flashdata('operation_msg', 'Request Confimed successfully');
-        redirect(base_url('withdraw-requests'));
-    }
-
-    public function get_user_detail($user_id = null)
-    {
-        $dataArray['local_css'] = array(
-            'jquery.dataTables.bootstrap',
-            'jquery-ui'
-        );
-
-        $dataArray['local_js'] = array(
-            'jquery.dataTables',
-            'jquery.dataTables.bootstrap',
-            'dataTables.fnFilterOnReturn',
-            'moment',
-            'jquery.validate',
-            'jquery-ui'
-        );
-        $user_detail = $this->User_model->getUserById($user_id);
-        $master_id = $user_detail->master_id;
-        $master_detail = $this->User_model->getUserById($master_id);
-
-        $dataArray['refered_data'] = $this->Refer_model->get_refered_users_list($user_id);
-        $dataArray['master_detail'] = $master_detail;
-        $this->load->view('/user-detail-page', $dataArray);
+       
     }
 }

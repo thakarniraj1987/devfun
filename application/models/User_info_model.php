@@ -66,11 +66,20 @@ class User_info_model extends My_Model
 
     public function addRegisteredUserInfo($dataValues)
     {
+        if (count($dataValues) > 0) {
+            // if ((array_key_exists('setting_id', $dataValues) && array_key_exists('user_id', $dataValues))) {
 
-        if (count($dataValues) > 0) {        
+            //      $this->db->where('setting_id', $dataValues['setting_id']);
+            //     $this->db->where('user_id', $dataValues['user_id']);
+
+            //     $this->db->update('user_info', $dataValues);
+
+              
+            //  } else {
                 $dataValues["created_at"] = date("Y-m-d H:i:s");
-                $this->db->insert('registered_users', $dataValues);
-                $info_id = $this->db->insert_id();            
+                $this->db->insert('user_info', $dataValues);
+                $info_id = $this->db->insert_id();
+            // }
             return $info_id;
         }
     }

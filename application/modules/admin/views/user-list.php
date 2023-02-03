@@ -1,4 +1,4 @@
-<div class="main-content" role="main">
+  <div class="main-content" role="main">
       <div class="main-inner">
 
           <section class="match-content">
@@ -12,7 +12,7 @@
                             echo 'Super Admin';
                         } else if ($user_type == 'Hyper Super Master') {
                             echo 'Admin';
-                        } else if ($user_type == 'Super Master') {
+                        }else if ($user_type == 'Super Master') {
                             echo 'Super Master';
                         } else if ($user_type == 'Master') {
                             echo 'Master';
@@ -24,21 +24,21 @@
                   </span>
 
 
-                  <a href="javascript:void(0)" class="btn btn-xs btn-primary pull-right" onclick="setAction()" style="margin-left:5px;">
-                      ACTION
-                  </a>
-                  <select class="user-mobile custom-user-select pull-right" id="useraction" style="color:black">
-                      <option value="">Select Action</option>
-                      <option value="lock_betting">Lock Betting</option>
-                      <option value="open_betting">Open Betting</option>
-                      <option value="lock_user">Lock User</option>
-                      <option value="unlock_user">Unlock User</option>
-                      <option value="close_user">Close User Account</option>
-                  </select>
+                  <a href="javascript:void(0)"  class="btn btn-xs btn-primary pull-right" onclick="setAction()" style="margin-left:5px;">
+                          ACTION
+                    </a>
+                      <select class="user-mobile custom-user-select pull-right" id="useraction" style="color:black">
+                          <option value="">Select Action</option>
+                          <option value="lock_betting">Lock Betting</option>
+                          <option value="open_betting">Open Betting</option>
+                          <option value="lock_user">Lock User</option>
+                          <option value="unlock_user">Unlock User</option>
+                          <option value="close_user">Close User Account</option>
+                      </select>
               </div>
 
-
-
+              
+             
 
               <div class="table_tittle lastdetail">
                   <!-- <span class="detailinfo"><b class="">S</b> Statement</span>
@@ -47,10 +47,8 @@
                   <span class="detailinfo"><b class="">P</b> : Change Password</span>
                   <span class="detailinfo"><b class="">D-W</b> : Free Chip In Out</span>
                   <span class="detailinfo"><b class="">S-E</b> : Settlement</span> -->
-                  <span class="detailinfo">&nbsp;</span>
-
+                  <span class="detailinfo">&nbsp;</span> 
                   <span class="detailinfo pull-right"><a class="btn btn-xs btn-primary pull-right" onclick="showAddUserModel(<?php echo $user_type == 'User' ? true : false; ?>)" href="javascript:void(0)"> Add New</a></span>
-
               </div>
 
               <div class="card-body" style="overflow-x: scroll;min-height:500px;">
@@ -86,7 +84,7 @@
                                       <label>Select Upline</label>
 
                                       <div>
-                                          <select class="form-control select2" onchange="setUserLimit(this.value)" id="master_id" name="master_id">
+                                          <select class="form-control select2" id="master_id" name="master_id">
                                               <option value="">--Select Upline--</option>
                                               <?php
                                                 if (!empty($masters)) {
@@ -160,16 +158,7 @@
                                   <label>Match Commission</label>
 
 
-                                  <input type="number" name="master_commision" id="master_commision" max="<?php
-                                    if(get_user_type() == 'Admin')
-                                    {
-                                        echo "5";
-                                    }
-                                    else
-                                    {
-                                        echo $master_user_detail->master_commision;
-                                    }
-                                  ?>" min="<?php echo $master_user_detail->master_commision; ?>" class="form-control" />
+                                  <input type="number" name="master_commision" id="master_commision" min="0" max="<?php echo $master_user_detail->master_commision; ?>" class="form-control" />
 
                               </div>
                           </div>
@@ -177,25 +166,16 @@
                               <div class="form-group">
                                   <label>Session Commission</label>
 
-                                  <input type="number" name="session_commision" id="session_commision" max="<?php
-                                    if(get_user_type() == 'Admin')
-                                    {
-                                        echo "5";
-                                    }
-                                    else
-                                    {
-                                        echo $master_user_detail->sessional_commision;
-                                    }
-                                  ?>" min="<?php echo $master_user_detail->sessional_commision; ?>" class="form-control" />
+                                  <input type="number" name="session_commision" id="session_commision" min="0" max="<?php echo $master_user_detail->sessional_commision; ?>" class="form-control" />
 
                               </div>
                           </div>
                       </div>
 
-                      <div >
+                      <div id="partnership-content">
                           <div class="row">
 
-                              <div class="col-md-6" id="partnership-content">
+                              <div class="col-md-6">
                                   <div class="form-group">
                                       <label>Partership <span id="master-partnership"><?php
                                                                                         if ($master_user_detail->partnership) {
@@ -211,9 +191,9 @@
                               </div>
                               <div class="col-md-6">
                                   <div class="form-group">
-                                      <label>Opening Balance <span id="master-partnership"></label>
+                                      <label>Deposite Balance <span id="master-partnership"></label>
 
-                                      <input type="number" name="deposite_bal" min="0" max="<?php echo !empty($master_user_detail->user_id)?count_total_balance($master_user_detail->user_id): count_total_balance($_SESSION['my_userdata']['user_id']); ?>" id="deposite_bal" class="form-control" />
+                                      <input type="number" name="deposite_bal" min="0" max="<?php echo count_total_balance($_SESSION['my_userdata']['user_id']); ?>" id="deposite_bal" class="form-control" />
 
                                   </div>
                               </div>
@@ -317,11 +297,7 @@ Label" aria-hidden="true">
                               <input type="number" name="Chips" class="form-control" id="ChipsValue" required="" onkeyup="chip_calculate()">
                               <span id="ChipsN" class="errmsg"></span>
                           </div>
-                          <div class="col-md-4 form-group">
-                              <label> Remarks : </label>
-                              <input type="text" name="remarks" class="form-control" id="remarks">
-                              <span id="remarksN" class="errmsg"></span>
-                          </div>
+
                           <div class="col-md-12">
                               <div class="tabel_content ">
                                   <table class="table table-bordered table-hover">
@@ -459,7 +435,7 @@ Label" aria-hidden="true">
 
                               </div>
                           </div>
-                          <div class="col-md-4 edit_partnership_div">
+                          <div class="col-md-4">
                               <div class="form-group">
                                   <label>Partership <?php
                                                     if ($master_user_detail->partnership) {
@@ -475,16 +451,7 @@ Label" aria-hidden="true">
                           <div class="col-md-4">
                               <div class="form-group">
                                   <label>Match Commission <span id="edit-match-commission"></span></label>
-                                  <input type="number" max="<?php
-                                    if(get_user_type() == 'Admin')
-                                    {
-                                        echo "5";
-                                    }
-                                    else
-                                    {
-                                        echo $master_user_detail->master_commision;
-                                    }
-                                  ?>" min="<?php echo $master_user_detail->master_commision; ?>" name="edit_match_commission" id="edit_match_commission" class="form-control" required />
+                                  <input type="number" min="0" max="<?php echo $master_user_detail->master_commision; ?>" name="edit_match_commission" id="edit_match_commission" class="form-control" required />
 
                               </div>
                           </div>
@@ -492,16 +459,7 @@ Label" aria-hidden="true">
                               <div class="form-group">
                                   <label>Session Commission <span id="edit-session-commission"></span></label>
 
-                                  <input type="number" max="<?php
-                                    if(get_user_type() == 'Admin')
-                                    {
-                                        echo "5";
-                                    }
-                                    else
-                                    {
-                                        echo $master_user_detail->sessional_commision;
-                                    }
-                                  ?>" min="<?php echo $master_user_detail->sessional_commision; ?>" name="edit_session_commission" id="edit_session_commission" class="form-control" />
+                                  <input type="number" min="0" max="<?php echo $master_user_detail->sessional_commision; ?>" name="edit_session_commission" id="edit_session_commission" class="form-control" />
 
                               </div>
                           </div>
@@ -575,17 +533,16 @@ Label" aria-hidden="true">
 
 
   <script>
-      function free_chips_in_outs(user_id, master_id, user_name, type) {
-        document.getElementById("chip-in-out-form").reset();
-        //   $('#chip-in-out-form').trigger('reset');
-          $("#chip_master_id").val(master_id);
+      function free_chips_in_outs(user_id, user_name, type) {
+          $('#chip-in-out-form').trigger('reset');
+
           $.ajax({
               url: "<?php echo base_url(); ?>admin/User/free_chip_in_out",
               method: "POST",
               data: {
                   user_id: user_id,
                   type: type,
-                  master_id: master_id
+                  master_id: "<?php echo $master_id; ?>"
               },
               dataType: "json",
               success: function(response) {
@@ -716,8 +673,8 @@ Label" aria-hidden="true">
           $('#partnership').attr('max', partnership);
           $('#casino_partnership').attr('max', casino_partnership);
           $('#teenpati_partnership').attr('max', teenpati_partnership);
-          $('#master_commision').attr('min', master_commision);
-          $('#session_commision').attr('min', sessional_commision);
+          $('#master_commision').attr('max', master_commision);
+          $('#session_commision').attr('max', sessional_commision);
 
 
 
@@ -769,9 +726,6 @@ Label" aria-hidden="true">
 
       function editUser(user_id) {
 
-          if ($("#user_type").val() == "User") {
-              $(".edit_partnership_div").hide();
-          }
 
           $.ajax({
               url: "<?php echo base_url(); ?>admin/User/get_user",
@@ -832,22 +786,5 @@ Label" aria-hidden="true">
 
           for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
           return result;
-      }
-
-      function setUserLimit(user_id)
-      {
-          console.log(user_id);
-
-          $.ajax({
-         url: "<?php echo base_url('getUserBalance'); ?>",
-         type: "post",
-         data:{
-             user_id : user_id,
-         },
-         success: function(response) {
-            console.log(response);
-            $("#deposite_bal").attr('max',response);
-         }
-      });
       }
   </script>

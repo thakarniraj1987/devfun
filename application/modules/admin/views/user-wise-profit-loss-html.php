@@ -1,25 +1,4 @@
-<table class="table table-striped jambo_table bulk_action">
-                                <thead>
-                                    <tr class="headings">
-                                        <th style="width:30%;">Account</th>
-                                        <?php
-                                        if (!empty($runners)) {
-                                            foreach ($runners as $runner) { ?>
-                                                <th class="text-center">
-                                                    <span id="ContentPlaceHolder1_team01"><?php echo $runner['runner_name']; ?></span>
-                                                </th>
-
-                                        <?php }
-                                        }
-                                        ?>
-                                    </tr>
-                                </thead>
-                                <tbody >
-
-                               
 <input name="profit_loss_user_id" type="hidden" id="profit_loss_user_id" value="<?php echo $user_id; ?>" />
-
-
 <?php
 $i = 1;
 
@@ -261,5 +240,3 @@ if ($user_type != 'Super Admin') { ?>
 
 
 </tr>
-</tbody>
-                            </table>

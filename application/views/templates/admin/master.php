@@ -18,11 +18,9 @@ if (empty($_SESSION['my_userdata'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="cache-control" content="no-cache" />
   <meta http-equiv="expires" content="0" />
-  <title>Realbets</title>
+  <title>royalbook</title>
 
-  <link rel="icon" href="<?php echo base_url(); ?>assets/login/logo.png">
-  
-
+  <link rel="shortcut icon" type="image/x-icon" href="<?php echo base_url(); ?>assets/app/favicon.ico?version=1.12314745689)!important">
   <link href="<?php echo base_url(); ?>assets/app/bootstrap.min.css" rel="stylesheet">
   <link href="<?php echo base_url(); ?>assets/app/font-awesome.min.css?version=1635691263" rel="stylesheet">
   <link href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" rel="stylesheet">
@@ -39,17 +37,13 @@ if (empty($_SESSION['my_userdata'])) {
   <link href="<?php echo base_url(); ?>assets/app/owl.carousel.css" rel="stylesheet">
   <link href="<?php echo base_url(); ?>assets/app/owl.theme.css" rel="stylesheet">
   <script src="<?php echo base_url(); ?>assets/app/moment.min.js"></script>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-  <!-- <script src="<?php echo base_url(); ?>assets/app/daterangepicker.js"></script> -->
+  <script src="<?php echo base_url(); ?>assets/app/daterangepicker.js"></script>
   <link href="<?php echo base_url(); ?>assets/app/jquery.dataTables.min.css " rel="stylesheet" type="text/css" />
 
 
-
+ 
   <script>
     var betNotifyjs = '1'
-
-    var superior_arr = <?php echo json_encode(get_superior_arr(get_user_id(), get_user_type())); ?>;
   </script>
 
 
@@ -68,32 +62,18 @@ if (empty($_SESSION['my_userdata'])) {
   <script type="text/javascript" src="<?php echo base_url(); ?>assets/exchange/jquery.countdown.js"></script>
   <script src="<?php echo base_url(); ?>assets/app/jquery.dataTables.min.js"></script>
 
-  <script src="<?php echo base_url(); ?>assets/app/aes.js"></script>
-  <script src="<?php echo base_url(); ?>assets/app/aes-json-format.js"></script>
+<script src="<?php echo base_url(); ?>assets/app/aes.js"></script>
+<script src="<?php echo base_url(); ?>assets/app/aes-json-format.js"></script>
 
-  <script src="<?php echo base_url(); ?>assets/app/js.cookie.min.js"></script>
+<script src="<?php echo base_url(); ?>assets/app/js.cookie.min.js"></script>
   <script>
     var base_url = '<?php echo base_url(); ?>';
   </script>
   <script>
-    // var socket = io('<?php echo get_ws_endpoint(); ?>', {
-    //   transports: ['websocket'],
-    //   rememberUpgrade: false
-    // });
-
-
-   
-      var socket = io('<?php echo get_ws_endpoint(); ?>', {
-        transports: ['websocket'],
-        rememberUpgrade: false,
-        // reconnecting:true
-      });
-
-    
-
-
-
-
+    var socket = io('<?php echo get_ws_endpoint(); ?>', {
+      transports: ['websocket'],
+      rememberUpgrade: false
+    });
 
 
     function submit_update_chip() {
@@ -136,53 +116,8 @@ if (empty($_SESSION['my_userdata'])) {
       });
     }
 
-
-
-
-    socket.on("connect", () => {
-      console.log('socket connected ::::::::::::::::::::::' + new Date(), socket);
-      console.log(socket.connected); // true
-    });
-
-
-
-    socket.on("connect_error", () => {
-      setTimeout(() => {
-        console.log('socket connection error ::::::::::::::::::::::' + new Date());
-
-        socket.connect();
-      }, 1000);
-    });
-    $(document).ready(function() {
-            var window_out_time = 0;
-            var screeninterval;
-
-            window.addEventListener('blur', () => {
-                console.log("out", window_out_time);
-
-                screeninterval = setInterval(function() {
-                    window_out_time = window_out_time + 1;
-                }, 1000);
-
-            });
-
-            window.addEventListener('focus', () => {
-
-                console.log("in", window_out_time);
-
-                if (window_out_time >= 20) {
-                    location.reload();
-                } else {
-                    window_out_time = 0;
-                    clearInterval(screeninterval);
-                }
-            });
-
-        });
+    console.log('socket', socket);
   </script>
-
-  <script src="<?php echo base_url(); ?>assets/app/iframeResizer.min.js"></script>
-
 
 
 </head>
@@ -193,8 +128,6 @@ if (empty($_SESSION['my_userdata'])) {
   <?php echo $template_content; ?>
   <?php echo $template_footer; ?>
   </div>
-
-
   <script>
     $.widget.bridge('uibutton', $.ui.button)
   </script>

@@ -113,17 +113,12 @@ class   Reports extends My_Controller
         $user = $this->User_model->getUserById($user_id);
         $user_type = $user->user_type;
 
-        $dataArray = array(
-            'fltrselct' => $fltrselct,
-            'user_id' => $user_id,
-            'fromDate' => get_yesterday_datetime(),
-            'toDate' => get_today_end_datetime(),
-        );
-
-        $newopen_bal = $this->Ledger_model->count_total_balance_by_date($dataArray);
 
         if ($user_type == 'User') {
-
+            $dataArray = array(
+                'fltrselct' => $fltrselct,
+                'user_id' => $user_id
+            );
 
 
             $reports = $this->Ledger_model->get_client_ledger_new($dataArray);
@@ -131,7 +126,7 @@ class   Reports extends My_Controller
 
             // p($reports);
 
-            $balance = (float)$newopen_bal;
+            $balance = 0;
 
             if (!empty($reports)) {
                 foreach ($reports as $key => $report) {
@@ -162,28 +157,20 @@ class   Reports extends My_Controller
                 }
             }
 
-
-            if ($reports) {
-                $reports = add_openning_bal_row($newopen_bal, $reports);
-            }
 
             // p($reports);
             array_multisort(array_map('strtotime', array_column($reports, 'created_at')), SORT_DESC, $reports);
         } else {
-            // $dataArray = array(
-            //     'fltrselct' => $fltrselct,
-            //     'user_id' => $user_id
-            // );
-
-            // $dataArray['fromDate'] = date('Y-m-d H:i:s', strtotime("-1 days"));
-            // $dataArray['toDate'] = date('Y-m-d H:i:s');
-
-
+            $dataArray = array(
+                'fltrselct' => $fltrselct,
+                'user_id' => $user_id
+            );
 
             $reports = $this->Ledger_model->get_admin_ledger_new($dataArray);
 
 
-            $balance = (float)$newopen_bal;
+
+            $balance = 0;
 
             if (!empty($reports)) {
                 foreach ($reports as $key => $report) {
@@ -215,13 +202,12 @@ class   Reports extends My_Controller
             }
 
 
-            if ($reports) {
-                $reports = add_openning_bal_row($newopen_bal, $reports);
-            }
-
             // p($reports);
             array_multisort(array_map('strtotime', array_column($reports, 'created_at')), SORT_DESC, $reports);
         }
+
+
+
 
 
         $dataArray['reports'] = $reports;
@@ -242,6 +228,864 @@ class   Reports extends My_Controller
         $this->load->view('/account-statement', $dataArray);
     }
 
+    public function filterAcStatementBCK()
+    {
+
+        $search = $this->input->post('searchTerm');
+        $fdate = $this->input->post('fdate');
+        $tdate = $this->input->post('tdate');
+        $fltrselct = $this->input->post('fltrselct');
+        $user_id =  $this->input->post('user_id');
+        $user_type =  $this->input->post('user_type');
+
+
+        $dataArray = array(
+            'search' => $search,
+            'fltrselct' => $fltrselct,
+            'user_id' => $user_id
+        );
+
+
+        if (!empty($fdate) && !empty($tdate)) {
+            $dataArray['toDate'] = date('Y-m-d H:i:s', (strtotime("tomorrow", strtotime($tdate)) - 1));
+            $dataArray['fromDate'] = date('Y-m-d H:i:s', strtotime($fdate));
+        }
+
+
+        if ($fltrselct == 3) {
+            $dataArray = array(
+                'search_p_l' => $search,
+                'user_id' => $user_id
+            );
+
+            if (!empty($fdate) && !empty($tdate)) {
+                $dataArray['toDate'] = date('Y-m-d H:i:s', (strtotime("tomorrow", strtotime($tdate)) - 1));
+                $dataArray['fromDate'] = date('Y-m-d H:i:s', strtotime($fdate));
+            }
+            $dataArray['pstatus'] = 'Settled';
+        }
+
+
+
+        if ($user_type == 'User') {
+
+
+            if ($fltrselct == 3) {
+                $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
+
+                if (!empty($reportsData)) {
+                    foreach ($reportsData as $report) {
+
+
+                        $marketId = $report['market_id'];
+                        $betting_type = strtolower($report['betting_type']);
+
+
+                        if (isset($reports[$report['match_id']])) {
+                            if ($betting_type == 'fancy') {
+                                $market_name = 'Fancy';
+                            } else {
+                                $market_name = $report['market_name'];
+                            }
+
+
+
+                            $p_l =  $reports[$report['match_id']]['p_l'];
+
+
+                            if ($report['betting_is_tie'] == 'No') {
+                                if ($report['bet_result'] == 'Plus') {
+                                    $p_l =  $reports[$report['match_id']]['p_l'] + $report['profit'];
+                                } else if ($report['bet_result'] == 'Minus') {
+                                    $p_l = $reports[$report['match_id']]['p_l'] +  $report['loss'] * -1;
+                                }
+                            }
+
+
+
+
+
+                            $reports[$report['match_id']] = array(
+                                'match_id' => $report['match_id'],
+                                'event_name' => $report['event_name'],
+                                'market_name' => $market_name,
+                                'market_id' => $marketId,
+
+                                'p_l' => $p_l,
+                                'commission' => 0,
+                                'created_at' => $report['created_at']
+                            );
+                        } else {
+                            if ($betting_type == 'fancy') {
+                                $market_name = 'Fancy';
+                            } else {
+                                $market_name = $report['market_name'];
+                            }
+
+
+                            $p_l = 0;
+
+                            if ($report['betting_is_tie'] == 'No') {
+                                if ($report['bet_result'] == 'Plus') {
+                                    $p_l = $report['profit'];
+                                } else if ($report['bet_result'] == 'Minus') {
+                                    $p_l = $report['loss'] * -1;
+                                }
+                            }
+
+                            $getCommssion = $this->Ledger_model->get_commission_amt_by_event_id(array(
+                                'user_id' => $user_id,
+                                'match_id' => $report['match_id']
+                            ));
+
+
+                            // p($getCommssion);
+
+
+                            if (!empty($getCommssion)) {
+                                $p_l += $getCommssion->total_commission;
+                            }
+
+                            // p($p_l);
+                            // p($report);
+                            $reports[$report['match_id']] = array(
+                                'match_id' => $report['match_id'],
+                                'event_name' => $report['event_name'],
+                                'market_name' => $market_name,
+                                'market_id' => $marketId,
+
+                                'p_l' => $p_l,
+                                'commission' => 0,
+                                'created_at' => $report['created_at']
+                            );
+                        }
+                    }
+                }
+            } else {
+                $reports = $this->Ledger_model->get_ledger($dataArray);
+            }
+        } else if ($user_type == 'Master') {
+            $reports = array();
+
+            if ($fltrselct == 3) {
+                $dataArray['pstatus'] = 'Settled';
+
+                $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
+
+                if (!empty($reportsData)) {
+                    foreach ($reportsData as $report) {
+                        $marketId = $report['market_id'];
+                        $betting_type = strtolower($report['betting_type']);
+
+
+                        if (isset($reports[$report['match_id']])) {
+                            if ($betting_type == 'fancy') {
+                                $market_name = 'Fancy';
+                            } else {
+                                $market_name = $report['market_name'];
+                            }
+
+                            $p_l = 0;
+
+                            if ($report['bet_result'] == 'Minus') {
+                                $p_l =  $reports[$report['match_id']]['p_l'] + $report['profit'];
+                            } else if ($report['bet_result'] == 'Plus') {
+                                $p_l = $reports[$report['match_id']]['p_l'] +  $report['loss'] * -1;
+                            }
+
+
+                            $reports[$report['match_id']] = array(
+                                'match_id' => $report['match_id'],
+                                'event_name' => $report['event_name'],
+                                'market_name' => $market_name,
+                                'market_id' => $marketId,
+
+                                'p_l' => $p_l,
+                                'commission' => 0,
+                                'created_at' => $report['created_at']
+                            );
+
+                            $comm_pl = 0;
+                            $sessional_commission = 2;
+
+                            if ($betting_type == 'fancy') {
+                                $tmp_comm_value =  abs($p_l) *  $sessional_commission / 100;
+                            }
+                            $comm_pl =  $reports[$report['match_id']]['comm_pl'] + $tmp_comm_value;
+                            $reports[$report['match_id']]['comm_pl'] =  $comm_pl;
+                        } else {
+                            if ($betting_type == 'fancy') {
+                                $market_name = 'Fancy';
+                            } else {
+                                $market_name = $report['market_name'];
+                            }
+
+
+                            $p_l = 0;
+
+                            if ($report['bet_result'] == 'Minus') {
+                                $p_l = $report['profit'];
+                            } else if ($report['bet_result'] == 'Plus') {
+                                $p_l = $report['loss'] * -1;
+                            }
+
+
+
+
+                            $grand_total_mo_comm = 0;
+                            $grand_total_bm_comm = 0;
+
+                            $grand_total_fancy_comm = 0;
+
+
+                            $getCommissionUsers = $this->Betting_model->get_betting_events_user(array(
+                                'user_id' => $user_id,
+                                'match_id' => $report['match_id']
+                            ));
+
+
+
+                            if (!empty($getCommissionUsers)) {
+                                foreach ($getCommissionUsers as $CommissionUser) {
+                                    $dataArray2 = array(
+                                        'user_id' => $CommissionUser->client_user_id,
+                                        'match_id' => $report['match_id']
+                                    );
+
+                                    //***************MATCH ODDS COMM */
+                                    $matchOddsbettings = $this->Betting_model->get_match_odds_bettings_by_event_id($dataArray2);
+
+                                    $total_mo_profit = 0;
+                                    $total_mo_loss = 0;
+                                    $total_mo_amt = 0;
+                                    $user_mo_comm = 0;
+                                    $master_mo_comm = 0;
+                                    if (!empty($matchOddsbettings)) {
+                                        foreach ($matchOddsbettings as $matchOddsbetting) {
+                                            $user_mo_comm = $matchOddsbetting['master_commission'];
+                                            if ($matchOddsbetting['bet_result'] == 'Plus') {
+                                                $total_mo_profit += $matchOddsbetting['profit'];
+                                            } else if ($matchOddsbetting['bet_result'] == 'Minus') {
+                                                $total_mo_loss += $matchOddsbetting['loss'];
+                                            }
+                                        }
+                                    }
+
+                                    $master_mo_comm = $CommissionUser->master_commission -  $user_mo_comm;
+
+                                    $total_mo_amt = $total_mo_profit - $total_mo_loss;
+
+                                    if ($total_mo_amt < 0) {
+
+                                        $commission_amt = (abs($total_mo_amt) * $CommissionUser->master_commission) / 100;
+                                    }
+
+                                    $mo_commission_amt = (abs($total_mo_amt) * $master_mo_comm) / 100;
+
+                                    $grand_total_mo_comm += $mo_commission_amt;
+                                    //***************MATCH ODDS COMM */
+
+
+                                    //***************BOOKMAKER COMM */
+                                    $bookMakerbettings = $this->Betting_model->get_bookmaker_bettings_by_event_id($dataArray2);
+
+
+                                    $total_bm_profit = 0;
+                                    $total_bm_loss = 0;
+                                    $total_bm_amt = 0;
+                                    $user_bm_comm = 0;
+                                    $master_bm_comm = 0;
+                                    if (!empty($bookMakerbettings)) {
+                                        foreach ($bookMakerbettings as $bookMakerbetting) {
+                                            $user_bm_comm = $bookMakerbetting['master_commission'];
+                                            if ($bookMakerbetting['bet_result'] == 'Plus') {
+                                                $total_bm_profit += $bookMakerbetting['profit'];
+                                            } else if ($bookMakerbetting['bet_result'] == 'Minus') {
+                                                $total_bm_loss += $bookMakerbetting['loss'];
+                                            }
+                                        }
+                                    }
+
+                                    $master_bm_comm = $CommissionUser->master_commission -  $user_bm_comm;
+
+                                    $total_bm_amt = $total_bm_profit - $total_bm_loss;
+
+                                    if ($total_bm_amt < 0) {
+
+
+
+                                        $bm_commission_amt = (abs($total_bm_amt) * $master_bm_comm) / 100;
+                                    }
+
+                                    $grand_total_bm_comm += $bm_commission_amt;
+                                    //***************BOOKMAKER COMM */
+
+                                    // p($bm_commission_amt);
+                                    //***************FANCY COMM */
+                                    $fancybettings = $this->Betting_model->get_fancy_bettings_by_event_id($dataArray2);
+
+                                    $total_fancy_profit = 0;
+                                    $total_fancy_loss = 0;
+                                    $total_fancy_amt = 0;
+                                    $user_fancy_comm = 0;
+                                    $master_fancy_comm = 0;
+                                    if (!empty($fancybettings)) {
+                                        foreach ($fancybettings as $fancybetting) {
+
+                                            $user_fancy_comm = $fancybetting['sessional_commission'];
+                                            if ($fancybetting['bet_result'] == 'Plus') {
+                                                $total_fancy_profit += $fancybetting['profit'];
+                                            } else if ($fancybetting['bet_result'] == 'Minus') {
+                                                $total_fancy_loss += $fancybetting['loss'];
+                                            }
+                                        }
+                                    }
+
+                                    $master_fancy_comm = $CommissionUser->sessional_commission -  $user_fancy_comm;
+
+                                    $total_fancy_amt = $total_fancy_profit - $total_fancy_loss;
+
+                                    if ($total_fancy_amt < 0) {
+
+
+
+                                        $fancy_commission_amt = (abs($total_fancy_amt) * $master_fancy_comm) / 100;
+                                    }
+
+                                    $grand_total_fancy_comm += $fancy_commission_amt;
+                                    //***************FANCY COMM */
+
+
+                                }
+                            }
+
+                            $p_l -= $grand_total_mo_comm;
+                            $p_l -= $grand_total_bm_comm;
+                            $p_l -= $grand_total_fancy_comm;
+
+
+
+                            $reports[$report['match_id']] = array(
+                                'match_id' => $report['match_id'],
+                                'event_name' => $report['event_name'],
+                                'market_name' => $market_name,
+                                'market_id' => $marketId,
+
+                                'p_l' => $p_l,
+                                'commission' => 0,
+                                'created_at' => $report['created_at']
+                            );
+                            // P($grand_total_fancy_comm);
+
+
+
+                            // // $comm_pl = 0;
+                            // // $sessional_commission = 2;
+
+                            // // if ($betting_type == 'fancy') {
+                            // //     $tmp_comm_value =  abs($p_l) *  $sessional_commission / 100;
+                            // // }
+                            // $comm_pl =  $reports[$report['match_id']]['comm_pl'] + $tmp_comm_value;
+                            // $reports[$report['match_id']]['comm_pl'] =  $comm_pl;
+                        }
+                    }
+                }
+            } else {
+                $reports = $this->Ledger_model->get_ledger($dataArray);
+            }
+        } else if ($user_type == 'Super Master') {
+            $reports = array();
+
+            if ($fltrselct == 3) {
+                $dataArray['pstatus'] = 'Settled';
+
+                $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
+
+
+                $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
+
+                if (!empty($reportsData)) {
+                    foreach ($reportsData as $report) {
+                        $marketId = $report['market_id'];
+                        $betting_type = strtolower($report['betting_type']);
+
+
+                        if (isset($reports[$report['match_id']])) {
+                            if ($betting_type == 'fancy') {
+                                $market_name = 'Fancy';
+                            } else {
+                                $market_name = $report['market_name'];
+                            }
+
+                            $p_l = 0;
+
+                            if ($report['bet_result'] == 'Minus') {
+                                $p_l =  $reports[$report['match_id']]['p_l'] + $report['profit'];
+                            } else if ($report['bet_result'] == 'Plus') {
+                                $p_l = $reports[$report['match_id']]['p_l'] +  $report['loss'] * -1;
+                            }
+
+
+                            $reports[$report['match_id']] = array(
+                                'match_id' => $report['match_id'],
+                                'event_name' => $report['event_name'],
+                                'market_name' => $market_name,
+                                'market_id' => $marketId,
+
+                                'p_l' => $p_l,
+                                'commission' => 0,
+                                'created_at' => $report['created_at']
+                            );
+
+                            $comm_pl = 0;
+                            $sessional_commission = 2;
+
+                            if ($betting_type == 'fancy') {
+                                $tmp_comm_value =  abs($p_l) *  $sessional_commission / 100;
+                            }
+                            $comm_pl =  $reports[$report['match_id']]['comm_pl'] + $tmp_comm_value;
+                            $reports[$report['match_id']]['comm_pl'] =  $comm_pl;
+                        } else {
+                            if ($betting_type == 'fancy') {
+                                $market_name = 'Fancy';
+                            } else {
+                                $market_name = $report['market_name'];
+                            }
+
+
+                            $p_l = 0;
+
+                            if ($report['bet_result'] == 'Minus') {
+                                $p_l = $report['profit'];
+                            } else if ($report['bet_result'] == 'Plus') {
+                                $p_l = $report['loss'] * -1;
+                            }
+
+
+
+
+                            $grand_total_mo_comm = 0;
+                            $grand_total_bm_comm = 0;
+
+                            $grand_total_fancy_comm = 0;
+
+
+                            $getCommissionUsers = $this->Betting_model->get_betting_events_user(array(
+                                'user_id' => $user_id,
+                                'match_id' => $report['match_id']
+                            ));
+
+
+
+                            if (!empty($getCommissionUsers)) {
+                                foreach ($getCommissionUsers as $CommissionUser) {
+
+                                    $bet_user_type = '';
+
+                                    if ($user_type == 'Super Master') {
+                                        $bet_user_type = 'Master';
+                                    } else if ($user_type == 'Hyper Super Master') {
+                                        $bet_user_type = 'Super Master';
+                                    } else if ($user_type == 'Admin') {
+                                        $bet_user_type = 'Hyper Super Master';
+                                    } else if ($user_type == 'Super Admin') {
+                                        $bet_user_type = 'Admin';
+                                    }
+
+                                    $dataArray2 = array(
+                                        'user_id' => $CommissionUser->client_user_id,
+                                        'match_id' => $report['match_id'],
+                                        'user_type' => $bet_user_type
+                                    );
+
+                                    //***************MATCH ODDS COMM */
+                                    $matchOddsbettings = $this->Betting_model->get_masters_wise_match_odds_bettings_by_event_id($dataArray2);
+
+
+                                    $total_mo_profit = 0;
+                                    $total_mo_loss = 0;
+                                    $total_mo_amt = 0;
+                                    $user_mo_comm = 0;
+                                    $master_mo_comm = 0;
+                                    if (!empty($matchOddsbettings)) {
+                                        foreach ($matchOddsbettings as $matchOddsbetting) {
+                                            $user_mo_comm = $matchOddsbetting['master_commission'];
+                                            if ($matchOddsbetting['bet_result'] == 'Plus') {
+                                                $total_mo_profit += $matchOddsbetting['profit'];
+                                            } else if ($matchOddsbetting['bet_result'] == 'Minus') {
+                                                $total_mo_loss += $matchOddsbetting['loss'];
+                                            }
+                                        }
+                                    }
+
+                                    $master_mo_comm = $CommissionUser->master_commission -  $user_mo_comm;
+
+                                    $total_mo_amt = $total_mo_profit - $total_mo_loss;
+
+                                    if ($total_mo_amt < 0) {
+
+                                        $commission_amt = (abs($total_mo_amt) * $CommissionUser->master_commission) / 100;
+                                    }
+
+                                    $mo_commission_amt = (abs($total_mo_amt) * $master_mo_comm) / 100;
+
+                                    $grand_total_mo_comm += $mo_commission_amt;
+                                    //***************MATCH ODDS COMM */
+
+
+                                    //***************BOOKMAKER COMM */
+                                    $bookMakerbettings = $this->Betting_model->get_masters_wise_bookmaker_bettings_by_event_id($dataArray2);
+
+
+
+
+                                    $total_bm_profit = 0;
+                                    $total_bm_loss = 0;
+                                    $total_bm_amt = 0;
+                                    $user_bm_comm = 0;
+                                    $master_bm_comm = 0;
+                                    if (!empty($bookMakerbettings)) {
+                                        foreach ($bookMakerbettings as $bookMakerbetting) {
+                                            $user_bm_comm = $bookMakerbetting['master_commission'];
+                                            if ($bookMakerbetting['bet_result'] == 'Plus') {
+                                                $total_bm_profit += $bookMakerbetting['profit'];
+                                            } else if ($bookMakerbetting['bet_result'] == 'Minus') {
+                                                $total_bm_loss += $bookMakerbetting['loss'];
+                                            }
+                                        }
+                                    }
+
+                                    $master_bm_comm = $CommissionUser->master_commission -  $user_bm_comm;
+
+                                    $total_bm_amt = $total_bm_profit - $total_bm_loss;
+
+                                    if ($total_bm_amt < 0) {
+
+
+
+                                        $bm_commission_amt = (abs($total_bm_amt) * $master_bm_comm) / 100;
+                                    }
+
+                                    $grand_total_bm_comm += $bm_commission_amt;
+                                    //***************BOOKMAKER COMM */
+
+                                    // p($bm_commission_amt);
+                                    //***************FANCY COMM */
+                                    $fancybettings = $this->Betting_model->get_fancy_bettings_by_event_id($dataArray2);
+
+                                    $total_fancy_profit = 0;
+                                    $total_fancy_loss = 0;
+                                    $total_fancy_amt = 0;
+                                    $user_fancy_comm = 0;
+                                    $master_fancy_comm = 0;
+                                    if (!empty($fancybettings)) {
+                                        foreach ($fancybettings as $fancybetting) {
+
+                                            $user_fancy_comm = $fancybetting['sessional_commission'];
+                                            if ($fancybetting['bet_result'] == 'Plus') {
+                                                $total_fancy_profit += $fancybetting['profit'];
+                                            } else if ($fancybetting['bet_result'] == 'Minus') {
+                                                $total_fancy_loss += $fancybetting['loss'];
+                                            }
+                                        }
+                                    }
+
+                                    $master_fancy_comm = $CommissionUser->sessional_commission -  $user_fancy_comm;
+
+                                    $total_fancy_amt = $total_fancy_profit - $total_fancy_loss;
+
+                                    if ($total_fancy_amt < 0) {
+
+
+
+                                        $fancy_commission_amt = (abs($total_fancy_amt) * $master_fancy_comm) / 100;
+                                    }
+
+                                    $grand_total_fancy_comm += $fancy_commission_amt;
+                                    //***************FANCY COMM */
+
+
+                                }
+                            }
+
+                            $p_l -= $grand_total_mo_comm;
+                            $p_l -= $grand_total_bm_comm;
+                            $p_l -= $grand_total_fancy_comm;
+
+
+
+                            $reports[$report['match_id']] = array(
+                                'match_id' => $report['match_id'],
+                                'event_name' => $report['event_name'],
+                                'market_name' => $market_name,
+                                'market_id' => $marketId,
+
+                                'p_l' => $p_l,
+                                'commission' => 0,
+                                'created_at' => $report['created_at']
+                            );
+                            // P($grand_total_fancy_comm);
+
+
+
+                            // // $comm_pl = 0;
+                            // // $sessional_commission = 2;
+
+                            // // if ($betting_type == 'fancy') {
+                            // //     $tmp_comm_value =  abs($p_l) *  $sessional_commission / 100;
+                            // // }
+                            // $comm_pl =  $reports[$report['match_id']]['comm_pl'] + $tmp_comm_value;
+                            // $reports[$report['match_id']]['comm_pl'] =  $comm_pl;
+                        }
+                    }
+                }
+            } else {
+                $reports = $this->Ledger_model->get_ledger($dataArray);
+            }
+        } else if ($user_type == 'Hyper Super Master') {
+            $reports = array();
+
+            if ($fltrselct == 3) {
+
+                $dataArray['pstatus'] = 'Settled';
+
+                $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
+                if (!empty($reportsData)) {
+                    foreach ($reportsData as $report) {
+                        $marketId = $report['market_id'];
+                        $betting_type = strtolower($report['betting_type']);
+
+
+                        if (isset($reports[$report['match_id']])) {
+                            if ($betting_type == 'fancy') {
+                                $market_name = 'Fancy';
+                            } else {
+                                $market_name = $report['market_name'];
+                            }
+
+                            $p_l = 0;
+
+                            if ($report['bet_result'] == 'Minus') {
+                                $p_l =  $reports[$report['match_id']]['p_l'] + $report['profit'];
+                            } else if ($report['bet_result'] == 'Plus') {
+                                $p_l = $reports[$report['match_id']]['p_l'] +  $report['loss'] * -1;
+                            }
+
+
+                            $reports[$report['match_id']] = array(
+                                'match_id' => $report['match_id'],
+                                'event_name' => $report['event_name'],
+                                'market_name' => $market_name,
+                                'market_id' => $marketId,
+
+                                'p_l' => $p_l,
+                                'commission' => 0,
+                                'created_at' => $report['created_at']
+                            );
+                        } else {
+                            if ($betting_type == 'fancy') {
+                                $market_name = 'Fancy';
+                            } else {
+                                $market_name = $report['market_name'];
+                            }
+
+
+                            $p_l = 0;
+
+                            if ($report['bet_result'] == 'Minus') {
+                                $p_l = $report['profit'];
+                            } else if ($report['bet_result'] == 'Plus') {
+                                $p_l = $report['loss'] * -1;
+                            }
+
+
+                            $reports[$report['match_id']] = array(
+                                'match_id' => $report['match_id'],
+                                'event_name' => $report['event_name'],
+                                'market_name' => $market_name,
+                                'market_id' => $marketId,
+
+                                'p_l' => $p_l,
+                                'commission' => 0,
+                                'created_at' => $report['created_at']
+                            );
+                        }
+                    }
+                }
+            } else {
+                $reports = $this->Ledger_model->get_ledger($dataArray);
+            }
+        } else if ($user_type == 'Admin') {
+            $reports = array();
+
+            if ($fltrselct == 3) {
+                $dataArray['pstatus'] = 'Settled';
+
+                $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
+                if (!empty($reportsData)) {
+                    foreach ($reportsData as $report) {
+                        $marketId = $report['market_id'];
+                        $betting_type = strtolower($report['betting_type']);
+
+
+                        if (isset($reports[$report['match_id']])) {
+                            if ($betting_type == 'fancy') {
+                                $market_name = 'Fancy';
+                            } else {
+                                $market_name = $report['market_name'];
+                            }
+
+                            $p_l = 0;
+
+                            if ($report['bet_result'] == 'Minus') {
+                                $p_l =  $reports[$report['match_id']]['p_l'] + $report['profit'];
+                            } else if ($report['bet_result'] == 'Plus') {
+                                $p_l = $reports[$report['match_id']]['p_l'] +  $report['loss'] * -1;
+                            }
+
+
+                            $reports[$report['match_id']] = array(
+                                'match_id' => $report['match_id'],
+                                'event_name' => $report['event_name'],
+                                'market_name' => $market_name,
+                                'market_id' => $marketId,
+
+                                'p_l' => $p_l,
+                                'commission' => 0,
+                                'created_at' => $report['created_at']
+                            );
+                        } else {
+                            if ($betting_type == 'fancy') {
+                                $market_name = 'Fancy';
+                            } else {
+                                $market_name = $report['market_name'];
+                            }
+
+
+                            $p_l = 0;
+
+                            if ($report['bet_result'] == 'Minus') {
+                                $p_l = $report['profit'];
+                            } else if ($report['bet_result'] == 'Plus') {
+                                $p_l = $report['loss'] * -1;
+                            }
+
+
+                            $reports[$report['match_id']] = array(
+                                'match_id' => $report['match_id'],
+                                'event_name' => $report['event_name'],
+                                'market_name' => $market_name,
+                                'market_id' => $marketId,
+
+                                'p_l' => $p_l,
+                                'commission' => 0,
+                                'created_at' => $report['created_at']
+                            );
+                        }
+                    }
+                }
+            } else {
+                $reports = $this->Ledger_model->get_ledger($dataArray);
+            }
+        } else if ($user_type == 'Super Admin') {
+            $reports = array();
+
+            if ($fltrselct == 3) {
+                $dataArray['pstatus'] = 'Settled';
+
+                $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
+                if (!empty($reportsData)) {
+                    foreach ($reportsData as $report) {
+                        $marketId = $report['market_id'];
+                        $betting_type = strtolower($report['betting_type']);
+
+
+                        if (isset($reports[$report['match_id']])) {
+                            if ($betting_type == 'fancy') {
+                                $market_name = 'Fancy';
+                            } else {
+                                $market_name = $report['market_name'];
+                            }
+
+                            $p_l = 0;
+
+                            if ($report['bet_result'] == 'Minus') {
+                                $p_l =  $reports[$report['match_id']]['p_l'] + $report['profit'];
+                            } else if ($report['bet_result'] == 'Plus') {
+                                $p_l = $reports[$report['match_id']]['p_l'] +  $report['loss'] * -1;
+                            }
+
+
+                            $reports[$report['match_id']] = array(
+                                'match_id' => $report['match_id'],
+                                'event_name' => $report['event_name'],
+                                'market_name' => $market_name,
+                                'market_id' => $marketId,
+
+                                'p_l' => $p_l,
+                                'commission' => 0,
+                                'created_at' => $report['created_at']
+                            );
+                        } else {
+                            if ($betting_type == 'fancy') {
+                                $market_name = 'Fancy';
+                            } else {
+                                $market_name = $report['market_name'];
+                            }
+
+
+                            $p_l = 0;
+
+                            if ($report['bet_result'] == 'Minus') {
+                                $p_l = $report['profit'];
+                            } else if ($report['bet_result'] == 'Plus') {
+                                $p_l = $report['loss'] * -1;
+                            }
+
+
+                            $reports[$report['match_id']] = array(
+                                'match_id' => $report['match_id'],
+                                'event_name' => $report['event_name'],
+                                'market_name' => $market_name,
+                                'market_id' => $marketId,
+
+                                'p_l' => $p_l,
+                                'commission' => 0,
+                                'created_at' => $report['created_at']
+                            );
+                        }
+                    }
+                }
+            } else {
+                $reports = $this->Ledger_model->get_ledger($dataArray);
+            }
+        }
+
+
+        if (!empty($fdate) && !empty($tdate)) {
+
+            $opening_balance = $this->Ledger_model->count_opening_balance_by_date(array(
+                'user_id' => $user_id,
+                'tdate' =>  date('Y-m-d H:i:s', strtotime($fdate))
+            ));
+        } else {
+            $opening_balance = 0;
+        }
+
+
+
+        array_multisort(array_map('strtotime', array_column($reports, 'created_at')), SORT_ASC, $reports);
+        $dataArray['reports'] = $reports;
+
+        $dataArray['opening_balance'] = $opening_balance;
+        if ($fltrselct == 3) {
+            $accountStmt  = $this->load->viewPartial('/profit-loss-list-html', $dataArray);
+        } else {
+            $accountStmt = $this->load->viewPartial('/account-statement-list-html', $dataArray);
+        }
+
+        echo json_encode($accountStmt);
+    }
 
 
     public function filterAcStatement()
@@ -255,6 +1099,11 @@ class   Reports extends My_Controller
         $user_type =  $this->input->post('user_type');
 
 
+
+
+
+
+
         $reports = array();
         if (!$user_id) {
             $user_id = get_user_id();
@@ -262,26 +1111,22 @@ class   Reports extends My_Controller
 
         $user = $this->User_model->getUserById($user_id);
         $user_type = $user->user_type;
-        $dataArray = array(
-            'fltrselct' => $fltrselct,
-            'user_id' => $user_id,
-            'fromDate' => $fdate,
-            'toDate' => $tdate,
-        );
 
-        $newopen_bal = $this->Ledger_model->count_total_balance_by_date($dataArray);
+
 
 
         if ($user_type == 'User') {
+            $dataArray = array(
+                'fltrselct' => $fltrselct,
+                'user_id' => $user_id
+            );
 
-
-            // p($dataArray);
             $reports = $this->Ledger_model->get_client_ledger_new($dataArray);
 
 
             // p($reports);
 
-            $balance = (float)$newopen_bal;
+            $balance = 0;
 
             if (!empty($reports)) {
                 foreach ($reports as $key => $report) {
@@ -313,23 +1158,20 @@ class   Reports extends My_Controller
             }
 
 
-            if ($reports) {
-                $reports = add_openning_bal_row($newopen_bal, $reports);
-            }
-
+            // p($reports);
             array_multisort(array_map('strtotime', array_column($reports, 'created_at')), SORT_DESC, $reports);
         } else {
-            // $dataArray = array(
-            //     'search' => $search,
-            //     'fltrselct' => $fltrselct,
-            //     'user_id' => $user_id
-            // );
+            $dataArray = array(
+                'search' => $search,
+                'fltrselct' => $fltrselct,
+                'user_id' => $user_id
+            );
 
 
-            // if (!empty($fdate) && !empty($tdate)) {
-            //     $dataArray['toDate'] = date('Y-m-d H:i:s', (strtotime("tomorrow", strtotime($tdate)) - 1));
-            //     $dataArray['fromDate'] = date('Y-m-d H:i:s', strtotime($fdate));
-            // }
+            if (!empty($fdate) && !empty($tdate)) {
+                $dataArray['toDate'] = date('Y-m-d H:i:s', (strtotime("tomorrow", strtotime($tdate)) - 1));
+                $dataArray['fromDate'] = date('Y-m-d H:i:s', strtotime($fdate));
+            }
 
             $reports = $this->Ledger_model->get_admin_ledger_new($dataArray);
 
@@ -337,7 +1179,7 @@ class   Reports extends My_Controller
 
 
 
-            $balance = (float)$newopen_bal;
+            $balance = 0;
 
             if (!empty($reports)) {
                 foreach ($reports as $key => $report) {
@@ -369,9 +1211,7 @@ class   Reports extends My_Controller
                 }
             }
 
-            if ($reports) {
-                $reports = add_openning_bal_row($newopen_bal, $reports);
-            }
+
             // p($reports);
             array_multisort(array_map('strtotime', array_column($reports, 'created_at')), SORT_DESC, $reports);
         }
@@ -924,11 +1764,11 @@ class   Reports extends My_Controller
             'user_id' => $user_id
         );
 
-        // if (!empty($fdate) && !empty($tdate)) {
+        if (!empty($fdate) && !empty($tdate)) {
 
-        //     $dataArray['fdate'] = date('Y-m-d H:i:s', strtotime($fdate));
-        //     $dataArray['tdate'] = date('Y-m-d H:i:s', (strtotime("tomorrow", strtotime($tdate)) - 1));
-        // }
+            $dataArray['fdate'] = date('Y-m-d', strtotime($fdate));
+            $dataArray['tdate'] = date('Y-m-d H:i:s', (strtotime("tomorrow", strtotime($tdate)) - 1));
+        }
 
         $user_type = $user_detail->user_type;
 
@@ -938,8 +1778,8 @@ class   Reports extends My_Controller
         );
 
         if (!empty($fdate) && !empty($tdate)) {
-            $dataArray['toDate'] = date('Y-m-d H:i:s', strtotime($tdate));
-            $dataArray['fromDate'] = date('Y-m-d H:i:s', strtotime($fdate));
+            $dataArray['toDate'] = date('Y-m-d', strtotime($tdate));
+            $dataArray['fromDate'] = date('Y-m-d', strtotime($fdate));
         }
 
         $dataArray['pstatus'] = 'Settled';
@@ -951,36 +1791,7 @@ class   Reports extends My_Controller
 
 
             $dataArray['pstatus'] = 'Settled';
-
-
-            if ($user_type == 'Master') {
-                $reportsData = $this->Report_model->get_profit_loss_events_list($dataArray);
-            } else {
-
-                $parent_user_type = '';
-                $self_user_type = '';
-
-                if ($user_type == 'Super Master') {
-                    $parent_user_type = 'Hyper Super Master';
-                    $self_user_type = $user_type;
-                } else if ($user_type == 'Hyper Super Master') {
-                    $parent_user_type = 'Admin';
-                    $self_user_type = $user_type;
-                } else if ($user_type == 'Admin') {
-                    $parent_user_type = 'Super Admin';
-                    $self_user_type = $user_type;
-                }
-
-                $dataArray['parent_user_type'] = $parent_user_type;
-                $dataArray['self_user_type'] = $self_user_type;
-
-
-                $reportsData = $this->Report_model->get_profit_loss_events_list_new($dataArray);
-            }
-
-
-
-
+            $reportsData = $this->Report_model->get_profit_loss_events_list($dataArray);
 
 
 
@@ -1001,8 +1812,8 @@ class   Reports extends My_Controller
 
                     // p($report);
 
-                    // $match_comm = 0;
-                    // $session_comm = 0;
+                    $match_comm = 0;
+                    $session_comm = 0;
 
                     $match_pl = $profit - $loss;
                     $session_pl = $total_fancy_profit - $total_fancy_loss;
@@ -1010,85 +1821,27 @@ class   Reports extends My_Controller
 
 
 
-
-                    // if ($match_pl < 0) {
-                    //     $match_comm = abs($match_pl * $master_commission / 100);
-                    // }
-
-
-                    // if ($total_fancy_stake > 0) {
-                    //     $session_comm = abs($total_fancy_stake * $sessional_commission / 100);
-                    // }
-
-                    $filter_user_type = '';
-
-
-                    if ($user_type == 'Master') {
-                        $filter_user_type = 'User';
-                    } else if ($user_type == 'Super Master') {
-                        $filter_user_type = 'Master';
-                    } else if ($user_type == 'Hyper Super Master') {
-                        $filter_user_type = 'Super Master';
-                    } else if ($user_type == 'Admin') {
-                        $filter_user_type = 'Hyper Super Master';
-                    } else if ($user_type == 'Super Admin') {
-                        $filter_user_type = 'Admin';
+                    if ($match_pl < 0) {
+                        $match_comm = abs($match_pl * $master_commission / 100);
                     }
 
 
-                    if ($report['is_casino'] == 'Yes') {
-
-                        $total_commission = $this->Betting_model->count_match_market_wise_masters_commission(array(
-                            'match_id' => $report['match_id'],
-                            'user_id' => $user_id,
-                            'user_type' => $filter_user_type,
-                            'market_id' => $report['market_id'],
-
-                        ));
-                    } else {
-                        $total_commission = $this->Betting_model->count_match_wise_masters_commission(array(
-                            'match_id' => $report['match_id'],
-                            'user_id' => $user_id,
-                            'user_type' => $filter_user_type
-
-                        ));
+                    if ($total_fancy_stake > 0) {
+                        $session_comm = abs($total_fancy_stake * $sessional_commission / 100);
                     }
-
 
 
 
                     $p_l = 0;
 
 
-                    $p_l = (($match_pl + $total_commission->total_commission) * $report['total_share'] / 100) + ($session_pl  * $report['total_share'] / 100);
+                    $p_l = ($match_pl + $match_comm) + ($session_pl + $session_comm);
 
-
-
-                    if ($report['is_casino'] == 'Yes') {
-
-                        $market_id = explode('__', $report['market_id']);
-
-
-                        if (!empty($market_id)) {
-                            $market_id = $market_id[1];
-                            $market_id = explode('_', $market_id);
-
-                            if (!empty($market_id)) {
-
-                                $market_id  = $market_id[0];
-                            }
-                        }
-
-                        $event_name = $event_name . ' / ' . $report['market_name'] . ' / ' . $market_id;
-                    }
 
                     // p($p_l);
-                    $reports[] = array(
+                    $reports[$report['match_id']] = array(
                         'match_id' => $match_id,
                         'event_name' => $event_name,
-                        'is_casino' => $report['is_casino'],
-                        'market_id' => $report['market_id'],
-
 
                         'p_l' => $p_l,
                         'commission' => 0,
@@ -1099,122 +1852,99 @@ class   Reports extends My_Controller
         } else {
             $dataArray['pstatus'] = 'Settled';
             $reports = array();
-            $reportsData = $this->Betting_model->get_user_profit_loss($dataArray);
+
+            $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
+
+
+
 
 
             if (!empty($reportsData)) {
                 foreach ($reportsData as $report) {
 
-                    $event_name = $report['event_name'];
-                    if ($report['is_casino'] == 'Yes') {
 
-                        $market_id = explode('__', $report['market_id']);
+                    $marketId = $report['market_id'];
+                    $betting_type = strtolower($report['betting_type']);
 
 
-                        if (!empty($market_id)) {
-                            $market_id = $market_id[1];
-                            $market_id = explode('_', $market_id);
+                    if (isset($reports[$report['match_id']])) {
+                        if ($betting_type == 'fancy') {
+                            $market_name = 'Fancy';
+                        } else {
+                            $market_name = $report['market_name'];
+                        }
 
-                            if (!empty($market_id)) {
 
-                                $market_id  = $market_id[0];
+
+                        $p_l =  $reports[$report['match_id']]['p_l'];
+
+
+                        if ($report['betting_is_tie'] == 'No') {
+                            if ($report['bet_result'] == 'Plus') {
+                                $p_l =  $reports[$report['match_id']]['p_l'] + $report['profit'];
+                            } else if ($report['bet_result'] == 'Minus') {
+                                $p_l = $reports[$report['match_id']]['p_l'] +  $report['loss'] * -1;
                             }
                         }
 
-                        $event_name = $event_name . ' / ' . $report['market_name'] . ' / ' . $market_id;
+
+
+
+
+                        $reports[$report['match_id']] = array(
+                            'match_id' => $report['match_id'],
+                            'event_name' => $report['event_name'],
+                            'market_name' => $market_name,
+                            'market_id' => $marketId,
+
+                            'p_l' => $p_l,
+                            'commission' => 0,
+                            'created_at' => $report['created_at']
+                        );
+                    } else {
+                        if ($betting_type == 'fancy') {
+                            $market_name = 'Fancy';
+                        } else {
+                            $market_name = $report['market_name'];
+                        }
+
+
+                        $p_l = 0;
+
+                        if ($report['betting_is_tie'] == 'No') {
+                            if ($report['bet_result'] == 'Plus') {
+                                $p_l = $report['profit'];
+                            } else if ($report['bet_result'] == 'Minus') {
+                                $p_l = $report['loss'] * -1;
+                            }
+                        }
+
+                        $getCommssion = $this->Ledger_model->get_commission_amt_by_event_id(array(
+                            'user_id' => $user_id,
+                            'match_id' => $report['match_id']
+                        ));
+
+
+                        // p($getCommssion);
+
+
+                        if (!empty($getCommssion)) {
+                            $p_l += $getCommssion->total_commission;
+                        }
+
+                        // p($p_l);
+                        // p($report);
+                        $reports[$report['match_id']] = array(
+                            'match_id' => $report['match_id'],
+                            'event_name' => $report['event_name'],
+                            'market_name' => $market_name,
+                            'market_id' => $marketId,
+
+                            'p_l' => $p_l,
+                            'commission' => 0,
+                            'created_at' => $report['created_at']
+                        );
                     }
-
-
-                    $reports[] = array(
-                        'match_id' => $report['match_id'],
-                        'event_name' => $event_name,
-                        'is_casino' => $report['is_casino'],
-                        'market_id' => $report['market_id'],
-                        'p_l' => $report['total_p_l'] + $report['total_commission_pl'],
-                        // 'p_l' => $report['total_p_l'],
-
-                        'commission' => 0,
-                        'created_at' => $report['created_at']
-                    );
-
-                    // if (isset($reports[$report['match_id']])) {
-                    //     if ($betting_type == 'fancy') {
-                    //         $market_name = 'Fancy';
-                    //     } else {
-                    //         $market_name = $report['market_name'];
-                    //     }
-
-
-
-                    //     $p_l =  $reports[$report['match_id']]['p_l'];
-
-
-                    //     if ($report['betting_is_tie'] == 'No') {
-                    //         if ($report['bet_result'] == 'Plus') {
-                    //             $p_l =  $reports[$report['match_id']]['p_l'] + $report['profit'];
-                    //         } else if ($report['bet_result'] == 'Minus') {
-                    //             $p_l = $reports[$report['match_id']]['p_l'] +  $report['loss'] * -1;
-                    //         }
-                    //     }
-
-
-
-
-
-                    //     $reports[$report['match_id']] = array(
-                    //         'match_id' => $report['match_id'],
-                    //         'event_name' => $report['event_name'],
-                    //         'market_name' => $market_name,
-                    //         'market_id' => $marketId,
-
-                    //         'p_l' => $p_l,
-                    //         'commission' => 0,
-                    //         'created_at' => $report['created_at']
-                    //     );
-                    // } else {
-                    //     if ($betting_type == 'fancy') {
-                    //         $market_name = 'Fancy';
-                    //     } else {
-                    //         $market_name = $report['market_name'];
-                    //     }
-
-
-                    //     $p_l = 0;
-
-                    //     if ($report['betting_is_tie'] == 'No') {
-                    //         if ($report['bet_result'] == 'Plus') {
-                    //             $p_l = $report['profit'];
-                    //         } else if ($report['bet_result'] == 'Minus') {
-                    //             $p_l = $report['loss'] * -1;
-                    //         }
-                    //     }
-
-                    //     $getCommssion = $this->Ledger_model->get_commission_amt_by_event_id(array(
-                    //         'user_id' => $user_id,
-                    //         'match_id' => $report['match_id']
-                    //     ));
-
-
-                    //     // p($getCommssion);
-
-
-                    //     if (!empty($getCommssion)) {
-                    //         $p_l += $getCommssion->total_commission;
-                    //     }
-
-                    //     // p($p_l);
-                    //     // p($report);
-                    //     $reports[$report['match_id']] = array(
-                    //         'match_id' => $report['match_id'],
-                    //         'event_name' => $report['event_name'],
-                    //         'market_name' => $market_name,
-                    //         'market_id' => $marketId,
-
-                    //         'p_l' => $p_l,
-                    //         'commission' => 0,
-                    //         'created_at' => $report['created_at']
-                    //     );
-                    // }
                 }
             }
         }
@@ -2108,7 +2838,6 @@ class   Reports extends My_Controller
             // p("Here")
             $dataArray['fancy']  = $this->load->viewPartial('/client-pl-list-html', $dataArray);
         } else {
-
             $dataArray['fancy']  = $this->load->viewPartial('/client-pl-list-html', $dataArray);
         }
 
@@ -2705,7 +3434,840 @@ class   Reports extends My_Controller
 
 
 
+    public function chip_summary($user_id = null)
+    {
+        log_message("MY_INFO", 'OLD Chip Summary Load Start');
+        $minusArr = array();
+        $plusArr = array();
 
+        if (!$user_id) {
+            $user_id = get_user_id();
+        }
+
+        $user =  $this->User_model->getUserById($user_id);
+        $user_type = $user->user_type;
+        $user_name = $user->name;
+
+        if ($user_type === 'Master') {
+
+            $partnership = $user->partnership;
+            $master_id = $user->master_id;
+
+            $master_commision = $user->master_commision;
+
+            $master_user =  $this->User_model->getUserById($master_id);
+            $parent_commision = $master_user->master_commision;
+            $parent_name = $master_user->name;
+            $parent_user_name = $master_user->user_name;
+
+
+            $users =  $this->User_model->getInnerUserById($user_id);
+
+            $ledger_plus_settle_amt = $this->Ledger_model->get_total_plus_settlement(array('user_id' => $user_id, 'role' => 'Parent'))->settlement_amount;
+
+
+
+            $ledger_minus_settle_amt = $this->Ledger_model->get_total_minus_settlement(array('user_id' => $user_id, 'role' => 'Parent'))->settlement_amount;
+            $parent_total_settle_amount = $ledger_plus_settle_amt - $ledger_minus_settle_amt;
+
+
+            // $parent_total_settle_amount = 0;
+            // p($parent_total_settle_amount)
+            // $$parent_total_settle_amount = 0;
+            // p($parent_total_settle_amount);
+            $parentBettingArr = array(
+                'user_id' => $user->user_id,
+                'user_name' => $parent_user_name,
+                'name' => $parent_name,
+                'amount' => 0,
+                'master_comission' => 0,
+                'partnership' => 0,
+                'type' => 'Parent',
+
+                'parent_comission' => 0,
+            );
+
+            $totalAmt = 0;
+            if (!empty($users)) {
+                foreach ($users as $user) {
+
+
+
+                    $bettings = (array) $this->Report_model->get_settled_accont_by_users($user->user_id);
+
+                    // p(sizeof($bettings),0);
+                    $ledger_plus_settle_amt = $this->Ledger_model->get_total_plus_settlement(array('user_id' => $user->user_id, 'role' => 'Parent'))->settlement_amount;
+
+
+                    $ledger_minus_settle_amt = $this->Ledger_model->get_total_minus_settlement(array('user_id' => $user->user_id, 'role' => 'Parent'))->settlement_amount;
+                    // $total_settle_amount = $ledger_plus_settle_amt - $ledger_minus_settle_amt;
+                    $total_settle_amount = 0;
+
+
+                    // if (!empty($bettings)) {
+                    //     foreach ($bettings as $betting) {
+                    //         if ($betting['bet_result'] == 'Plus') {
+                    //             $totalAmt += $betting['profit'];
+                    //         } else if ($betting['bet_result'] == 'Minus') {
+                    //             $totalAmt -= $betting['loss'];
+                    //         }
+                    //     }
+                    // }
+
+
+
+
+                    $minus_acc_bettings = array();
+                    if (!empty($bettings)) {
+                        $bettingArr = array(
+                            'user_id' => $user->user_id,
+                            'user_name' => $user->user_name,
+                            'name' => $user->name,
+                            'amount' => 0,
+                            'master_comission' => 0,
+                            'partnership' => 0,
+                            'type' => 'User',
+
+                            'parent_comission' => 0,
+                        );
+
+
+                        // p($bettings);
+
+                        foreach ($bettings as $betting) {
+                            if ($betting['bet_result'] == 'Minus') {
+                                $bettingArr['amount'] -= $betting['loss'];
+
+                                $parnet_loss = $betting['loss'] - (($betting['loss']) * ($partnership / 100));
+
+                                $parentBettingArr["amount"] -= $parnet_loss;
+                            } else if ($betting['bet_result'] == 'Plus') {
+                                $master_comission = 0;
+                                $parent_comission = 0;
+                                $profit_amt = $betting['profit'] - $master_comission;
+                                $bettingArr['amount'] += $profit_amt;
+
+                                $parnet_loss = $profit_amt - (($profit_amt) * ($partnership / 100));
+                                $parentBettingArr["amount"] += $parnet_loss;
+
+
+
+                                $bettingArr['master_comission'] += $master_comission;
+                                $bettingArr['parent_comission'] += $parent_comission;
+                            }
+                            $bettingArr['partnership']  =  $partnership;
+                        }
+
+
+
+
+
+
+                        if ($bettingArr['amount'] < 0) {
+
+                            $bettingArr['amount'] +=   $total_settle_amount;
+                        } else {
+                            $bettingArr['amount'] -=  $total_settle_amount;
+                        }
+
+
+                        if ($bettingArr['amount'] < 0) {
+                            array_push($minusArr, $bettingArr);
+                        } else {
+                            array_push($plusArr, $bettingArr);
+                        }
+                    }
+                }
+
+                if ($parentBettingArr['amount'] < 0) {
+
+                    $parentBettingArr['amount'] +=   ($parent_total_settle_amount);
+                } else {
+                    $parentBettingArr['amount'] -=    ($parent_total_settle_amount);
+                }
+
+                $parentBettingArr['amount'] = round($parentBettingArr['amount']);
+
+
+                if ($parentBettingArr['amount'] > 0) {
+                    array_push($minusArr, $parentBettingArr);
+                } else if ($parentBettingArr['amount'] < 0) {
+                    array_push($plusArr, $parentBettingArr);
+                }
+            }
+        } else if ($user_type === 'Super Master') {
+            $partnership = $user->partnership;
+            $master_id = $user->master_id;
+
+
+            $master_user =  $this->User_model->getUserById($master_id);
+            $parent_commision_pr = $master_user->master_commision;
+            $parent_name = $master_user->name;
+            $parent_user_name = $master_user->user_name;
+
+
+            $ledger_plus_settle_amt = $this->Ledger_model->get_total_plus_settlement(array('user_id' => $user_id, 'role' => 'Parent'))->settlement_amount;
+
+
+            $ledger_minus_settle_amt = $this->Ledger_model->get_total_minus_settlement(array('user_id' => $user_id, 'role' => 'Parent'))->settlement_amount;
+            $parent_total_settle_amount = $ledger_plus_settle_amt - $ledger_minus_settle_amt;
+
+            // p($parent_total_settle_amount);
+
+            $parentBettingArr = array(
+                'user_id' => $user->user_id,
+                'user_name' => $parent_user_name,
+                'name' => $parent_name,
+                'amount' => 0,
+                'master_comission' => 0,
+                'partnership' => 0,
+                'type' => 'Parent',
+
+                'parent_comission' => 0,
+            );
+
+            // p($parentBettingArr);
+
+            $masters =  $this->User_model->getInnerUserById($user_id);
+
+
+
+
+            if (!empty($masters)) {
+                foreach ($masters as $master) {
+                    $chid_partnership_pr = $master->partnership;
+                    // $child_commission_pr = $master->master_commision;
+                    $child_commission_pr = 0;
+
+
+                    $ledger_plus_settle_amt = $this->Ledger_model->get_total_plus_settlement(array('user_id' => $master->user_id, 'role' => 'Parent'))->settlement_amount;
+
+
+                    $ledger_minus_settle_amt = $this->Ledger_model->get_total_minus_settlement(array('user_id' => $master->user_id, 'role' => 'Parent'))->settlement_amount;
+
+                    $total_settle_amount = $ledger_plus_settle_amt - $ledger_minus_settle_amt;
+
+
+                    $users =  $this->User_model->getInnerUserById($master->user_id);
+                    $bettingArr = array(
+                        'user_id' => $master->user_id,
+                        'user_name' => $master->user_name,
+                        'name' => $master->name,
+                        'amount' => 0,
+                        'master_comission' => 0,
+                        'partnership' => 0,
+                        'type' => 'User',
+                        'parent_comission' => 0,
+                    );
+
+
+
+                    if (!empty($users)) {
+                        foreach ($users as $user) {
+
+                            $bettings = (array) $this->Report_model->get_settled_accont_by_users($user->user_id);
+
+                            if (!empty($bettings)) {
+
+                                foreach ($bettings as $betting) {
+                                    if ($betting['bet_result'] == 'Minus') {
+                                        $child_loss = ($betting['loss']) * ($chid_partnership_pr / 100);
+
+
+                                        $profit_amt = $betting['loss']  - $child_loss;
+
+                                        // p($profit_amt);
+                                        $bettingArr['amount'] -= $profit_amt;
+
+
+                                        $parent_loss =  $betting['loss'] - ($betting['loss'] * ($partnership / 100));
+
+
+                                        $parentBettingArr["amount"] -= $parent_loss;
+                                    } else if ($betting['bet_result'] == 'Plus') {
+
+                                        $child_comission  =  0;
+                                        $superior_comission  =  0;
+                                        $parent_comission  =  0;
+
+
+                                        $child_profit = ($betting['profit'] - $child_comission) * ($chid_partnership_pr / 100);
+
+
+
+                                        $profit_amt = $betting['profit'] - $child_comission - $child_profit;
+
+
+
+                                        $bettingArr['amount'] += $profit_amt;
+
+                                        $parent_profit =  $betting['profit'] - ($betting['profit'] * ($partnership / 100));
+                                        $parentBettingArr["amount"] += $parent_profit;
+
+                                        $bettingArr['master_comission'] += $superior_comission;
+                                        $bettingArr['parent_comission'] += $parent_comission;
+                                    }
+
+                                    $bettingArr['partnership']  =  $partnership;
+                                }
+                            }
+                        }
+                    }
+
+
+                    if ($bettingArr['amount'] < 0) {
+                        $bettingArr['amount'] +=   abs($total_settle_amount);
+                    } else {
+                        $bettingArr['amount'] -=  abs($total_settle_amount);
+                    }
+
+                    $bettingArr['amount'] = round($bettingArr['amount']);
+                    if ($bettingArr['amount'] < 0) {
+                        array_push($minusArr, $bettingArr);
+                    } else {
+                        array_push($plusArr, $bettingArr);
+                    }
+                }
+
+                if ($parentBettingArr['amount'] < 0) {
+
+                    $parentBettingArr['amount'] +=   $parent_total_settle_amount;
+                } else {
+                    $parentBettingArr['amount'] -=  $parent_total_settle_amount;
+                }
+
+
+                $parentBettingArr['amount'] = round($parentBettingArr['amount']);
+                if ($parentBettingArr['amount'] > 0) {
+                    array_push($minusArr, $parentBettingArr);
+                } else if ($parentBettingArr['amount'] < 0) {
+                    array_push($plusArr, $parentBettingArr);
+                }
+            }
+
+            // p($plusArr);
+            // exit;
+        } else if ($user_type === 'Hyper Super Master') {
+
+            $hyper_super_master_partnership = $user->partnership;
+            $master_id = $user->master_id;
+
+            $hyper_super_master_comission_pr = $user->master_commision;
+
+            $master_user =  $this->User_model->getUserById($master_id);
+            $parent_commision_pr = $master_user->master_commision;
+            $parent_name = $master_user->name;
+            $parent_user_name = $master_user->user_name;
+
+
+            $ledger_plus_settle_amt = $this->Ledger_model->get_total_plus_settlement(array('user_id' => $user_id, 'role' => 'Parent'))->settlement_amount;
+
+
+            $ledger_minus_settle_amt = $this->Ledger_model->get_total_minus_settlement(array('user_id' => $user_id, 'role' => 'Parent'))->settlement_amount;
+            $parent_total_settle_amount = $ledger_plus_settle_amt - $ledger_minus_settle_amt;
+
+            $parentBettingArr = array(
+                'user_id' => $user->user_id,
+                'user_name' => $parent_user_name,
+                'name' => $parent_name,
+                'amount' => 0,
+                'master_comission' => 0,
+                'partnership' => 0,
+                'type' => 'Parent',
+
+                'parent_comission' => 0,
+            );
+
+
+            $super_masters =  $this->User_model->getInnerUserById($user_id);
+
+
+            if (!empty($super_masters)) {
+                foreach ($super_masters as $super_master) {
+
+
+                    $smaster_partnership_pr = $super_master->partnership;
+                    $super_master_commission_pr = $super_master->master_commision;
+
+
+                    $ledger_plus_settle_amt = $this->Ledger_model->get_total_plus_settlement(array('user_id' => $super_master->user_id, 'role' => 'Parent'))->settlement_amount;
+
+                    $ledger_minus_settle_amt = $this->Ledger_model->get_total_minus_settlement(array('user_id' => $super_master->user_id, 'role' => 'Parent'))->settlement_amount;
+
+                    $total_settle_amount = $ledger_plus_settle_amt - $ledger_minus_settle_amt;
+
+                    //                    $total_settle_amount = 0;
+                    // p($total_settle_amount);
+                    $bettingArr = array(
+                        'user_id' => $super_master->user_id,
+                        'user_name' => $super_master->user_name,
+                        'name' => $super_master->name,
+                        'amount' => 0,
+                        'master_comission' => 0,
+                        'partnership' => 0,
+                        'type' => 'User',
+                        'parent_comission' => 0,
+                    );
+
+
+                    $masters =  $this->User_model->getInnerUserById($super_master->user_id);
+
+                    if (!empty($masters)) {
+                        foreach ($masters as $master) {
+                            $master_commission_pr = $master->master_commision;
+                            $master_partnership_pr = $master->partnership;
+
+
+                            $users =  $this->User_model->getInnerUserById($master->user_id);
+                            if (!empty($users)) {
+                                foreach ($users as $user) {
+
+                                    $bettings = (array) $this->Report_model->get_settled_accont_by_users($user->user_id);
+
+                                    foreach ($bettings as $betting) {
+                                        if ($betting['bet_result'] == 'Minus') {
+
+
+                                            $master_loss = ($betting['loss']) * ($master_partnership_pr / 100);
+
+
+                                            $profit_amt = $betting['loss'] - $master_loss;
+
+
+                                            $smaster_loss = ($betting['loss']) * ($smaster_partnership_pr / 100);
+                                            $profit_amt = $betting['loss'] - $smaster_loss;
+
+
+
+                                            $bettingArr['amount'] -= $profit_amt;
+
+                                            $parent_loss = $betting['loss'] - ($betting['loss'] * ($hyper_super_master_partnership / 100));
+
+
+                                            $parentBettingArr["amount"] -= $parent_loss;
+                                        } else if ($betting['bet_result'] == 'Plus') {
+
+                                            $master_profit = ($betting['profit']) * ($master_partnership_pr / 100);
+
+                                            $profit_amt = $betting['profit'];
+
+                                            $smaster_profit = ($profit_amt) * ($smaster_partnership_pr / 100);
+
+
+
+                                            $profit_amt =  $betting['profit'] - $smaster_profit;
+
+                                            $bettingArr['amount'] += $profit_amt;
+                                            $parent_loss = $betting['profit'] - ($betting['profit'] * ($hyper_super_master_partnership / 100));
+                                            $parentBettingArr["amount"] += $parent_loss;
+
+                                            $bettingArr['master_comission'] += 0;
+                                            $bettingArr['parent_comission'] += 0;
+                                        }
+                                        $bettingArr['partnership']  =  $hyper_super_master_partnership;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
+                    if ($bettingArr['amount'] < 0) {
+                        $bettingArr['amount'] +=   abs($total_settle_amount);
+                    } else {
+                        $bettingArr['amount'] -=  abs($total_settle_amount);
+                    }
+
+                    $bettingArr['amount'] =   round($bettingArr['amount']);
+
+                    if ($bettingArr['amount'] < 0) {
+                        array_push($minusArr, $bettingArr);
+                    } else {
+                        array_push($plusArr, $bettingArr);
+                    }
+                }
+
+                if ($parentBettingArr['amount'] < 0) {
+
+                    $parentBettingArr['amount'] +=   $parent_total_settle_amount;
+                } else {
+                    $parentBettingArr['amount'] -=  $parent_total_settle_amount;
+                }
+
+                $parentBettingArr['amount'] =   round($parentBettingArr['amount']);
+
+
+                if ($parentBettingArr['amount'] > 0) {
+                    array_push($minusArr, $parentBettingArr);
+                } else if ($parentBettingArr['amount'] < 0) {
+                    array_push($plusArr, $parentBettingArr);
+                }
+            }
+            // exit;
+        } else if ($user_type === 'Admin') {
+
+            $admin_partnership = $user->partnership;
+            $master_id = $user->master_id;
+
+            $hyper_super_master_comission_pr = $user->master_commision;
+
+            $master_user =  $this->User_model->getUserById($master_id);
+            $parent_commision_pr = $master_user->master_commision;
+            $parent_name = $master_user->name;
+            $parent_user_name = $master_user->user_name;
+
+
+
+            $ledger_plus_settle_amt = $this->Ledger_model->get_total_plus_settlement(array('user_id' => $user_id, 'role' => 'Parent'))->settlement_amount;
+
+
+            $ledger_minus_settle_amt = $this->Ledger_model->get_total_minus_settlement(array('user_id' => $user_id, 'role' => 'Parent'))->settlement_amount;
+            $parent_total_settle_amount = $ledger_plus_settle_amt - $ledger_minus_settle_amt;
+            $parentBettingArr = array(
+                'user_id' => $user->user_id,
+                'user_name' => $parent_user_name,
+                'name' => $parent_name,
+                'amount' => 0,
+                'master_comission' => 0,
+                'partnership' => 0,
+                'type' => 'Parent',
+
+                'parent_comission' => 0,
+            );
+
+            $hyper_super_master_users =  $this->User_model->getInnerUserById($user_id);
+
+
+            if (!empty($hyper_super_master_users)) {
+                foreach ($hyper_super_master_users as $hyper_super_master_user) {
+
+
+
+
+                    $chid_partnership_pr = $hyper_super_master_user->partnership;
+                    $hmaster_partnership_pr = $hyper_super_master_user->partnership;
+
+
+                    $ledger_plus_settle_amt = $this->Ledger_model->get_total_plus_settlement(array('user_id' => $hyper_super_master_user->user_id, 'role' => 'Parent'))->settlement_amount;
+
+
+
+                    $ledger_minus_settle_amt = $this->Ledger_model->get_total_minus_settlement(array('user_id' => $hyper_super_master_user->user_id, 'role' => 'Parent'))->settlement_amount;
+
+
+                    $total_settle_amount = $ledger_plus_settle_amt - $ledger_minus_settle_amt;
+
+                    $bettingArr = array(
+                        'user_id' => $hyper_super_master_user->user_id,
+                        'user_name' => $hyper_super_master_user->user_name,
+                        'name' => $hyper_super_master_user->name,
+                        'amount' => 0,
+                        'master_comission' => 0,
+                        'partnership' => 0,
+                        'type' => 'User',
+                        'parent_comission' => 0,
+                    );
+
+                    // p($bettingArr);
+
+
+
+                    $super_masters =  $this->User_model->getInnerUserById($hyper_super_master_user->user_id);
+
+                    if (!empty($super_masters)) {
+                        foreach ($super_masters as $super_master) {
+                            $smaster_partnership_pr = $super_master->partnership;
+
+
+
+                            $masters =  $this->User_model->getInnerUserById($super_master->user_id);
+
+                            if (!empty($masters)) {
+                                foreach ($masters as $master) {
+
+                                    $master_partnership_pr = $master->partnership;
+                                    $users =  $this->User_model->getInnerUserById($master->user_id);
+                                    if (!empty($users)) {
+                                        foreach ($users as $user) {
+
+                                            $bettings = (array) $this->Report_model->get_settled_accont_by_users($user->user_id);
+
+                                            if (!empty($bettings)) {
+
+                                                foreach ($bettings as $betting) {
+                                                    if ($betting['bet_result'] == 'Minus') {
+                                                        $master_loss = ($betting['loss']) * ($master_partnership_pr / 100);
+
+
+
+                                                        $profit_amt = $betting['loss'] - $master_loss;
+
+
+
+
+                                                        $hmaster_loss = ($betting['loss']) * ($hmaster_partnership_pr / 100);
+
+
+                                                        $profit_amt = $betting['loss'] - $hmaster_loss;
+
+
+                                                        $bettingArr['amount'] -= $profit_amt;
+
+
+                                                        $parent_loss = $betting['loss'] - ($betting['loss'] * ($admin_partnership / 100));
+                                                        $parentBettingArr["amount"] -= $parent_loss;
+                                                    } else if ($betting['bet_result'] == 'Plus') {
+
+                                                        $master_profit = ($betting['profit']) * ($master_partnership_pr / 100);
+
+                                                        $profit_amt = $betting['profit'] - $master_profit;
+
+                                                        $smaster_profit = ($profit_amt) * ($smaster_partnership_pr / 100);
+                                                        $profit_amt = $profit_amt - $smaster_profit;
+
+                                                        $hmaster_profit = ($betting['profit']) * ($hmaster_partnership_pr / 100);
+                                                        $profit_amt = $betting['profit'] - $hmaster_profit;
+
+                                                        $bettingArr['amount'] += $profit_amt;
+
+                                                        $parent_loss =  $betting['profit'] - ($betting['profit'] * ($admin_partnership / 100));
+                                                        $parentBettingArr["amount"] += $parent_loss;
+
+                                                        $bettingArr['master_comission'] += 0;
+                                                        $bettingArr['parent_comission'] += 0;
+                                                    }
+                                                    $bettingArr['partnership']  =  $admin_partnership;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
+                    // if ($bettingArr['amount'] < 0) {
+                    //     $bettingArr['amount'] =  number_format($bettingArr['amount'], 2) + number_format($total_settle_amount, 2);
+                    // } else {
+                    //     $bettingArr['amount'] =  number_format($bettingArr['amount'], 2) - number_format($total_settle_amount, 2);
+                    // }
+                    // $bettingArr['amount'] =   round($bettingArr['amount']);
+
+                    // if ($bettingArr['amount'] < 0) {
+                    //     array_push($minusArr, $bettingArr);
+                    // }  else {
+                    //     array_push($plusArr, $bettingArr);
+                    // }
+                    if ($bettingArr['amount'] < 0) {
+                        $bettingArr['amount'] +=   abs($total_settle_amount);
+                    } else {
+                        $bettingArr['amount'] -=  abs($total_settle_amount);
+                    }
+
+                    $bettingArr['amount'] =   round($bettingArr['amount']);
+
+                    if ($bettingArr['amount'] < 0) {
+                        array_push($minusArr, $bettingArr);
+                    } else {
+                        array_push($plusArr, $bettingArr);
+                    }
+                }
+
+                // if ($parentBettingArr['amount'] < 0) {
+
+                //     $parentBettingArr['amount'] = round($parentBettingArr['amount']) +   $parent_total_settle_amount;
+                // } else {
+                //     $parentBettingArr['amount'] =   round($parentBettingArr['amount']) - $parent_total_settle_amount;
+                // }
+
+                // $parentBettingArr['amount'] =   round($parentBettingArr['amount']);
+
+                // if ($parentBettingArr['amount'] > 0) {
+                //     array_push($minusArr, $parentBettingArr);
+                // } else if ($parentBettingArr['amount'] < 0) {
+                //     array_push($plusArr, $parentBettingArr);
+                // }
+
+                if ($parentBettingArr['amount'] < 0) {
+
+                    $parentBettingArr['amount'] +=   $parent_total_settle_amount;
+                } else {
+                    $parentBettingArr['amount'] -=  $parent_total_settle_amount;
+                }
+
+                $parentBettingArr['amount'] =   round($parentBettingArr['amount']);
+
+
+                if ($parentBettingArr['amount'] > 0) {
+                    array_push($minusArr, $parentBettingArr);
+                } else if ($parentBettingArr['amount'] < 0) {
+                    array_push($plusArr, $parentBettingArr);
+                }
+            }
+        } else if (get_user_type() === 'Super Admin') {
+
+            $user_id = get_user_id();
+            $user =  $this->User_model->getUserById($user_id);
+            $hyper_super_master_partnership = $user->partnership;
+            $master_id = $user->master_id;
+
+            $hyper_super_master_comission_pr = $user->master_commision;
+
+            $master_user =  $this->User_model->getUserById($master_id);
+            $parent_commision_pr = 0;
+            $parent_name = '';
+
+
+
+            $admin_users =  $this->User_model->getInnerUserById($user_id);
+
+
+            if (!empty($admin_users)) {
+                foreach ($admin_users as $admin_user) {
+                    // if ($admin_user->user_id != 6320)
+                    // continue;
+                    $chid_partnership_pr = $admin_user->partnership;
+                    $super_master_commission_pr = $admin_user->master_commision;
+                    $admin_partnership_pr =  $admin_user->partnership;
+
+                    $ledger_plus_settle_amt = $this->Ledger_model->get_total_plus_settlement(array('user_id' => $admin_user->user_id, 'role' => 'Parent'))->settlement_amount;
+
+                    $ledger_minus_settle_amt = $this->Ledger_model->get_total_minus_settlement(array('user_id' => $admin_user->user_id, 'role' => 'Parent'))->settlement_amount;
+
+                    $total_settle_amount = $ledger_plus_settle_amt - $ledger_minus_settle_amt;
+                    $bettingArr = array(
+                        'user_id' => $admin_user->user_id,
+                        'user_name' => $admin_user->user_name,
+                        'name' => $admin_user->name,
+                        'amount' => 0,
+                        'master_comission' => 0,
+                        'partnership' => 0,
+                        'type' => 'User',
+
+                        'parent_comission' => 0,
+                    );
+
+
+                    $hyper_super_master_users =  $this->User_model->getInnerUserById($admin_user->user_id);
+
+                    if (!empty($hyper_super_master_users)) {
+                        foreach ($hyper_super_master_users as $hyper_super_master_user) {
+                            $hmaster_partnership_pr =  $hyper_super_master_user->partnership;
+
+
+
+                            $super_masters =  $this->User_model->getInnerUserById($hyper_super_master_user->user_id);
+
+                            if (!empty($super_masters)) {
+                                foreach ($super_masters as $super_master) {
+
+                                    $smaster_partnership_pr =  $super_master->partnership;
+
+
+
+                                    $masters =  $this->User_model->getInnerUserById($super_master->user_id);
+
+                                    if (!empty($masters)) {
+                                        foreach ($masters as $master) {
+                                            $master_commission_pr = $master->master_commision;
+                                            $master_partnership_pr =  $master->partnership;
+                                            $users =  $this->User_model->getInnerUserById($master->user_id);
+                                            if (!empty($users)) {
+                                                foreach ($users as $user) {
+
+                                                    $bettings = (array) $this->Report_model->get_settled_accont_by_users($user->user_id);
+
+
+                                                    if (!empty($bettings)) {
+
+                                                        foreach ($bettings as $betting) {
+                                                            if ($betting['bet_result'] == 'Minus') {
+                                                                $master_loss = ($betting['loss']) * ($master_partnership_pr / 100);
+
+
+
+
+                                                                $profit_amt = $betting['loss'] - $master_loss;
+                                                                $smaster_loss = ($profit_amt) * ($smaster_partnership_pr / 100);
+                                                                $profit_amt = $profit_amt - $smaster_loss;
+
+
+                                                                $hmaster_loss = ($profit_amt) * ($hmaster_partnership_pr / 100);
+                                                                $profit_amt = $profit_amt - $hmaster_loss;
+
+
+                                                                $admin_loss = ($betting['loss']) * ($admin_partnership_pr / 100);
+                                                                $profit_amt = $betting['loss'] - $admin_loss;
+
+
+
+                                                                $bettingArr['amount'] -= $profit_amt;
+                                                            } else if ($betting['bet_result'] == 'Plus') {
+
+                                                                $master_profit = ($betting['profit']) * ($master_partnership_pr / 100);
+
+                                                                $profit_amt = $betting['profit'] - $master_profit;
+
+                                                                $smaster_profit = ($profit_amt) * ($smaster_partnership_pr / 100);
+                                                                $profit_amt = $profit_amt - $smaster_profit;
+                                                                //  p($profit_amt);
+
+                                                                $hmaster_profit = ($profit_amt) * ($hmaster_partnership_pr / 100);
+                                                                $profit_amt = $profit_amt - $hmaster_profit;
+
+                                                                $admin_profit = ($betting['profit']) * ($admin_partnership_pr / 100);
+                                                                $profit_amt = $betting['profit'] - $admin_profit;
+
+
+
+                                                                $bettingArr['amount'] += $profit_amt;
+                                                                $bettingArr['master_comission'] += 0;
+                                                                $bettingArr['parent_comission'] += 0;
+                                                            }
+                                                            $bettingArr['partnership']  =  $hyper_super_master_partnership;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
+                    // p($bettingArr['amount'])
+                    if ($bettingArr['amount'] < 0) {
+                        $bettingArr['amount'] =  $bettingArr['amount'] + $total_settle_amount;
+                    } else {
+                        $bettingArr['amount'] =  $bettingArr['amount'] - $total_settle_amount;
+                    }
+
+
+                    $bettingArr['amount'] = round($bettingArr['amount']);
+                    if ($bettingArr['amount'] < 0) {
+                        array_push($minusArr, $bettingArr);
+                    } else {
+                        array_push($plusArr, $bettingArr);
+                    }
+                }
+            }
+        }
+
+
+        $dataArray['minus_acc'] = $minusArr;
+        $dataArray['plus_acc'] = $plusArr;
+        $dataArray['parent_name'] = $parent_name;
+        $dataArray['user_type'] = $user_type;
+        $dataArray['user_id'] = $user_id;
+        $dataArray['user_name'] = $user_name;
+
+
+        log_message("MY_INFO", 'OLD Chip Summary Load END');
+        $this->load->view('chip-summary', $dataArray);
+    }
 
 
 
@@ -3664,6 +5226,789 @@ class   Reports extends My_Controller
 
 
 
+    public function profitLossDetailTest($event_id = null, $user_id = null)
+    {
+        $this->load->library('Datatable');
+        $message = $this->session->flashdata('message');
+
+        $table_config = array(
+            'source' => site_url('admin/User/listUserdata'),
+            'datatable_class' => $this->config->config["datatable_class"],
+        );
+
+        $dataArray = array(
+            'table' => $this->datatable->make_table($this->_user_listing_headers, $table_config),
+            'message' => $message
+        );
+
+
+
+        $dataArray['local_css'] = array(
+            'dataTables.bootstrap4',
+            'responsive.bootstrap4'
+        );
+
+        $dataArray['local_js'] = array(
+            'dataTables.min',
+            'jquery.dataTables.bootstrap',
+            'dataTables.fnFilterOnReturn',
+            'dataTables.bootstrap4',
+            'dataTables.responsive',
+            'responsive.bootstrap4'
+        );
+
+
+        if (!$user_id) {
+            $user_id =  $_SESSION['my_userdata']['user_id'];
+        }
+        $dataArray['user_id']  = $user_id;
+        // $dataArray['sportid']  = isset($sportid;
+        // if ($sportid != 0) {
+        //     $dataArray['sportid']  = 5;
+        // }
+        $dataArray['toDate'] = date('Y-m-d');
+        $dataArray['fromDate'] = date('Y-m-d');
+
+        $search = '';
+        $dataArray = array(
+            'search_p_l' => $search,
+
+            // 'sportid' => $sportid,
+
+            'user_id' => $user_id
+        );
+
+        if (!empty($fdate) && !empty($tdate)) {
+            $dataArray['toDate'] = date('Y-m-d', strtotime($tdate));
+            $dataArray['fromDate'] = date('Y-m-d', strtotime($fdate));
+        }
+
+
+        $user_detail = $this->User_model->getUserById($user_id);
+
+
+
+        $user_type = $user_detail->user_type;
+
+
+
+
+        if ($user_type == 'Master') {
+
+            $dataArray['pstatus'] = 'Settled';
+
+            $reports = array();
+
+            $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
+
+            // $getCommssion = $this->Ledger_model->get_commission_amt_by_event_id(array(
+            //     'user_id' => $user_id,
+            //     'match_id' => $report['match_id']
+            // ));
+
+            if (!empty($reportsData)) {
+                foreach ($reportsData as $report) {
+
+                    if ($report['match_id'] != $event_id) {
+                        continue;
+                    }
+
+
+
+                    $marketId = $report['market_id'];
+                    $betting_type = strtolower($report['betting_type']);
+                    $market_id = str_replace('.', '_', $marketId);
+
+                    if (isset($reports[$betting_type])) {
+                        if ($betting_type == 'fancy') {
+                            $market_name = 'Fancy';
+                        } else {
+                            $market_name = $report['market_name'];
+                        }
+
+                        $p_l = 0;
+
+                        if ($report['bet_result'] == 'Minus') {
+
+                            $p_l =  $reports[$betting_type]['p_l'] + $report['profit'];
+                        } else if ($report['bet_result'] == 'Plus') {
+
+                            // p($reports[$betting_type]['p_l'] +  $report['loss'] * -1);
+                            $p_l = $reports[$betting_type]['p_l'] +  $report['loss'] * -1;
+                        }
+
+
+
+                        $reports[$betting_type]["match_id"] = $report['match_id'];
+                        $reports[$betting_type]["event_name"] = $report['event_name'];
+                        $reports[$betting_type]["market_name"] = $report['market_name'];
+                        $reports[$betting_type]["market_id"] = $report['marketId'];
+                        $reports[$betting_type]["match_id"] = $report['match_id'];
+                        $reports[$betting_type]["p_l"] = $p_l;
+                    } else {
+                        if ($betting_type == 'fancy') {
+                            $market_name = 'Fancy';
+                        } else {
+                            $market_name = $report['market_name'];
+                        }
+
+
+                        $p_l = 0;
+
+                        if ($report['bet_result'] == 'Plus') {
+                            $p_l = $report['loss']  * -1;
+                        } else if ($report['bet_result'] == 'Minus') {
+
+
+                            $p_l = $report['profit'];
+                        }
+
+
+                        $grand_total_mo_comm = 0;
+                        $grand_total_bm_comm = 0;
+
+                        $grand_total_fancy_comm = 0;
+
+
+                        $getCommissionUsers = $this->Betting_model->get_betting_events_user(array(
+                            'user_id' => $user_id,
+                            'match_id' => $report['match_id']
+                        ));
+
+
+
+
+
+
+                        if (!empty($getCommissionUsers)) {
+                            foreach ($getCommissionUsers as $CommissionUser) {
+                                $dataArray2 = array(
+                                    'user_id' => $CommissionUser->client_user_id,
+                                    'match_id' => $report['match_id']
+                                );
+
+                                //***************MATCH ODDS COMM */
+                                $matchOddsbettings = $this->Betting_model->get_match_odds_bettings_by_event_id($dataArray2);
+
+                                $total_mo_profit = 0;
+                                $total_mo_loss = 0;
+                                $total_mo_amt = 0;
+                                $user_mo_comm = 0;
+                                $master_mo_comm = 0;
+                                if (!empty($matchOddsbettings)) {
+                                    foreach ($matchOddsbettings as $matchOddsbetting) {
+                                        $user_mo_comm = $matchOddsbetting['master_commission'];
+                                        if ($matchOddsbetting['bet_result'] == 'Plus') {
+                                            $total_mo_profit += $matchOddsbetting['profit'];
+                                        } else if ($matchOddsbetting['bet_result'] == 'Minus') {
+                                            $total_mo_loss += $matchOddsbetting['loss'];
+                                        }
+                                    }
+                                }
+
+                                $master_mo_comm = $CommissionUser->master_commission -  $user_mo_comm;
+
+                                $total_mo_amt = $total_mo_profit - $total_mo_loss;
+
+                                if ($total_mo_amt < 0) {
+
+                                    $commission_amt = (abs($total_mo_amt) * $CommissionUser->master_commission) / 100;
+                                }
+
+                                $mo_commission_amt = (abs($total_mo_amt) * $master_mo_comm) / 100;
+
+                                $grand_total_mo_comm += $mo_commission_amt;
+
+                                //***************MATCH ODDS COMM */
+
+
+                                //***************BOOKMAKER COMM */
+                                $bookMakerbettings = $this->Betting_model->get_bookmaker_bettings_by_event_id($dataArray2);
+
+
+                                $total_bm_profit = 0;
+                                $total_bm_loss = 0;
+                                $total_bm_amt = 0;
+                                $user_bm_comm = 0;
+                                $master_bm_comm = 0;
+                                if (!empty($bookMakerbettings)) {
+                                    foreach ($bookMakerbettings as $bookMakerbetting) {
+                                        $user_bm_comm = $bookMakerbetting['master_commission'];
+                                        if ($bookMakerbetting['bet_result'] == 'Plus') {
+                                            $total_bm_profit += $bookMakerbetting['profit'];
+                                        } else if ($bookMakerbetting['bet_result'] == 'Minus') {
+                                            $total_bm_loss += $bookMakerbetting['loss'];
+                                        }
+                                    }
+                                }
+
+                                $master_bm_comm = $CommissionUser->master_commission -  $user_bm_comm;
+
+                                $total_bm_amt = $total_bm_profit - $total_bm_loss;
+
+                                if ($total_bm_amt < 0) {
+
+
+
+                                    $bm_commission_amt = (abs($total_bm_amt) * $master_bm_comm) / 100;
+                                }
+
+
+                                if ($CommissionUser->market_name == 'Bookmaker') {
+                                    $grand_total_bm_comm += $bm_commission_amt;
+                                }
+                                //***************BOOKMAKER COMM */
+
+                                // p($bm_commission_amt);
+                                //***************FANCY COMM */
+                                $fancybettings = $this->Betting_model->get_fancy_bettings_by_event_id($dataArray2);
+
+                                $total_fancy_profit = 0;
+                                $total_fancy_loss = 0;
+                                $total_fancy_amt = 0;
+                                $user_fancy_comm = 0;
+                                $master_fancy_comm = 0;
+                                if (!empty($fancybettings)) {
+                                    foreach ($fancybettings as $fancybetting) {
+
+                                        $user_fancy_comm = $fancybetting['sessional_commission'];
+                                        if ($fancybetting['bet_result'] == 'Plus') {
+                                            $total_fancy_profit += $fancybetting['profit'];
+                                        } else if ($fancybetting['bet_result'] == 'Minus') {
+                                            $total_fancy_loss += $fancybetting['loss'];
+                                        }
+                                    }
+                                }
+
+                                $master_fancy_comm = $CommissionUser->sessional_commission -  $user_fancy_comm;
+
+                                $total_fancy_amt = $total_fancy_profit - $total_fancy_loss;
+
+                                $total_fancy_stake = 0;
+
+                                if ($market_name = 'Fancy') {
+
+                                    $total_fancy_stake = $this->Betting_model->count_total_session_stake(
+                                        $CommissionUser->client_user_id,
+                                        $report['match_id']
+                                    );
+                                }
+
+
+                                if ($total_fancy_stake > 0) {
+
+
+
+                                    $fancy_commission_amt = (abs($total_fancy_stake) * $CommissionUser->sessional_commission) / 100;
+
+                                    // p($master_fancy_comm,0);
+                                }
+
+                                if ($CommissionUser->betting_type == 'Fancy') {
+                                    $grand_total_fancy_comm += $fancy_commission_amt;
+                                }
+
+                                //***************FANCY COMM */
+
+
+                            }
+                        }
+
+
+
+                        if ($betting_type == 'fancy') {
+                            $commission = $grand_total_fancy_comm;
+                            $p_l -= $grand_total_fancy_comm;
+                        } else {
+                            $commission = $grand_total_mo_comm + $grand_total_bm_comm;
+                            $p_l -= $grand_total_mo_comm;
+                            $p_l -= $grand_total_bm_comm;
+                        }
+
+                        $reports[$betting_type] = array(
+                            'match_id' => $report['match_id'],
+                            'event_name' => $report['event_name'],
+                            'market_name' => $market_name,
+                            'market_id' => $marketId,
+                            'p_l' => $p_l,
+                            'comm_pl' => $commission,
+                            'created_at' => $report['created_at']
+                        );
+
+
+
+                        // p($reports);
+
+
+                        // p($reports, 0);
+
+
+                        // $comm_pl = 0;
+                        // $sessional_commission = 2;
+
+                        // $getCommssion = $this->Ledger_model->get_commission_amt_by_event_id(array(
+                        //     'user_id' => $user_id,
+                        //     'match_id' => $report['match_id']
+                        // ));
+
+
+                        ///COMMENT ON 23 AUG
+                        // if ($betting_type == 'fancy') {
+                        //     $session_comm_amt = $this->Betting_model->count_total_master_session_comm($user_id, $report['match_id']);
+
+                        //     $tmp_comm_value =  $session_comm_amt;
+
+
+                        //     // p($tmp_comm_value);
+                        // } else {
+
+                        //     $match_comm_amt = $this->Betting_model->count_total_master_match_comm($user_id, $report['match_id']);
+                        //     $tmp_comm_value =  $match_comm_amt;
+                        // }
+
+
+                        // // p($tmp_comm_value);
+                        // $comm_pl =  $reports[$betting_type]['comm_pl'] + $tmp_comm_value;
+                        // if ($betting_type == 'fancy') {
+                        // }
+                        // $reports[$betting_type]['comm_pl'] =  $comm_pl;
+                        //COMMENT ON 23 UAG
+                    }
+                }
+            }
+
+            // p($reports);
+        } else if ($user_type == 'Super Master' || $user_type == 'Hyper Super Master' || $user_type == 'Admin' || $user_type == 'Super Admin') {
+
+            $dataArray['pstatus'] = 'Settled';
+
+            $reports = array();
+
+            $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
+            // $getCommssion = $this->Ledger_model->get_commission_amt_by_event_id(array(
+            //     'user_id' => $user_id,
+            //     'match_id' => $report['match_id']
+            // ));
+
+            if (!empty($reportsData)) {
+                foreach ($reportsData as $report) {
+
+                    if ($report['match_id'] != $event_id) {
+                        continue;
+                    }
+
+
+
+                    $marketId = $report['market_id'];
+                    $betting_type = strtolower($report['betting_type']);
+                    $market_id = str_replace('.', '_', $marketId);
+
+                    if (isset($reports[$betting_type])) {
+                        if ($betting_type == 'fancy') {
+                            $market_name = 'Fancy';
+                        } else {
+                            $market_name = $report['market_name'];
+                        }
+
+                        $p_l = 0;
+
+                        if ($report['bet_result'] == 'Minus') {
+
+                            $p_l =  $reports[$betting_type]['p_l'] + $report['profit'];
+                        } else if ($report['bet_result'] == 'Plus') {
+
+                            // p($reports[$betting_type]['p_l'] +  $report['loss'] * -1);
+                            $p_l = $reports[$betting_type]['p_l'] +  $report['loss'] * -1;
+                        }
+
+
+
+                        $reports[$betting_type]["match_id"] = $report['match_id'];
+                        $reports[$betting_type]["event_name"] = $report['event_name'];
+                        $reports[$betting_type]["market_name"] = $report['market_name'];
+                        $reports[$betting_type]["market_id"] = $report['marketId'];
+                        $reports[$betting_type]["match_id"] = $report['match_id'];
+                        $reports[$betting_type]["p_l"] = $p_l;
+
+
+
+                        // = array(
+                        //     'match_id' => $report['match_id'],
+                        //     'event_name' => $report['event_name'],
+                        //     'market_name' => $market_name,
+                        //     'market_id' => $marketId,
+
+                        //     'p_l' => $p_l,
+                        //     'commission' => 0,
+                        //     'created_at' => $report['created_at']
+                        // );
+
+                        // if ($betting_type == 'fancy') {
+                        //     $session_comm_amt = $this->Betting_model->count_total_master_session_comm($user_id,$report['match_id']);
+
+                        //     $tmp_comm_value =  $session_comm_amt;
+
+
+                        //     // p($tmp_comm_value);
+                        //  }
+                        // $comm_pl =  $reports[$betting_type]['comm_pl'] + $tmp_comm_value;
+                        // if ($betting_type == 'fancy') {
+                        //  }
+                        // $reports[$betting_type]['comm_pl'] =  $comm_pl;
+                    } else {
+                        if ($betting_type == 'fancy') {
+                            $market_name = 'Fancy';
+                        } else {
+                            $market_name = $report['market_name'];
+                        }
+
+
+                        $p_l = 0;
+
+                        if ($report['bet_result'] == 'Plus') {
+                            $p_l = $report['loss']  * -1;
+                        } else if ($report['bet_result'] == 'Minus') {
+
+
+                            $p_l = $report['profit'];
+                        }
+
+
+
+                        $grand_total_mo_comm = 0;
+                        $grand_total_bm_comm = 0;
+
+                        $grand_total_fancy_comm = 0;
+
+
+                        $getCommissionUsers = $this->Betting_model->get_betting_events_user(array(
+                            'user_id' => $user_id,
+                            'match_id' => $report['match_id']
+                        ));
+
+
+
+                        if (!empty($getCommissionUsers)) {
+                            foreach ($getCommissionUsers as $CommissionUser) {
+
+                                $bet_user_type = '';
+
+                                if ($user_type == 'Super Master') {
+                                    $bet_user_type = 'Master';
+                                } else if ($user_type == 'Hyper Super Master') {
+                                    $bet_user_type = 'Super Master';
+                                } else if ($user_type == 'Admin') {
+                                    $bet_user_type = 'Hyper Super Master';
+                                } else if ($user_type == 'Super Admin') {
+                                    $bet_user_type = 'Admin';
+                                }
+
+                                $dataArray2 = array(
+                                    'user_id' => $CommissionUser->client_user_id,
+                                    'match_id' => $report['match_id'],
+                                    'user_type' => $bet_user_type
+                                );
+
+                                //***************MATCH ODDS COMM */
+                                $matchOddsbettings = $this->Betting_model->get_masters_wise_match_odds_bettings_by_event_id($dataArray2);
+
+
+                                $total_mo_profit = 0;
+                                $total_mo_loss = 0;
+                                $total_mo_amt = 0;
+                                $user_mo_comm = 0;
+                                $master_mo_comm = 0;
+                                if (!empty($matchOddsbettings)) {
+                                    foreach ($matchOddsbettings as $matchOddsbetting) {
+                                        $user_mo_comm = $matchOddsbetting['master_commission'];
+                                        if ($matchOddsbetting['bet_result'] == 'Plus') {
+                                            $total_mo_profit += $matchOddsbetting['profit'];
+                                        } else if ($matchOddsbetting['bet_result'] == 'Minus') {
+                                            $total_mo_loss += $matchOddsbetting['loss'];
+                                        }
+                                    }
+                                }
+
+                                $master_mo_comm = $CommissionUser->master_commission -  $user_mo_comm;
+
+                                $total_mo_amt = $total_mo_profit - $total_mo_loss;
+
+                                if ($total_mo_amt < 0) {
+
+                                    $commission_amt = (abs($total_mo_amt) * $CommissionUser->master_commission) / 100;
+                                }
+
+                                $mo_commission_amt = (abs($total_mo_amt) * $master_mo_comm) / 100;
+
+                                $grand_total_mo_comm += $mo_commission_amt;
+                                //***************MATCH ODDS COMM */
+
+
+                                //***************BOOKMAKER COMM */
+                                $bookMakerbettings = $this->Betting_model->get_masters_wise_bookmaker_bettings_by_event_id($dataArray2);
+
+
+
+
+                                $total_bm_profit = 0;
+                                $total_bm_loss = 0;
+                                $total_bm_amt = 0;
+                                $user_bm_comm = 0;
+                                $master_bm_comm = 0;
+                                if (!empty($bookMakerbettings)) {
+                                    foreach ($bookMakerbettings as $bookMakerbetting) {
+                                        $user_bm_comm = $bookMakerbetting['master_commission'];
+                                        if ($bookMakerbetting['bet_result'] == 'Plus') {
+                                            $total_bm_profit += $bookMakerbetting['profit'];
+                                        } else if ($bookMakerbetting['bet_result'] == 'Minus') {
+                                            $total_bm_loss += $bookMakerbetting['loss'];
+                                        }
+                                    }
+                                }
+
+                                $master_bm_comm = $CommissionUser->master_commission -  $user_bm_comm;
+
+                                $total_bm_amt = $total_bm_profit - $total_bm_loss;
+
+                                if ($total_bm_amt < 0) {
+
+
+
+                                    $bm_commission_amt = (abs($total_bm_amt) * $master_bm_comm) / 100;
+                                }
+
+                                $grand_total_bm_comm += $bm_commission_amt;
+                                //***************BOOKMAKER COMM */
+
+                                // p($bm_commission_amt);
+                                //***************FANCY COMM */
+                                $fancybettings = $this->Betting_model->get_fancy_bettings_by_event_id($dataArray2);
+
+                                $total_fancy_profit = 0;
+                                $total_fancy_loss = 0;
+                                $total_fancy_amt = 0;
+                                $user_fancy_comm = 0;
+                                $master_fancy_comm = 0;
+                                if (!empty($fancybettings)) {
+                                    foreach ($fancybettings as $fancybetting) {
+
+                                        $user_fancy_comm = $fancybetting['sessional_commission'];
+                                        if ($fancybetting['bet_result'] == 'Plus') {
+                                            $total_fancy_profit += $fancybetting['profit'];
+                                        } else if ($fancybetting['bet_result'] == 'Minus') {
+                                            $total_fancy_loss += $fancybetting['loss'];
+                                        }
+                                    }
+                                }
+
+                                $master_fancy_comm = $CommissionUser->sessional_commission -  $user_fancy_comm;
+
+                                $total_fancy_amt = $total_fancy_profit - $total_fancy_loss;
+
+                                if ($total_fancy_amt < 0) {
+
+
+
+                                    $fancy_commission_amt = (abs($total_fancy_amt) * $master_fancy_comm) / 100;
+                                }
+
+                                $grand_total_fancy_comm += $fancy_commission_amt;
+                                //***************FANCY COMM */
+
+
+                            }
+                        }
+
+
+                        if ($market_name == 'Bookmaker') {
+                            $commission =   $grand_total_bm_comm;
+                        } else if ($market_name == 'Fancy') {
+                            $commission =   $grand_total_fancy_comm;
+                        } else {
+                            $commission = $grand_total_mo_comm;
+                        }
+
+
+                        $p_l -= $grand_total_mo_comm;
+                        $p_l -= $grand_total_bm_comm;
+                        $p_l -= $grand_total_fancy_comm;
+
+
+
+                        $reports[$betting_type] = array(
+                            'match_id' => $report['match_id'],
+                            'event_name' => $report['event_name'],
+                            'market_name' => $market_name,
+                            'market_id' => $marketId,
+                            'p_l' => $p_l,
+                            'comm_pl' => $commission,
+                            'created_at' => $report['created_at']
+                        );
+                        // $comm_pl = 0;
+                        // $sessional_commission = 2;
+
+                        // $getCommssion = $this->Ledger_model->get_commission_amt_by_event_id(array(
+                        //     'user_id' => $user_id,
+                        //     'match_id' => $report['match_id']
+                        // ));
+
+
+                        ///COMMENT ON 23 AUG
+                        // if ($betting_type == 'fancy') {
+                        //     $session_comm_amt = $this->Betting_model->count_total_master_session_comm($user_id, $report['match_id']);
+
+                        //     $tmp_comm_value =  $session_comm_amt;
+
+
+                        //     // p($tmp_comm_value);
+                        // } else {
+
+                        //     $match_comm_amt = $this->Betting_model->count_total_master_match_comm($user_id, $report['match_id']);
+                        //     $tmp_comm_value =  $match_comm_amt;
+                        // }
+
+
+                        // // p($tmp_comm_value);
+                        // $comm_pl =  $reports[$betting_type]['comm_pl'] + $tmp_comm_value;
+                        // if ($betting_type == 'fancy') {
+                        // }
+                        // $reports[$betting_type]['comm_pl'] =  $comm_pl;
+                        //COMMENT ON 23 UAG
+                    }
+                }
+            }
+        } else {
+
+            $dataArray['pstatus'] = 'Settled';
+
+            $reports = array();
+            $reportsData = $this->Betting_model->get_bettings($dataArray);
+
+            // p($reportsData);
+
+            if (!empty($reportsData)) {
+                foreach ($reportsData as $report) {
+
+                    if ($report['match_id'] != $event_id) {
+                        continue;
+                    }
+
+
+
+                    $marketId = $report['market_id'];
+                    $betting_type = strtolower($report['betting_type']);
+                    $market_id = str_replace('.', '_', $marketId);
+
+                    if (isset($reports[$betting_type])) {
+                        if ($betting_type == 'fancy') {
+                            $market_name = 'Fancy';
+                        } else {
+                            $market_name = $report['market_name'];
+                        }
+
+                        // if ($report['market_name'] == 'Bookmaker') {
+                        //     $betting_type = 'Bookmaker';
+                        //                             }
+
+                        $p_l = 0;
+
+                        if ($report['bet_result'] == 'Plus') {
+
+                            $p_l =  $reports[$betting_type]['p_l'] + $report['profit'];
+                        } else if ($report['bet_result'] == 'Minus') {
+
+                            // p($reports[$betting_type]['p_l'] +  $report['loss'] * -1);
+                            $p_l = $reports[$betting_type]['p_l'] +  $report['loss'] * -1;
+                        }
+
+
+
+                        $reports[$betting_type]['match_id'] = $report['match_id'];
+                        $reports[$betting_type]['event_name'] = $report['event_name'];
+                        $reports[$betting_type]['market_name'] = $market_name;
+                        $reports[$betting_type]['market_id'] = $marketId;
+
+                        $reports[$betting_type]['p_l'] = $p_l;
+
+                        $reports[$betting_type]['created_at'] = $report['created_at'];
+                    } else {
+                        if ($betting_type == 'fancy') {
+                            $market_name = 'Fancy';
+                        } else {
+                            $market_name = $report['market_name'];
+                        }
+
+                        // if ($report['market_name'] == 'Bookmaker') {
+                        //     $betting_type = 'Bookmaker';
+                        //                             }
+
+
+                        $p_l = 0;
+
+                        if ($report['bet_result'] == 'Plus') {
+                            $p_l = $report['profit'];
+                        } else if ($report['bet_result'] == 'Minus') {
+
+
+                            $p_l = $report['loss'] * -1;
+                        }
+
+
+                        if ($market_name == 'Bookmaker') {
+                            $getCommssion = $this->Ledger_model->get_user_bookmaker_commission_amt_by_event_id(array(
+                                'user_id' => $user_id,
+                                'match_id' => $report['match_id']
+                            ));
+                        } else if ($market_name == 'Fancy') {
+                            $getCommssion = $this->Ledger_model->get_user_fancy_commission_amt_by_event_id(array(
+                                'user_id' => $user_id,
+                                'match_id' => $report['match_id']
+                            ));
+                        } else {
+                            $getCommssion = $this->Ledger_model->get_user_match_odds_commission_amt_by_event_id(array(
+                                'user_id' => $user_id,
+                                'match_id' => $report['match_id']
+                            ));
+                        }
+
+
+
+
+
+
+                        if (!empty($getCommssion)) {
+                            $p_l += $getCommssion->total_commission;
+                        }
+
+
+                        // p($getCommssion);
+
+                        $reports[$betting_type] = array(
+                            'match_id' => $report['match_id'],
+                            'event_name' => $report['event_name'],
+                            'market_name' => $market_name,
+                            'market_id' => $marketId,
+                            'p_l' => $p_l,
+                            'comm_pl' => $getCommssion->total_commission,
+                            'created_at' => $report['created_at']
+                        );
+                    }
+                }
+            }
+        }
+
+        // p($reports);
+
+
+        $dataArray['user_id'] = $user_id;
+        $dataArray['user_type'] = $user_type;
+        $dataArray['event_id'] = $event_id;
+        $dataArray['reports'] = $reports;
+
+        $dataArray['profit_loss']  = $this->load->viewPartial('/profit-loss-detail-list-html', $dataArray);
+        $this->load->view('/profit-loss-detail', $dataArray);
+    }
+
 
     public function profitLossbethistory($event_id = null, $market_id = null, $user_id = null, $is_fancy = null)
     {
@@ -3674,7 +6019,6 @@ class   Reports extends My_Controller
 
             $user_id =  $_SESSION['my_userdata']['user_id'];
         }
-
 
 
         $dataArray['pstatus'] = 'Settled';
@@ -3688,16 +6032,6 @@ class   Reports extends My_Controller
         $dataArray['match_id'] = $event_id;
 
 
-
-        // p($is_fancy);
-        if ($is_fancy == 'Yes') {
-            // $dataArray['selection_id'] = $market_id;
-        } else {
-            $dataArray['market_id'] = $market_id;
-        }
-
-
-
         $user =  $this->User_model->getUserById($user_id);
         $user_type = $user->user_type;
         $reportsData = array();
@@ -3705,18 +6039,13 @@ class   Reports extends My_Controller
 
         $dataArray['user_id']  = $user_id;
 
-        $dataArray['is_fancy'] = $is_fancy;
 
 
 
         if ($user_type == 'User') {
 
-
-            // p($dataArray);
             $reports = $this->Betting_model->get_bettings($dataArray);
 
-
-            // p($reports);
             foreach ($reports as $reportKey => $report) {
 
 
@@ -3748,7 +6077,15 @@ class   Reports extends My_Controller
                 }
             }
             $reportsData = array_merge($reportsData, $reports);
-        } else {
+        } else if ($user_type == 'Master') {
+            $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
+        } else if ($user_type == 'Super Master') {
+            $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
+        } else if ($user_type == 'Hyper Super Master') {
+            $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
+        } else if ($user_type == 'Admin') {
+            $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
+        } else if ($user_type == 'Super Admin') {
             $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
         }
         array_multisort(array_map('strtotime', array_column($reportsData, 'created_at')), SORT_DESC, $reportsData);
@@ -3886,7 +6223,82 @@ class   Reports extends My_Controller
         echo json_encode($bethistory);
     }
 
+    // public function chip_summarynew($list_user_type = null)
+    // {
+    //     log_message("MY_INFO", 'Chip Summary Load Start');
+    //     $minusArr = array();
+    //     $plusArr = array();
+    //          $user_id = get_user_id();
+    //      $user = $this->User_model->getUserById($user_id);
+    //     $user_type = $user->user_type;
+    //     $user_name = $user->name;
+    //     $partnership = $user->partnership;
 
+    //     p($user_type);
+    //     if ($user->master_id == 0) {
+    //         $parent_name = '';
+    //         $parent_user_name = '';
+    //     } else {
+    //         $master_id = $user->master_id;
+    //         $master_user = $this->User_model->getUserById($master_id);
+    //         $parent_name = $master_user->name;
+    //         $parent_user_name = $master_user->user_name;
+    //         $master_partnership = $master_user->partnership;
+    //     }
+    //     $users = $this->User_model->getInnerUserById($user_id);
+    //     $parent_total_settle_amount = $this->Ledger_model->get_total_settlement($user->user_id,'Y');
+    //     $parentBettingArr = array(
+    //         'user_id' => $user->user_id,
+    //         'user_name' => $parent_user_name,
+    //         'name' => $parent_name,
+    //         'amount' => 0,
+    //         'master_comission' => 0,
+    //         'partnership' => 0,
+    //         'type' => 'Parent',
+    //         'parent_comission' => 0,
+    //     );
+
+    //     if (!empty($users)) {
+    //         foreach ($users as $user) {
+    //             $total_settle_amount = $this->Ledger_model->get_total_settlement($user->user_id,'N');
+    //                 $bettingArr = array(
+    //                     'user_id' => $user->user_id,
+    //                     'user_name' => $user->user_name,
+    //                     'name' => $user->name,
+    //                     'amount' => $total_settle_amount,
+    //                     'master_comission' => 0,
+    //                     'partnership' => 0,
+    //                     'type' => 'User',
+    //                     'parent_comission' => 0,
+    //                 );
+    //                 if ($total_settle_amount < 0) {
+    //                     array_push($minusArr, $bettingArr);
+    //                 } else {
+    //                     array_push($plusArr, $bettingArr);
+    //                 }
+    //         }
+    //     }
+    //     if ($parentBettingArr['amount'] < 0) {
+    //         $parentBettingArr['amount'] -= ($parent_total_settle_amount);
+    //     } else {
+    //         $parentBettingArr['amount'] += ($parent_total_settle_amount);
+    //     }
+    //     $parentBettingArr['amount'] = round($parentBettingArr['amount']);
+    //     if ($parentBettingArr['amount'] > 0) {
+    //         array_push($minusArr, $parentBettingArr);
+    //     } else if ($parentBettingArr['amount'] < 0) {
+    //         array_push($plusArr, $parentBettingArr);
+    //     }
+
+    //     $dataArray['minus_acc'] = $minusArr;
+    //     $dataArray['plus_acc'] = $plusArr;
+    //     $dataArray['parent_name'] = $parent_name;
+    //     $dataArray['user_type'] = $user_type;
+    //     $dataArray['user_id'] = $user_id;
+    //     $dataArray['user_name'] = $user_name;
+    //     log_message("MY_INFO", 'Chip Summary Load End');
+    //     $this->load->view('chip-summary', $dataArray);
+    // }
 
     public function chip_summarynew1($user_id = null)
     {
@@ -3896,7 +6308,8 @@ class   Reports extends My_Controller
             $user_id = get_user_id();
         }
         $user = $this->User_model->getUserById($user_id);
-        $login_user = $user;
+
+
         $user_type = $user->user_type;
 
 
@@ -3913,12 +6326,13 @@ class   Reports extends My_Controller
             $list_user_type = 'client';
         }
 
+        // p("Hello");
+        log_message("MY_INFO", 'Chip Summary Load Start');
         $minusArr = array();
         $plusArr = array();
         $user_type = $user->user_type;
-        $parent_user_type = $user->user_type;
-
         $user_name = $user->name;
+        $partnership = $user->partnership;
 
         if ($user->master_id == 0) {
             $parent_name = '';
@@ -3928,41 +6342,254 @@ class   Reports extends My_Controller
             $master_user = $this->User_model->getUserById($master_id);
             $parent_name = $master_user->name;
             $parent_user_name = $master_user->user_name;
+            $master_partnership = $master_user->partnership;
         }
 
         $users = array();
 
-        $users = $this->User_model->getInnerUserById($user_id);
 
-        $parent_total_settle_amount = $this->Ledger_model->get_total_settlement($user->user_id, 'Y');
+        //MASTERS
+        if ($user_type == 'Master') {
+            if ($list_user_type == 'client') {
+
+                $users = $this->User_model->getInnerUserById($user_id);
+            }
+        }
+        //MASTERS
+
+
+
+
+
+        //SUPER MASTERS
+        if ($user_type == 'Super Master') {
+            if ($list_user_type === 'client') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+
+                if (!empty($masters)) {
+                    foreach ($masters as $master) {
+                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                        $users = array_merge($users, $usersData);
+                    }
+                }
+            } else if ($list_user_type === 'agent') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+                $users = array_merge($users, $masters);
+            }
+        }
+        //SUPER MASTERS
+
+
+        //HYPER SUPER MASTERS
+        if ($user_type == 'Hyper Super Master') {
+            if ($list_user_type === 'super') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+                $users = array_merge($users, $masters);
+            } else if ($list_user_type === 'agent') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+
+                if (!empty($masters)) {
+                    foreach ($masters as $master) {
+                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                        $users = array_merge($users, $usersData);
+                    }
+                }
+            } else if ($list_user_type === 'client') {
+                $supers = $this->User_model->getInnerUserById($user_id);
+                if (!empty($supers)) {
+                    foreach ($supers as $super) {
+                        $masters = $this->User_model->getInnerUserById($super->user_id);
+
+                        if (!empty($masters)) {
+                            foreach ($masters as $master) {
+                                $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                $users = array_merge($users, $usersData);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //HYPER SUPER MASTERS
+
+        //ADMIN MASTERS
+        if ($user_type == 'Admin') {
+            if ($list_user_type === 'master') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+                $users = array_merge($users, $masters);
+            } else if ($list_user_type === 'super') {
+
+                $supers = $this->User_model->getInnerUserById($user_id);
+
+
+
+                if (!empty($supers)) {
+                    foreach ($supers as $super) {
+                        $masters = $this->User_model->getInnerUserById($super->user_id);
+
+
+                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                        $users = array_merge($users, $masters);
+                    }
+                }
+            } else if ($list_user_type === 'agent') {
+                $hypers = $this->User_model->getInnerUserById($user_id);
+
+                if (!empty($hypers)) {
+                    foreach ($hypers as $hyper) {
+                        $supers = $this->User_model->getInnerUserById($hyper->user_id);
+
+                        if (!empty($supers)) {
+                            foreach ($supers as $super) {
+                                $masters = $this->User_model->getInnerUserById($super->user_id);
+
+
+                                $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                $users = array_merge($users, $masters);
+                            }
+                        }
+                    }
+                }
+            } else if ($list_user_type === 'client') {
+
+                $hypers = $this->User_model->getInnerUserById($user_id);
+                if (!empty($hypers)) {
+                    foreach ($hypers as $hyper) {
+                        $supers = $this->User_model->getInnerUserById($hyper->user_id);
+
+                        if (!empty($supers)) {
+                            foreach ($supers as $super) {
+                                $masters = $this->User_model->getInnerUserById($super->user_id);
+
+                                if (!empty($masters)) {
+                                    foreach ($masters as $master) {
+                                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                        $users = array_merge($users, $usersData);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //HYPER SUPER MASTERS
+
+
+
+
+        //SUPER ADMIN MASTERS
+        if ($user_type == 'Super Admin') {
+            if ($list_user_type === 'sba') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+                $users = array_merge($users, $masters);
+            } else if ($list_user_type === 'master') {
+
+                $supers = $this->User_model->getInnerUserById($user_id);
+
+
+
+                if (!empty($supers)) {
+                    foreach ($supers as $super) {
+                        $masters = $this->User_model->getInnerUserById($super->user_id);
+
+
+                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                        $users = array_merge($users, $masters);
+                    }
+                }
+            } else if ($list_user_type === 'super') {
+                $hypers = $this->User_model->getInnerUserById($user_id);
+
+                if (!empty($hypers)) {
+                    foreach ($hypers as $hyper) {
+                        $supers = $this->User_model->getInnerUserById($hyper->user_id);
+
+                        if (!empty($supers)) {
+                            foreach ($supers as $super) {
+                                $masters = $this->User_model->getInnerUserById($super->user_id);
+
+
+                                $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                $users = array_merge($users, $masters);
+                            }
+                        }
+                    }
+                }
+            } else if ($list_user_type === 'agent') {
+
+                $hypers = $this->User_model->getInnerUserById($user_id);
+                if (!empty($hypers)) {
+                    foreach ($hypers as $hyper) {
+                        $supers = $this->User_model->getInnerUserById($hyper->user_id);
+
+                        if (!empty($supers)) {
+                            foreach ($supers as $super) {
+                                $masters = $this->User_model->getInnerUserById($super->user_id);
+
+                                if (!empty($masters)) {
+                                    foreach ($masters as $master) {
+                                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                        $users = array_merge($users, $usersData);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if ($list_user_type === 'client') {
+
+                $admins = $this->User_model->getInnerUserById($user_id);
+
+                if (!empty($admins)) {
+                    foreach ($admins as $admin) {
+                        $hypers = $this->User_model->getInnerUserById($admin->user_id);
+                        if (!empty($hypers)) {
+                            foreach ($hypers as $hyper) {
+                                $supers = $this->User_model->getInnerUserById($hyper->user_id);
+
+                                if (!empty($supers)) {
+                                    foreach ($supers as $super) {
+                                        $masters = $this->User_model->getInnerUserById($super->user_id);
+
+                                        if (!empty($masters)) {
+                                            foreach ($masters as $master) {
+                                                $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                                $users = array_merge($users, $usersData);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //HYPER SUPER MASTERS
+
+        $parent_total_settle_amount = $this->Ledger_model->get_total_settlement_for_user($user->user_id, 'Y');
         $parentBettingArr = array(
             'user_id' => $user->user_id,
             'user_name' => $parent_user_name,
-            'name' => $parent_name,
+            'name' => '<b>' . $parent_name . '</b>',
             'amount' => 0,
             'master_comission' => 0,
             'partnership' => 0,
             'type' => 'Parent',
             'parent_comission' => 0,
         );
-
-
-
         if (!empty($users)) {
             foreach ($users as $user) {
 
-                // if ($user->user_type == 'User') {
-                //     $total_settle_amount = $this->Ledger_model->get_total_settlement_for_user($user->user_id, 'N', $user->user_type);
-                // } else {
-                //     $total_settle_amount = $this->Ledger_model->count_supers_total_settlement($user->user_id);
-                // }
-
-                $total_settle_amount = get_total_settlement($user->user_id);
-
-                if (!empty($total_settle_amount)) {
-                    $total_settle_amount = $total_settle_amount['amount'];
+                if ($user->user_type == 'User') {
+                    $total_settle_amount = $this->Ledger_model->get_total_settlement_for_user($user->user_id, 'N', $user->user_type);
+                } else {
+                    $total_settle_amount = $this->Ledger_model->get_total_settlement_for_user($user->user_id, 'N', $user->user_type);
                 }
 
+
+                //   p($total_settle_amount);
                 $bettingArr = array(
                     'user_id' => $user->user_id,
                     'user_name' => $user->user_name,
@@ -3973,54 +6600,210 @@ class   Reports extends My_Controller
                     'type' => $user->user_type,
                     'parent_comission' => 0,
                 );
-
-
-                if ($total_settle_amount > 0) {
-                    array_push($plusArr, $bettingArr);
-                } else {
+                if ($total_settle_amount < 0) {
                     array_push($minusArr, $bettingArr);
+                } else {
+                    array_push($plusArr, $bettingArr);
                 }
+
+                // if ($user->user_id != '10474') {
+                //     // continue;
+                // }
+
+                // if ($user->user_type == 'User') {
+
+
+
+
+
+                //     $total_settle_amount = $this->Ledger_model->get_total_settlement_for_user($user->user_id, 'N', $user->user_type);
+
+
+
+                // } else {
+                //     $user_type = $user->user_type;
+                //     $user_id = $user->user_id;
+                //     $resultData = array();
+
+                //     $dataArray = array(
+                //         'user_id' => $user_id,
+                //         'pstatus' => 'Settled'
+                //     );
+
+                //     $reports = array();
+                //     // if ($user_id != '8930') {
+                //     //     continue;
+                //     // }
+
+                //     $ledgerData = $this->Ledger_model->get_ledger(array(
+                //         'fltrselct' => 2,
+                //         'user_id' => $user_id
+                //     ));
+
+
+
+                //     // p($ledgerData);
+
+
+
+
+                //     $reportsData = $this->Report_model->get_my_ledger_test(array(
+                //         'user_id' => $user_id
+                //     ));
+
+
+
+
+                //     if (!empty($reportsData)) {
+                //         foreach ($reportsData as $key => $report) {
+                //             $event_id  = $report['match_id'];
+
+
+                //             // p($report);
+                //             // p($report);
+
+
+                //             // p($report);
+
+                //             $resultData[$event_id] = array(
+                //                 'match_id' => $report['match_id'],
+                //                 'event_name' => $report['event_name'],
+                //                 'created_at' => $report['created_at'],
+                //                 'p_l' => 0,
+                //             );
+
+
+                //             $user_match_pl = $report['profit'] - $report['loss'];
+
+                //             $user_session_pl =  $report['total_fancy_profit'] - $report['total_fancy_loss'];
+
+
+
+                //             $user_match_comm = 0;
+                //             $user_session_comm = 0;
+
+
+                //             // p($report);
+
+                //             if ($report['event_type'] == 4) {
+
+
+
+                //                 if ($user_match_pl < 0) {
+                //                     $user_match_comm = abs($user_match_pl) * $report['master_commission'] / 100;
+                //                 }
+                //             }
+
+                //             $total_session_stake =  $report['total_fancy_stake'];
+
+                //             if ($report['event_type'] == 4) {
+                //                 if ($total_session_stake > 0) {
+                //                     $user_session_comm = abs($total_session_stake) * $report['sessional_commission'] / 100;
+                //                 }
+                //             }
+
+                //             $total_pl = $user_match_pl + $user_session_pl;
+
+
+                //             $total_comm = $user_match_comm + $user_session_comm;
+
+                //             if ($total_pl < 0) {
+                //                 $net_amt = ($total_pl + $total_comm);
+                //             } else {
+                //                 $net_amt = ($total_pl + $total_comm);
+                //             }
+
+                //             $share_amt = $net_amt *  $report['partnership'] / 100;
+
+                //             // p($report['partnership']);
+
+
+                //             // $final_amt = $net_amt - $share_amt;
+                //             $final_amt = $share_amt;
+
+                //             // p($final_amt);
+
+                //             if ($final_amt < 0) {
+                //                 $final_amt = $final_amt * -1;
+                //                 $resultData[$event_id]['p_l'] += $final_amt;
+                //             } else {
+                //                 $final_amt = $final_amt * -1;
+
+                //                 $resultData[$event_id]['p_l'] += $final_amt;
+                //             }
+                //         }
+                //     }
+
+
+                //     $total_settle_amount = 0;
+
+                //     if (!empty($resultData)) {
+                //         foreach ($resultData as $data) {
+                //             if ($data['p_l'] > 0) {
+                //                 $total_settle_amount += abs($data['p_l']);
+                //             } else {
+                //                 $total_settle_amount -= abs($data['p_l']);
+                //             }
+                //         }
+                //     }
+
+
+
+                //     if (!empty($ledgerData)) {
+                //         foreach ($ledgerData as $data) {
+                //             if ($data['role'] == 'Parent') {
+                //                 if ($data['transaction_type'] == 'Debit') {
+                //                     $total_settle_amount += $data['amount'];
+                //                 } else if ($data['transaction_type'] == 'Credit') {
+                //                     $total_settle_amount -= $data['amount'];
+                //                 }
+                //             }
+                //         }
+                //     }
+
+
+
+
+                //     $bettingArr = array(
+                //         'user_id' => $user->user_id,
+                //         'user_name' => $user->user_name,
+                //         'name' => $user->name,
+                //         'amount' => $total_settle_amount,
+                //         'master_comission' => 0,
+                //         'partnership' => 0,
+                //         'type' => $user_type,
+                //         'parent_comission' => 0,
+                //     );
+
+
+
+
+                //     // $total_settle_amount = $total_settle_amount * -1;
+
+                //     if ($total_settle_amount > 0) {
+                //         array_push($minusArr, $bettingArr);
+                //     } else {
+                //         array_push($plusArr, $bettingArr);
+                //     }
+                // }
             }
         }
-
-
 
         if ($parentBettingArr['amount'] < 0) {
             $parentBettingArr['amount'] -= ($parent_total_settle_amount);
         } else {
             $parentBettingArr['amount'] += ($parent_total_settle_amount);
         }
-
-
-
-
-        //Cash forom and Cash to (Donwline and upline)
-        $parentBettingArr['amount'] =  ($parentBettingArr['amount']);
-
-        if ($parent_user_type == 'Super Admin') {
-            $cash_from_clients = $this->Ledger_model->cash_from_client_for_masters($user_id);
-        } else {
-            $cash_from_clients = $this->Ledger_model->cash_from_client($user_id);
+        $parentBettingArr['amount'] = round($parentBettingArr['amount']);
+        if ($parentBettingArr['amount'] > 0) {
+            array_push($minusArr, $parentBettingArr);
+        } else if ($parentBettingArr['amount'] < 0) {
+            array_push($plusArr, $parentBettingArr);
         }
 
 
-        $cash_from_upline = $this->Ledger_model->cash_from_upline($user_id);
-        //Cash forom and Cash to (Donwline and upline)
 
 
-
-        //Profit & Loss (self and upline)
-
-        $upline_profit_and_loss_arr = get_upline_sharing($user_id);
-        if (!empty($upline_profit_and_loss_arr)) {
-            $upline_profit_and_loss = $upline_profit_and_loss_arr['amount'];
-        }
-
-        $self_profit_and_loss_arr = get_my_sharing($user_id);
-
-        if (!empty($self_profit_and_loss_arr)) {
-            $self_profit_and_loss = $self_profit_and_loss_arr['amount'];
-        }
 
 
         $dataArray['minus_acc'] = $minusArr;
@@ -4029,10 +6812,8 @@ class   Reports extends My_Controller
         $dataArray['user_type'] = $user_type;
         $dataArray['user_id'] = $user_id;
         $dataArray['user_name'] = $user_name;
-        $dataArray['cash_from_clients'] = $cash_from_clients;
-        $dataArray['cash_from_upline'] = $cash_from_upline;
-        $dataArray['self_profit_and_loss'] = $self_profit_and_loss;
-        $dataArray['upline_profit_and_loss'] = $upline_profit_and_loss;
+        log_message("MY_INFO", 'Chip Summary Load End');
+
 
 
         $this->load->view('chip-summary', $dataArray);
@@ -8701,9 +11482,1014 @@ class   Reports extends My_Controller
 
 
 
+    public function chip_summarynew_data()
+    {
+
+        $list_user_type = $this->input->post('list_user_type');
+
+
+        $this->load->helper('url');
+        $this->load->helper('file');
+        $minusArr = array();
+        $plusArr = array();
+        $user_id = get_user_id();
+        $user = $this->User_model->getUserById($user_id);
+        $user_type = $user->user_type;
+        $user_name = $user->name;
+        $partnership = $user->partnership;
+
+        if ($user->master_id == 0) {
+            $parent_name = '';
+            $parent_user_name = '';
+        } else {
+
+            $parent_id = $user->master_id;
+            $master_id = $user->master_id;
+            $master_user = $this->User_model->getUserById($master_id);
+            $parent_name = $master_user->name;
+            $parent_user_name = $master_user->user_name;
+            $master_partnership = $master_user->partnership;
+        }
+
+        $users = array();
+
+
+        //MASTERS
+        if ($user_type == 'Master') {
+            if ($list_user_type == 'client') {
+
+                $users = $this->User_model->getInnerUserById($user_id);
+            }
+        }
+        //MASTERS
 
 
 
+        //SUPER MASTERS
+        if ($user_type == 'Super Master') {
+            if ($list_user_type === 'client') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+
+                if (!empty($masters)) {
+                    foreach ($masters as $master) {
+                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                        $users = array_merge($users, $usersData);
+                    }
+                }
+            } else if ($list_user_type === 'agent') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+                $users = array_merge($users, $masters);
+            }
+        }
+        //SUPER MASTERS
+
+
+        //HYPER SUPER MASTERS
+        if ($user_type == 'Hyper Super Master') {
+            if ($list_user_type === 'super') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+                $users = array_merge($users, $masters);
+            } else if ($list_user_type === 'agent') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+
+                if (!empty($masters)) {
+                    foreach ($masters as $master) {
+                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                        $users = array_merge($users, $usersData);
+                    }
+                }
+            } else if ($list_user_type === 'client') {
+                $supers = $this->User_model->getInnerUserById($user_id);
+                if (!empty($supers)) {
+                    foreach ($supers as $super) {
+                        $masters = $this->User_model->getInnerUserById($super->user_id);
+
+                        if (!empty($masters)) {
+                            foreach ($masters as $master) {
+                                $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                $users = array_merge($users, $usersData);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //HYPER SUPER MASTERS
+
+        //ADMIN MASTERS
+        if ($user_type == 'Admin') {
+            if ($list_user_type === 'master') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+                $users = array_merge($users, $masters);
+            } else if ($list_user_type === 'super') {
+
+                $supers = $this->User_model->getInnerUserById($user_id);
+
+
+
+                if (!empty($supers)) {
+                    foreach ($supers as $super) {
+                        $masters = $this->User_model->getInnerUserById($super->user_id);
+
+
+                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                        $users = array_merge($users, $masters);
+                    }
+                }
+            } else if ($list_user_type === 'agent') {
+                $hypers = $this->User_model->getInnerUserById($user_id);
+
+                if (!empty($hypers)) {
+                    foreach ($hypers as $hyper) {
+                        $supers = $this->User_model->getInnerUserById($hyper->user_id);
+
+                        if (!empty($supers)) {
+                            foreach ($supers as $super) {
+                                $masters = $this->User_model->getInnerUserById($super->user_id);
+
+
+                                $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                $users = array_merge($users, $masters);
+                            }
+                        }
+                    }
+                }
+            } else if ($list_user_type === 'client') {
+
+                $hypers = $this->User_model->getInnerUserById($user_id);
+                if (!empty($hypers)) {
+                    foreach ($hypers as $hyper) {
+                        $supers = $this->User_model->getInnerUserById($hyper->user_id);
+
+                        if (!empty($supers)) {
+                            foreach ($supers as $super) {
+                                $masters = $this->User_model->getInnerUserById($super->user_id);
+
+                                if (!empty($masters)) {
+                                    foreach ($masters as $master) {
+                                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                        $users = array_merge($users, $usersData);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //HYPER SUPER MASTERS
+
+
+
+
+        //SUPER ADMIN MASTERS
+        if ($user_type == 'Super Admin') {
+            if ($list_user_type === 'sba') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+                $users = array_merge($users, $masters);
+            } else if ($list_user_type === 'master') {
+
+                $supers = $this->User_model->getInnerUserById($user_id);
+
+
+
+                if (!empty($supers)) {
+                    foreach ($supers as $super) {
+                        $masters = $this->User_model->getInnerUserById($super->user_id);
+
+
+                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                        $users = array_merge($users, $masters);
+                    }
+                }
+            } else if ($list_user_type === 'super') {
+                $hypers = $this->User_model->getInnerUserById($user_id);
+
+                if (!empty($hypers)) {
+                    foreach ($hypers as $hyper) {
+                        $supers = $this->User_model->getInnerUserById($hyper->user_id);
+
+                        if (!empty($supers)) {
+                            foreach ($supers as $super) {
+                                $masters = $this->User_model->getInnerUserById($super->user_id);
+
+
+                                $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                $users = array_merge($users, $masters);
+                            }
+                        }
+                    }
+                }
+            } else if ($list_user_type === 'agent') {
+
+                $hypers = $this->User_model->getInnerUserById($user_id);
+                if (!empty($hypers)) {
+                    foreach ($hypers as $hyper) {
+                        $supers = $this->User_model->getInnerUserById($hyper->user_id);
+
+                        if (!empty($supers)) {
+                            foreach ($supers as $super) {
+                                $masters = $this->User_model->getInnerUserById($super->user_id);
+
+                                if (!empty($masters)) {
+                                    foreach ($masters as $master) {
+                                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                        $users = array_merge($users, $usersData);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if ($list_user_type === 'client') {
+
+                $admins = $this->User_model->getInnerUserById($user_id);
+
+                if (!empty($admins)) {
+                    foreach ($admins as $admin) {
+                        $hypers = $this->User_model->getInnerUserById($admin->user_id);
+                        if (!empty($hypers)) {
+                            foreach ($hypers as $hyper) {
+                                $supers = $this->User_model->getInnerUserById($hyper->user_id);
+
+                                if (!empty($supers)) {
+                                    foreach ($supers as $super) {
+                                        $masters = $this->User_model->getInnerUserById($super->user_id);
+
+                                        if (!empty($masters)) {
+                                            foreach ($masters as $master) {
+                                                $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                                $users = array_merge($users, $usersData);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //HYPER SUPER MASTERS
+
+
+
+
+        if (!empty($users)) {
+            foreach ($users as $user) {
+
+
+                if ($user->user_type == 'User') {
+
+
+
+
+                    if ($user->user_id != '7478') {
+                        // continue;
+                    }
+                    $total_settle_amount = $this->Ledger_model->get_total_settlement_new($user->user_id, 'N', $user->user_type);
+
+                    $bettingArr = array(
+                        'user_id' => $user->user_id,
+                        'user_name' => $user->user_name,
+                        'name' => $user->name,
+                        'amount' => $total_settle_amount,
+                        'master_comission' => 0,
+                        'partnership' => 0,
+                        'type' => 'User',
+                        'parent_comission' => 0,
+                    );
+
+
+                    if ($user->user_type == 'User') {
+                        if ($total_settle_amount < 0) {
+                            array_push($minusArr, $bettingArr);
+                        } else {
+                            array_push($plusArr, $bettingArr);
+                        }
+                    } else {
+                        if ($total_settle_amount < 0) {
+                            array_push($minusArr, $bettingArr);
+                        } else {
+                            array_push($plusArr, $bettingArr);
+                        }
+                    }
+                } else {
+                    $user_type = $user->user_type;
+                    $user_id = $user->user_id;
+                    $resultData = array();
+
+                    $dataArray = array(
+                        'user_id' => $user_id,
+                        'pstatus' => 'Settled'
+                    );
+
+                    $reports = array();
+                    // if ($user_id != '8930') {
+                    //     continue;
+                    // }
+
+                    $ledgerData = $this->Ledger_model->get_ledger(array(
+                        'fltrselct' => 2,
+                        'user_id' => $user_id
+                    ));
+
+
+
+
+
+
+                    $reportsData = $this->Report_model->get_my_ledger_events_list($dataArray);
+
+
+
+
+                    if ($user_type == 'Master') {
+
+
+                        if (!empty($reportsData)) {
+                            foreach ($reportsData as $report) {
+                                $event_id  = $report['match_id'];
+                                $usersDatas =  $this->User_model->getInnerUserByEventId(array(
+                                    'user_id' => $user_id,
+                                    'match_id' => $report['match_id']
+                                ));
+
+
+                                $resultData[$event_id] = array(
+                                    'match_id' => $report['match_id'],
+                                    'event_name' => $report['event_name'],
+                                    'created_at' => $report['created_at'],
+                                    'p_l' => 0,
+                                );
+
+
+                                if (!empty($usersDatas)) {
+                                    foreach ($usersDatas as $key => $usersData) {
+
+
+
+                                        $usersDatas[$key]->master = array();
+                                        $usersDatas[$key]->super_master = array();
+                                        $usersDatas[$key]->hyper_super_master = array();
+                                        $usersDatas[$key]->admin = array();
+                                        $usersDatas[$key]->super_admin = array();
+
+                                        $user_match_pl = $this->Betting_model->count_total_match_profit_loss($usersData->user_id, $event_id);
+                                        $user_session_pl = $this->Betting_model->count_total_session_profit_loss($usersData->user_id, $event_id);
+
+
+                                        $user_session_comm = $this->Betting_model->count_total_session_comm($usersData->user_id, $event_id);
+                                        $get_match_comm = $this->Betting_model->count_total_match_comm($usersData->user_id, $event_id);
+
+
+
+
+                                        $get_master_partnership = $this->Betting_model->get_betting_info($user_id, $event_id);
+
+
+
+                                        $user_match_comm = 0;
+                                        $user_session_comm = 0;
+
+
+                                        if ($user_match_pl < 0) {
+                                            $user_match_comm = abs($user_match_pl) * $get_master_partnership->master_commission / 100;
+                                        }
+
+                                        $total_session_stake = $this->Betting_model->count_total_session_stake($usersData->user_id, $event_id);
+                                        if ($total_session_stake > 0) {
+                                            $user_session_comm = abs($total_session_stake) * $get_master_partnership->sessional_commission / 100;
+                                        }
+
+                                        $total_pl = $user_match_pl + $user_session_pl;
+
+                                        $total_comm = $user_match_comm + $user_session_comm;
+
+                                        if ($total_pl < 0) {
+                                            $net_amt = ($total_pl + $total_comm);
+                                        } else {
+                                            $net_amt = ($total_pl + $total_comm);
+                                        }
+                                        $share_amt = $net_amt *  $get_master_partnership->partnership / 100;
+
+
+
+                                        $final_amt = $net_amt - $share_amt;
+
+
+                                        if ($final_amt < 0) {
+                                            $final_amt = $final_amt * -1;
+                                            $resultData[$event_id]['p_l'] += $final_amt;
+                                        } else {
+                                            $final_amt = $final_amt * -1;
+
+                                            $resultData[$event_id]['p_l'] += $final_amt;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else if ($user_type == 'Super Master') {
+
+                        if (!empty($reportsData)) {
+                            foreach ($reportsData as $report) {
+                                $event_id  = $report['match_id'];
+                                $mastersDatas =  $this->User_model->getInnerUserByEventId(array(
+                                    'user_id' => $user_id,
+                                    'match_id' => $report['match_id']
+                                ));
+
+                                $resultData[$event_id] = array(
+                                    'match_id' => $report['match_id'],
+                                    'event_name' => $report['event_name'],
+                                    'created_at' => $report['created_at'],
+                                    'p_l' => 0,
+                                );
+
+
+                                if (!empty($mastersDatas)) {
+                                    foreach ($mastersDatas as $masterData) {
+                                        $usersDatas =  $this->User_model->getInnerUserByEventId(array(
+                                            'user_id' => $masterData->user_id,
+                                            'match_id' => $report['match_id']
+                                        ));
+
+
+
+
+
+                                        if (!empty($usersDatas)) {
+                                            foreach ($usersDatas as $key => $usersData) {
+
+
+
+                                                $usersDatas[$key]->master = array();
+                                                $usersDatas[$key]->super_master = array();
+                                                $usersDatas[$key]->hyper_super_master = array();
+                                                $usersDatas[$key]->admin = array();
+                                                $usersDatas[$key]->super_admin = array();
+
+                                                $user_match_pl = $this->Betting_model->count_total_match_profit_loss($usersData->user_id, $event_id);
+                                                $user_session_pl = $this->Betting_model->count_total_session_profit_loss($usersData->user_id, $event_id);
+
+
+                                                $user_session_comm = $this->Betting_model->count_total_session_comm($usersData->user_id, $event_id);
+                                                $get_match_comm = $this->Betting_model->count_total_match_comm($usersData->user_id, $event_id);
+
+
+
+
+                                                $get_master_partnership = $this->Betting_model->get_betting_info($user_id, $event_id);
+
+
+
+                                                $user_match_comm = 0;
+                                                $user_session_comm = 0;
+
+
+                                                if ($user_match_pl < 0) {
+                                                    $user_match_comm = abs($user_match_pl) * $get_master_partnership->master_commission / 100;
+                                                }
+
+                                                $total_session_stake = $this->Betting_model->count_total_session_stake($usersData->user_id, $event_id);
+                                                if ($total_session_stake > 0) {
+                                                    $user_session_comm = abs($total_session_stake) * $get_master_partnership->sessional_commission / 100;
+                                                }
+
+                                                $total_pl = $user_match_pl + $user_session_pl;
+
+                                                $total_comm = $user_match_comm + $user_session_comm;
+
+                                                if ($total_pl < 0) {
+                                                    $net_amt = ($total_pl + $total_comm);
+                                                } else {
+                                                    $net_amt = ($total_pl + $total_comm);
+                                                }
+                                                $share_amt = $net_amt *  $get_master_partnership->partnership / 100;
+
+
+
+                                                $final_amt = $net_amt - $share_amt;
+
+
+                                                if ($final_amt < 0) {
+                                                    $final_amt = $final_amt * -1;
+                                                    $resultData[$event_id]['p_l'] += $final_amt;
+                                                } else {
+                                                    $final_amt = $final_amt * -1;
+
+                                                    $resultData[$event_id]['p_l'] += $final_amt;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else if ($user_type == 'Hyper Super Master') {
+
+                        if (!empty($reportsData)) {
+                            foreach ($reportsData as $report) {
+                                $event_id  = $report['match_id'];
+
+                                $supersDatas =  $this->User_model->getInnerUserByEventId(array(
+                                    'user_id' => $user_id,
+                                    'match_id' => $report['match_id']
+                                ));
+
+                                $resultData[$event_id] = array(
+                                    'match_id' => $report['match_id'],
+                                    'event_name' => $report['event_name'],
+                                    'created_at' => $report['created_at'],
+                                    'p_l' => 0,
+                                );
+
+
+                                if (!empty($supersDatas)) {
+                                    foreach ($supersDatas as $superData) {
+
+                                        $mastersDatas =  $this->User_model->getInnerUserByEventId(array(
+                                            'user_id' => $superData->user_id,
+                                            'match_id' => $report['match_id']
+                                        ));
+
+
+                                        if (!empty($mastersDatas)) {
+                                            foreach ($mastersDatas as $masterData) {
+                                                $usersDatas =  $this->User_model->getInnerUserByEventId(array(
+                                                    'user_id' => $masterData->user_id,
+                                                    'match_id' => $report['match_id']
+                                                ));
+
+
+
+
+
+                                                if (!empty($usersDatas)) {
+                                                    foreach ($usersDatas as $key => $usersData) {
+
+
+
+                                                        $usersDatas[$key]->master = array();
+                                                        $usersDatas[$key]->super_master = array();
+                                                        $usersDatas[$key]->hyper_super_master = array();
+                                                        $usersDatas[$key]->admin = array();
+                                                        $usersDatas[$key]->super_admin = array();
+
+                                                        $user_match_pl = $this->Betting_model->count_total_match_profit_loss($usersData->user_id, $event_id);
+                                                        $user_session_pl = $this->Betting_model->count_total_session_profit_loss($usersData->user_id, $event_id);
+
+
+                                                        $user_session_comm = $this->Betting_model->count_total_session_comm($usersData->user_id, $event_id);
+                                                        $get_match_comm = $this->Betting_model->count_total_match_comm($usersData->user_id, $event_id);
+
+
+
+
+                                                        $get_master_partnership = $this->Betting_model->get_betting_info($user_id, $event_id);
+
+
+
+                                                        $user_match_comm = 0;
+                                                        $user_session_comm = 0;
+
+
+                                                        if ($user_match_pl < 0) {
+                                                            $user_match_comm = abs($user_match_pl) * $get_master_partnership->master_commission / 100;
+                                                        }
+
+                                                        $total_session_stake = $this->Betting_model->count_total_session_stake($usersData->user_id, $event_id);
+                                                        if ($total_session_stake > 0) {
+                                                            $user_session_comm = abs($total_session_stake) * $get_master_partnership->sessional_commission / 100;
+                                                        }
+
+                                                        $total_pl = $user_match_pl + $user_session_pl;
+
+                                                        $total_comm = $user_match_comm + $user_session_comm;
+
+                                                        if ($total_pl < 0) {
+                                                            $net_amt = ($total_pl + $total_comm);
+                                                        } else {
+                                                            $net_amt = ($total_pl + $total_comm);
+                                                        }
+                                                        $share_amt = $net_amt *  $get_master_partnership->partnership / 100;
+
+
+
+                                                        $final_amt = $net_amt - $share_amt;
+
+
+                                                        if ($final_amt < 0) {
+                                                            $final_amt = $final_amt * -1;
+                                                            $resultData[$event_id]['p_l'] += $final_amt;
+                                                        } else {
+                                                            $final_amt = $final_amt * -1;
+
+                                                            $resultData[$event_id]['p_l'] += $final_amt;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else if ($user_type == 'Admin') {
+
+                        if (!empty($reportsData)) {
+                            foreach ($reportsData as $report) {
+                                $event_id  = $report['match_id'];
+
+                                $resultData[$event_id] = array(
+                                    'match_id' => $report['match_id'],
+                                    'event_name' => $report['event_name'],
+                                    'created_at' => $report['created_at'],
+                                    'p_l' => 0,
+                                );
+
+
+                                $adminsDatas =  $this->User_model->getInnerUserByEventId(array(
+                                    'user_id' => $user_id,
+                                    'match_id' => $report['match_id']
+                                ));
+
+
+                                if (!empty($adminsDatas)) {
+                                    foreach ($adminsDatas as $adminData) {
+
+
+                                        $supersDatas =  $this->User_model->getInnerUserByEventId(array(
+                                            'user_id' => $adminData->user_id,
+                                            'match_id' => $report['match_id']
+                                        ));
+
+
+                                        if (!empty($supersDatas)) {
+                                            foreach ($supersDatas as $superData) {
+
+                                                $mastersDatas =  $this->User_model->getInnerUserByEventId(array(
+                                                    'user_id' => $superData->user_id,
+                                                    'match_id' => $report['match_id']
+                                                ));
+
+
+                                                if (!empty($mastersDatas)) {
+                                                    foreach ($mastersDatas as $masterData) {
+                                                        $usersDatas =  $this->User_model->getInnerUserByEventId(array(
+                                                            'user_id' => $masterData->user_id,
+                                                            'match_id' => $report['match_id']
+                                                        ));
+
+
+
+
+
+                                                        if (!empty($usersDatas)) {
+                                                            foreach ($usersDatas as $key => $usersData) {
+
+
+
+                                                                $usersDatas[$key]->master = array();
+                                                                $usersDatas[$key]->super_master = array();
+                                                                $usersDatas[$key]->hyper_super_master = array();
+                                                                $usersDatas[$key]->admin = array();
+                                                                $usersDatas[$key]->super_admin = array();
+
+                                                                $user_match_pl = $this->Betting_model->count_total_match_profit_loss($usersData->user_id, $event_id);
+                                                                $user_session_pl = $this->Betting_model->count_total_session_profit_loss($usersData->user_id, $event_id);
+
+
+                                                                $user_session_comm = $this->Betting_model->count_total_session_comm($usersData->user_id, $event_id);
+                                                                $get_match_comm = $this->Betting_model->count_total_match_comm($usersData->user_id, $event_id);
+
+
+
+
+                                                                $get_master_partnership = $this->Betting_model->get_betting_info($user_id, $event_id);
+
+
+
+                                                                $user_match_comm = 0;
+                                                                $user_session_comm = 0;
+
+
+                                                                if ($user_match_pl < 0) {
+                                                                    $user_match_comm = abs($user_match_pl) * $get_master_partnership->master_commission / 100;
+                                                                }
+
+                                                                $total_session_stake = $this->Betting_model->count_total_session_stake($usersData->user_id, $event_id);
+                                                                if ($total_session_stake > 0) {
+                                                                    $user_session_comm = abs($total_session_stake) * $get_master_partnership->sessional_commission / 100;
+                                                                }
+
+                                                                $total_pl = $user_match_pl + $user_session_pl;
+
+                                                                $total_comm = $user_match_comm + $user_session_comm;
+
+                                                                if ($total_pl < 0) {
+                                                                    $net_amt = ($total_pl + $total_comm);
+                                                                } else {
+                                                                    $net_amt = ($total_pl + $total_comm);
+                                                                }
+                                                                $share_amt = $net_amt *  $get_master_partnership->partnership / 100;
+
+
+
+                                                                $final_amt = $net_amt - $share_amt;
+
+
+                                                                if ($final_amt < 0) {
+                                                                    $final_amt = $final_amt * -1;
+                                                                    $resultData[$event_id]['p_l'] += $final_amt;
+                                                                } else {
+                                                                    $final_amt = $final_amt * -1;
+
+                                                                    $resultData[$event_id]['p_l'] += $final_amt;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else if ($user_type == 'Super Admin') {
+
+                        if (!empty($reportsData)) {
+                            foreach ($reportsData as $report) {
+                                $event_id  = $report['match_id'];
+                                $adminsDatas =  $this->User_model->getInnerUserByEventId(array(
+                                    'user_id' => $user_id,
+                                    'match_id' => $report['match_id']
+                                ));
+
+
+                                $resultData[$event_id] = array(
+                                    'match_id' => $report['match_id'],
+                                    'event_name' => $report['event_name'],
+                                    'created_at' => $report['created_at'],
+                                    'p_l' => 0,
+                                );
+
+
+
+
+                                if (!empty($adminsDatas)) {
+                                    foreach ($adminsDatas as $adminData) {
+
+                                        $hypersDatas =  $this->User_model->getInnerUserByEventId(array(
+                                            'user_id' => $adminData->user_id,
+                                            'match_id' => $report['match_id']
+                                        ));
+
+
+                                        if (!empty($hypersDatas)) {
+                                            foreach ($hypersDatas as $hyperData) {
+
+
+                                                $supersDatas =  $this->User_model->getInnerUserByEventId(array(
+                                                    'user_id' => $hyperData->user_id,
+                                                    'match_id' => $report['match_id']
+                                                ));
+
+
+                                                if (!empty($supersDatas)) {
+                                                    foreach ($supersDatas as $superData) {
+
+                                                        $mastersDatas =  $this->User_model->getInnerUserByEventId(array(
+                                                            'user_id' => $superData->user_id,
+                                                            'match_id' => $report['match_id']
+                                                        ));
+
+
+                                                        if (!empty($mastersDatas)) {
+                                                            foreach ($mastersDatas as $masterData) {
+                                                                $usersDatas =  $this->User_model->getInnerUserByEventId(array(
+                                                                    'user_id' => $masterData->user_id,
+                                                                    'match_id' => $report['match_id']
+                                                                ));
+
+
+
+
+                                                                if (!empty($usersDatas)) {
+                                                                    foreach ($usersDatas as $key => $usersData) {
+
+
+
+                                                                        $usersDatas[$key]->master = array();
+                                                                        $usersDatas[$key]->super_master = array();
+                                                                        $usersDatas[$key]->hyper_super_master = array();
+                                                                        $usersDatas[$key]->admin = array();
+                                                                        $usersDatas[$key]->super_admin = array();
+
+                                                                        $user_match_pl = $this->Betting_model->count_total_match_profit_loss($usersData->user_id, $event_id);
+                                                                        $user_session_pl = $this->Betting_model->count_total_session_profit_loss($usersData->user_id, $event_id);
+
+
+                                                                        $user_session_comm = $this->Betting_model->count_total_session_comm($usersData->user_id, $event_id);
+                                                                        $get_match_comm = $this->Betting_model->count_total_match_comm($usersData->user_id, $event_id);
+
+
+
+
+                                                                        $get_master_partnership = $this->Betting_model->get_betting_info($user_id, $event_id);
+
+
+
+                                                                        $user_match_comm = 0;
+                                                                        $user_session_comm = 0;
+
+
+                                                                        if ($user_match_pl < 0) {
+                                                                            $user_match_comm = abs($user_match_pl) * $get_master_partnership->master_commission / 100;
+                                                                        }
+
+                                                                        $total_session_stake = $this->Betting_model->count_total_session_stake($usersData->user_id, $event_id);
+                                                                        if ($total_session_stake > 0) {
+                                                                            $user_session_comm = abs($total_session_stake) * $get_master_partnership->sessional_commission / 100;
+                                                                        }
+
+                                                                        $total_pl = $user_match_pl + $user_session_pl;
+
+                                                                        $total_comm = $user_match_comm + $user_session_comm;
+
+                                                                        if ($total_pl < 0) {
+                                                                            $net_amt = ($total_pl + $total_comm);
+                                                                        } else {
+                                                                            $net_amt = ($total_pl + $total_comm);
+                                                                        }
+                                                                        $share_amt = $net_amt *  $get_master_partnership->partnership / 100;
+
+
+
+                                                                        $final_amt = $net_amt - $share_amt;
+
+
+                                                                        if ($final_amt < 0) {
+                                                                            $final_amt = $final_amt * -1;
+                                                                            $resultData[$event_id]['p_l'] += $final_amt;
+                                                                        } else {
+                                                                            $final_amt = $final_amt * -1;
+
+                                                                            $resultData[$event_id]['p_l'] += $final_amt;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
+
+                    $total_settle_amount = 0;
+
+                    if (!empty($resultData)) {
+                        foreach ($resultData as $data) {
+                            if ($data['p_l'] > 0) {
+                                $total_settle_amount += abs($data['p_l']);
+                            } else {
+                                $total_settle_amount -= abs($data['p_l']);
+                            }
+                        }
+                    }
+
+
+
+                    if (!empty($ledgerData)) {
+                        foreach ($ledgerData as $data) {
+                            if ($data['role'] == 'Parent') {
+                                if ($data['transaction_type'] == 'Debit') {
+                                    $total_settle_amount -= $data['amount'];
+                                } else if ($data['transaction_type'] == 'Credit') {
+                                    $total_settle_amount += $data['amount'];
+                                }
+                            }
+                        }
+                    }
+
+
+                    $bettingArr = array(
+                        'user_id' => $user->user_id,
+                        'user_name' => $user->user_name,
+                        'name' => $user->name,
+                        'amount' => $total_settle_amount,
+                        'master_comission' => 0,
+                        'partnership' => 0,
+                        'type' => $user_type,
+                        'parent_comission' => 0,
+                    );
+
+
+
+
+                    // $total_settle_amount = $total_settle_amount * -1;
+
+                    if ($total_settle_amount > 0) {
+                        array_push($minusArr, $bettingArr);
+                    } else {
+                        array_push($plusArr, $bettingArr);
+                    }
+                }
+            }
+        }
+
+
+
+        $json_data = array(
+            'plus_acc' => $plusArr,
+            'minus_acc' => $minusArr,
+        );
+        $json_data =  json_encode($json_data);
+
+
+
+        $file_name = get_user_id() . '_' . strtolower($list_user_type) . '_chip_summary.json';
+
+        $file_path = './json_data/' . $file_name;
+
+        write_chipsummary_data($file_path, $json_data);
+
+
+
+
+
+
+        $dataArray['minus_acc'] = $minusArr;
+        $dataArray['plus_acc'] = $plusArr;
+        $dataArray['parent_name'] = $parent_name;
+        $dataArray['user_type'] = $user_type;
+        $dataArray['user_id'] = $user_id;
+        $dataArray['user_name'] = $user_name;
+        log_message("MY_INFO", 'Chip Summary Load End');
+
+
+
+        // $this->load->view('chip-summary', $dataArray);
+    }
+
+
+    public function chip_summarynew($list_user_type = null)
+    {
+
+        log_message("MY_INFO", 'Chip Summary Load Start');
+        $minusArr = array();
+        $plusArr = array();
+        $user_id = get_user_id();
+        $user = $this->User_model->getUserById($user_id);
+        $user_type = $user->user_type;
+        $user_name = $user->name;
+        $partnership = $user->partnership;
+
+        if ($user->master_id == 0) {
+            $parent_name = '';
+            $parent_user_name = '';
+        } else {
+            $master_id = $user->master_id;
+            $master_user = $this->User_model->getUserById($master_id);
+            $parent_name = $master_user->name;
+            $parent_user_name = $master_user->user_name;
+            $master_partnership = $master_user->partnership;
+        }
+
+
+        $file_name = get_user_id() . '_' . strtolower($list_user_type) . '_chip_summary.json';
+
+        $file_path = './json_data/' . $file_name;
+
+
+        $data = json_decode(read_chipsummary_data($file_path), true);
+
+
+        $minusArr = !empty($data['minus_acc']) ? $data['minus_acc'] : [];
+        $plusArr = !empty($data['plus_acc']) ? $data['plus_acc'] : [];
+
+        $dataArray['minus_acc'] = $minusArr;
+        $dataArray['plus_acc'] = $plusArr;
+        $dataArray['parent_name'] = $parent_name;
+        $dataArray['user_type'] = $user_type;
+        $dataArray['user_id'] = $user_id;
+        $dataArray['user_name'] = $user_name;
+        $dataArray['list_user_type'] = $list_user_type;
+        log_message("MY_INFO", 'Chip Summary Load End');
+
+
+
+        $this->load->view('chip-summary', $dataArray);
+    }
 
 
     public function myledger1($sportid = null, $user_id = null)
@@ -8849,10 +12635,492 @@ class   Reports extends My_Controller
     }
 
 
+    public function chip_summarynew_data1()
+    {
+
+        $list_user_type = 'agent';
+
+
+        $this->load->helper('url');
+        $this->load->helper('file');
+        $minusArr = array();
+        $plusArr = array();
+        $user_id = get_user_id();
+        $user = $this->User_model->getUserById($user_id);
+        $user_type = $user->user_type;
+        $user_name = $user->name;
+        $partnership = $user->partnership;
+
+        if ($user->master_id == 0) {
+            $parent_name = '';
+            $parent_user_name = '';
+        } else {
+
+            $parent_id = $user->master_id;
+            $master_id = $user->master_id;
+            $master_user = $this->User_model->getUserById($master_id);
+            $parent_name = $master_user->name;
+            $parent_user_name = $master_user->user_name;
+            $master_partnership = $master_user->partnership;
+        }
+
+        $users = array();
+
+
+        //MASTERS
+        if ($user_type == 'Master') {
+            if ($list_user_type == 'client') {
+
+                $users = $this->User_model->getInnerUserById($user_id);
+            }
+        }
+        //MASTERS
 
 
 
-    public function profitLossDetail($event_id = null, $user_id = null, $market_id = null)
+        //SUPER MASTERS
+        if ($user_type == 'Super Master') {
+            if ($list_user_type === 'client') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+
+                if (!empty($masters)) {
+                    foreach ($masters as $master) {
+                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                        $users = array_merge($users, $usersData);
+                    }
+                }
+            } else if ($list_user_type === 'agent') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+                $users = array_merge($users, $masters);
+            }
+        }
+        //SUPER MASTERS
+
+
+        //HYPER SUPER MASTERS
+        if ($user_type == 'Hyper Super Master') {
+            if ($list_user_type === 'super') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+                $users = array_merge($users, $masters);
+            } else if ($list_user_type === 'agent') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+
+                if (!empty($masters)) {
+                    foreach ($masters as $master) {
+                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                        $users = array_merge($users, $usersData);
+                    }
+                }
+            } else if ($list_user_type === 'client') {
+                $supers = $this->User_model->getInnerUserById($user_id);
+                if (!empty($supers)) {
+                    foreach ($supers as $super) {
+                        $masters = $this->User_model->getInnerUserById($super->user_id);
+
+                        if (!empty($masters)) {
+                            foreach ($masters as $master) {
+                                $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                $users = array_merge($users, $usersData);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //HYPER SUPER MASTERS
+
+        //ADMIN MASTERS
+        if ($user_type == 'Admin') {
+            if ($list_user_type === 'master') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+                $users = array_merge($users, $masters);
+            } else if ($list_user_type === 'super') {
+
+                $supers = $this->User_model->getInnerUserById($user_id);
+
+
+
+                if (!empty($supers)) {
+                    foreach ($supers as $super) {
+                        $masters = $this->User_model->getInnerUserById($super->user_id);
+
+
+                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                        $users = array_merge($users, $masters);
+                    }
+                }
+            } else if ($list_user_type === 'agent') {
+                $hypers = $this->User_model->getInnerUserById($user_id);
+
+                if (!empty($hypers)) {
+                    foreach ($hypers as $hyper) {
+                        $supers = $this->User_model->getInnerUserById($hyper->user_id);
+
+                        if (!empty($supers)) {
+                            foreach ($supers as $super) {
+                                $masters = $this->User_model->getInnerUserById($super->user_id);
+
+
+                                $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                $users = array_merge($users, $masters);
+                            }
+                        }
+                    }
+                }
+            } else if ($list_user_type === 'client') {
+
+                $hypers = $this->User_model->getInnerUserById($user_id);
+                if (!empty($hypers)) {
+                    foreach ($hypers as $hyper) {
+                        $supers = $this->User_model->getInnerUserById($hyper->user_id);
+
+                        if (!empty($supers)) {
+                            foreach ($supers as $super) {
+                                $masters = $this->User_model->getInnerUserById($super->user_id);
+
+                                if (!empty($masters)) {
+                                    foreach ($masters as $master) {
+                                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                        $users = array_merge($users, $usersData);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //HYPER SUPER MASTERS
+
+
+
+
+        //SUPER ADMIN MASTERS
+        if ($user_type == 'Super Admin') {
+            if ($list_user_type === 'sba') {
+                $masters = $this->User_model->getInnerUserById($user_id);
+                $users = array_merge($users, $masters);
+            } else if ($list_user_type === 'master') {
+
+                $supers = $this->User_model->getInnerUserById($user_id);
+
+
+
+                if (!empty($supers)) {
+                    foreach ($supers as $super) {
+                        $masters = $this->User_model->getInnerUserById($super->user_id);
+
+
+                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                        $users = array_merge($users, $masters);
+                    }
+                }
+            } else if ($list_user_type === 'super') {
+                $hypers = $this->User_model->getInnerUserById($user_id);
+
+                if (!empty($hypers)) {
+                    foreach ($hypers as $hyper) {
+                        $supers = $this->User_model->getInnerUserById($hyper->user_id);
+
+                        if (!empty($supers)) {
+                            foreach ($supers as $super) {
+                                $masters = $this->User_model->getInnerUserById($super->user_id);
+
+
+                                $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                $users = array_merge($users, $masters);
+                            }
+                        }
+                    }
+                }
+            } else if ($list_user_type === 'agent') {
+
+                $hypers = $this->User_model->getInnerUserById($user_id);
+                if (!empty($hypers)) {
+                    foreach ($hypers as $hyper) {
+                        $supers = $this->User_model->getInnerUserById($hyper->user_id);
+
+                        if (!empty($supers)) {
+                            foreach ($supers as $super) {
+                                $masters = $this->User_model->getInnerUserById($super->user_id);
+
+                                if (!empty($masters)) {
+                                    foreach ($masters as $master) {
+                                        $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                        $users = array_merge($users, $usersData);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if ($list_user_type === 'client') {
+
+                $admins = $this->User_model->getInnerUserById($user_id);
+
+                if (!empty($admins)) {
+                    foreach ($admins as $admin) {
+                        $hypers = $this->User_model->getInnerUserById($admin->user_id);
+                        if (!empty($hypers)) {
+                            foreach ($hypers as $hyper) {
+                                $supers = $this->User_model->getInnerUserById($hyper->user_id);
+
+                                if (!empty($supers)) {
+                                    foreach ($supers as $super) {
+                                        $masters = $this->User_model->getInnerUserById($super->user_id);
+
+                                        if (!empty($masters)) {
+                                            foreach ($masters as $master) {
+                                                $usersData = $this->User_model->getInnerUserById($master->user_id);
+                                                $users = array_merge($users, $usersData);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //HYPER SUPER MASTERS
+
+
+
+        if (!empty($users)) {
+            foreach ($users as $user) {
+
+
+                if ($user->user_type == 'User') {
+
+
+
+
+                    if ($user->user_id != '7478') {
+                        // continue;
+                    }
+                    $total_settle_amount = $this->Ledger_model->get_total_settlement_new($user->user_id, 'N', $user->user_type);
+
+                    $bettingArr = array(
+                        'user_id' => $user->user_id,
+                        'user_name' => $user->user_name,
+                        'name' => $user->name,
+                        'amount' => $total_settle_amount,
+                        'master_comission' => 0,
+                        'partnership' => 0,
+                        'type' => 'User',
+                        'parent_comission' => 0,
+                    );
+
+
+                    if ($user->user_type == 'User') {
+                        if ($total_settle_amount < 0) {
+                            array_push($minusArr, $bettingArr);
+                        } else {
+                            array_push($plusArr, $bettingArr);
+                        }
+                    } else {
+                        if ($total_settle_amount < 0) {
+                            array_push($minusArr, $bettingArr);
+                        } else {
+                            array_push($plusArr, $bettingArr);
+                        }
+                    }
+                } else {
+                    $user_type = $user->user_type;
+                    $user_id = $user->user_id;
+                    $resultData = array();
+
+                    $dataArray = array(
+                        'user_id' => $user_id,
+                        'pstatus' => 'Settled'
+                    );
+
+                    $reports = array();
+                    // if ($user_id != '8930') {
+                    //     continue;
+                    // }
+
+                    $ledgerData = $this->Ledger_model->get_ledger(array(
+                        'fltrselct' => 2,
+                        'user_id' => $user_id
+                    ));
+
+
+
+
+
+
+                    $reportsData = $this->Report_model->get_my_ledger_test(array(
+                        'user_id' => $user_id
+                    ));
+
+                    if (!empty($reportsData)) {
+                        foreach ($reportsData as $key => $report) {
+                            $event_id  = $report['match_id'];
+
+
+
+                            // p($report);
+
+                            $resultData[$event_id] = array(
+                                'match_id' => $report['match_id'],
+                                'event_name' => $report['event_name'],
+                                'created_at' => $report['created_at'],
+                                'p_l' => 0,
+                            );
+
+
+                            $user_match_pl = $report['profit'] - $report['loss'];
+
+                            $user_session_pl =  $report['total_fancy_profit'] - $report['total_fancy_loss'];
+
+
+
+                            $user_match_comm = 0;
+                            $user_session_comm = 0;
+
+
+                            if ($report['event_type'] == 4) {
+
+
+
+                                if ($user_match_pl < 0) {
+                                    $user_match_comm = abs($user_match_pl) * $report['master_commission'] / 100;
+                                }
+                            }
+
+                            $total_session_stake =  $report['total_fancy_stake'];
+
+                            if ($report['event_type'] == 4) {
+                                if ($total_session_stake > 0) {
+                                    $user_session_comm = abs($total_session_stake) * $report['sessional_commission'] / 100;
+                                }
+                            }
+
+                            $total_pl = $user_match_pl + $user_session_pl;
+
+
+                            $total_comm = $user_match_comm + $user_session_comm;
+
+                            if ($total_pl < 0) {
+                                $net_amt = ($total_pl + $total_comm);
+                            } else {
+                                $net_amt = ($total_pl + $total_comm);
+                            }
+
+                            $share_amt = $net_amt *  $report['partnership'] / 100;
+
+                            // p($report['partnership']);
+
+
+                            // $final_amt = $net_amt - $share_amt;
+                            $final_amt = $share_amt;
+
+                            // p($final_amt);
+
+                            if ($final_amt < 0) {
+                                $final_amt = $final_amt * -1;
+                                $resultData[$event_id]['p_l'] += $final_amt;
+                            } else {
+                                $final_amt = $final_amt * -1;
+
+                                $resultData[$event_id]['p_l'] += $final_amt;
+                            }
+                        }
+                    }
+
+
+                    $total_settle_amount = 0;
+
+                    if (!empty($resultData)) {
+                        foreach ($resultData as $data) {
+                            if ($data['p_l'] > 0) {
+                                $total_settle_amount += abs($data['p_l']);
+                            } else {
+                                $total_settle_amount -= abs($data['p_l']);
+                            }
+                        }
+                    }
+
+
+
+                    if (!empty($ledgerData)) {
+                        foreach ($ledgerData as $data) {
+                            if ($data['role'] == 'Parent') {
+                                if ($data['transaction_type'] == 'Debit') {
+                                    $total_settle_amount -= $data['amount'];
+                                } else if ($data['transaction_type'] == 'Credit') {
+                                    $total_settle_amount += $data['amount'];
+                                }
+                            }
+                        }
+                    }
+
+
+                    $bettingArr = array(
+                        'user_id' => $user->user_id,
+                        'user_name' => $user->user_name,
+                        'name' => $user->name,
+                        'amount' => $total_settle_amount,
+                        'master_comission' => 0,
+                        'partnership' => 0,
+                        'type' => $user_type,
+                        'parent_comission' => 0,
+                    );
+
+
+
+
+                    // $total_settle_amount = $total_settle_amount * -1;
+
+                    if ($total_settle_amount > 0) {
+                        array_push($minusArr, $bettingArr);
+                    } else {
+                        array_push($plusArr, $bettingArr);
+                    }
+                }
+            }
+        }
+
+
+
+        $json_data = array(
+            'plus_acc' => $plusArr,
+            'minus_acc' => $minusArr,
+        );
+
+        p($json_data);
+        $json_data =  json_encode($json_data);
+
+
+
+        $file_name = get_user_id() . '_' . strtolower($list_user_type) . '_chip_summary.json';
+
+        $file_path = './json_data/' . $file_name;
+
+        write_chipsummary_data($file_path, $json_data);
+
+
+
+
+
+
+        $dataArray['minus_acc'] = $minusArr;
+        $dataArray['plus_acc'] = $plusArr;
+        $dataArray['parent_name'] = $parent_name;
+        $dataArray['user_type'] = $user_type;
+        $dataArray['user_id'] = $user_id;
+        $dataArray['user_name'] = $user_name;
+        log_message("MY_INFO", 'Chip Summary Load End');
+
+
+
+        // $this->load->view('chip-summary', $dataArray);
+    }
+
+
+    public function profitLossDetail($event_id = null, $user_id = null)
     {
         $this->load->library('Datatable');
         $message = $this->session->flashdata('message');
@@ -8894,16 +13162,15 @@ class   Reports extends My_Controller
         // }
         $dataArray['toDate'] = date('Y-m-d');
         $dataArray['fromDate'] = date('Y-m-d');
-        $dataArray['match_id'] = $event_id;
-        $dataArray['market_id'] = $market_id;
+
         $search = '';
-        // $dataArray = array(
-        //     'search_p_l' => $search,
+        $dataArray = array(
+            'search_p_l' => $search,
 
-        //     // 'sportid' => $sportid,
+            // 'sportid' => $sportid,
 
-        //     'user_id' => $user_id
-        // );
+            'user_id' => $user_id
+        );
 
         if (!empty($fdate) && !empty($tdate)) {
             $dataArray['toDate'] = date('Y-m-d', strtotime($tdate));
@@ -8919,280 +13186,581 @@ class   Reports extends My_Controller
 
 
 
+        // if ($user_type == 'Master') {
+        //     $reportsData = $this->Betting_model->get_masters_event_wise_profit_loss(array(
+        //         'user_id' => $user_id,
+        //         'event_id' => $event_id
+        //     ));
 
+
+        //     if (!empty($reportsData)) {
+        //         foreach ($reportsData as $report) {
+
+
+        //             $reports[] = array(
+        //                 'match_id' => $report['match_id'],
+        //                 'event_name' => $report['event_name'],
+        //                 'market_name' => $report['market_name'],
+        //                 'market_id' => $report['market_id'],
+        //                 'p_l' => $report['profit'] - $report['loss'],
+        //                 'comm_pl' => $report['plus_commission'] - $report['minus_commission'],
+        //                 'created_at' => $report['created_at']
+        //             );
+        //         }
+        //     }
+        // } else 
+        
         if ($user_type == 'Master') {
-
 
             $dataArray['pstatus'] = 'Settled';
 
             $reports = array();
-            $dataArray['market_id'] = $market_id;
 
+            $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
 
-            $parent_user_type = '';
-            $self_user_type = '';
-
-            if ($user_type == 'Super Master') {
-                $parent_user_type = 'Hyper Super Master';
-                $self_user_type = $user_type;
-            } else if ($user_type == 'Hyper Super Master') {
-                $parent_user_type = 'Admin';
-                $self_user_type = $user_type;
-            } else if ($user_type == 'Admin') {
-                $parent_user_type = 'Super Admin';
-                $self_user_type = $user_type;
-            }
-
-            $dataArray['parent_user_type'] = $parent_user_type;
-            $dataArray['self_user_type'] = $self_user_type;
-
-
-            $reportsData = $this->Report_model->get_profit_loss_masters_events_market_details($dataArray);
-
-
+            // $getCommssion = $this->Ledger_model->get_commission_amt_by_event_id(array(
+            //     'user_id' => $user_id,
+            //     'match_id' => $report['match_id']
+            // ));
 
             if (!empty($reportsData)) {
+                foreach ($reportsData as $report) {
 
-                foreach ($reportsData as $reportData) {
-
-
-                    $filter_user_type = '';
-
-
-                    if ($user_type == 'Master') {
-                        $filter_user_type = 'User';
-                    } else if ($user_type == 'Super Master') {
-                        $filter_user_type = 'Master';
-                    } else if ($user_type == 'Hyper Super Master') {
-                        $filter_user_type = 'Super Master';
-                    } else if ($user_type == 'Admin') {
-                        $filter_user_type = 'Hyper Super Master';
-                    } else if ($user_type == 'Super Admin') {
-                        $filter_user_type = 'Admin';
+                    if ($report['match_id'] != $event_id) {
+                        continue;
                     }
 
 
 
-                    $total_commission = $this->Betting_model->count_match_market_wise_masters_commission(array(
-                        'match_id' => $reportData['match_id'],
-                        'market_id' => $reportData['market_id'],
+                    $marketId = $report['market_id'];
+                    $betting_type = strtolower($report['betting_type']);
+                    $market_id = str_replace('.', '_', $marketId);
 
-                        'user_id' => $user_id,
-                        'user_type' => $filter_user_type
+                    if (isset($reports[$betting_type])) {
+                        if ($betting_type == 'fancy') {
+                            $market_name = 'Fancy';
+                        } else {
+                            $market_name = $report['market_name'];
+                        }
 
-                    ));
+                        $p_l = 0;
 
+                        if ($report['bet_result'] == 'Minus') {
 
+                            $p_l =  $reports[$betting_type]['p_l'] + $report['profit'];
+                        } else if ($report['bet_result'] == 'Plus') {
 
-                    $p_l = $reportData['total_pl'];
-                    $p_l = $p_l * $reportData['total_share'] / 100;
-
-
-                    // p($p_l );
-
-                    $commission = $total_commission->total_commission * $reportData['total_share'] / 100;
-                    $reports[] = array(
-                        'match_id' => $reportData['match_id'],
-                        'event_name' => $reportData['event_name'],
-                        'market_name' => $reportData['market_name'],
-                        'market_id' =>  $reportData['market_id'],
-                        'p_l' => $p_l,
-                        'comm_pl' => $commission,
-                        'created_at' => $reportData['created_at']
-                    );
-                }
-            }
+                            // p($reports[$betting_type]['p_l'] +  $report['loss'] * -1);
+                            $p_l = $reports[$betting_type]['p_l'] +  $report['loss'] * -1;
+                        }
 
 
 
-            $reportsData = $this->Report_model->get_profit_loss_masters_events_fancy_details($dataArray);
+                        $reports[$betting_type]["match_id"] = $report['match_id'];
+                        $reports[$betting_type]["event_name"] = $report['event_name'];
+                        $reports[$betting_type]["market_name"] = $report['market_name'];
+                        $reports[$betting_type]["market_id"] = $report['marketId'];
+                        $reports[$betting_type]["match_id"] = $report['match_id'];
+                        $reports[$betting_type]["p_l"] = $p_l;
+                    } else {
+                        if ($betting_type == 'fancy') {
+                            $market_name = 'Fancy';
+                        } else {
+                            $market_name = $report['market_name'];
+                        }
+
+
+                        $p_l = 0;
+
+                        if ($report['bet_result'] == 'Plus') {
+                            $p_l = $report['loss']  * -1;
+                        } else if ($report['bet_result'] == 'Minus') {
+
+
+                            $p_l = $report['profit'];
+                        }
+
+
+                        $grand_total_mo_comm = 0;
+                        $grand_total_bm_comm = 0;
+
+                        $grand_total_fancy_comm = 0;
+
+
+                        $getCommissionUsers = $this->Betting_model->get_betting_events_user(array(
+                            'user_id' => $user_id,
+                            'match_id' => $report['match_id']
+                        ));
 
 
 
-            if (!empty($reportsData)) {
-
-                foreach ($reportsData as $reportData) {
 
 
-                    $filter_user_type = '';
+
+                        if (!empty($getCommissionUsers)) {
+                            foreach ($getCommissionUsers as $CommissionUser) {
+                                $dataArray2 = array(
+                                    'user_id' => $CommissionUser->client_user_id,
+                                    'match_id' => $report['match_id']
+                                );
+
+                                //***************MATCH ODDS COMM */
+                                $matchOddsbettings = $this->Betting_model->get_match_odds_bettings_by_event_id($dataArray2);
+
+                                $total_mo_profit = 0;
+                                $total_mo_loss = 0;
+                                $total_mo_amt = 0;
+                                $user_mo_comm = 0;
+                                $master_mo_comm = 0;
+                                if (!empty($matchOddsbettings)) {
+                                    foreach ($matchOddsbettings as $matchOddsbetting) {
+                                        $user_mo_comm = $matchOddsbetting['master_commission'];
+                                        if ($matchOddsbetting['bet_result'] == 'Plus') {
+                                            $total_mo_profit += $matchOddsbetting['profit'];
+                                        } else if ($matchOddsbetting['bet_result'] == 'Minus') {
+                                            $total_mo_loss += $matchOddsbetting['loss'];
+                                        }
+                                    }
+                                }
+
+                                $master_mo_comm = $CommissionUser->master_commission -  $user_mo_comm;
+
+                                $total_mo_amt = $total_mo_profit - $total_mo_loss;
+
+                                if ($total_mo_amt < 0) {
+
+                                    $commission_amt = (abs($total_mo_amt) * $CommissionUser->master_commission) / 100;
+                                }
+
+                                $mo_commission_amt = (abs($total_mo_amt) * $master_mo_comm) / 100;
+
+                                $grand_total_mo_comm += $mo_commission_amt;
+
+                                //***************MATCH ODDS COMM */
 
 
-                    if ($user_type == 'Master') {
-                        $filter_user_type = 'User';
-                    } else if ($user_type == 'Super Master') {
-                        $filter_user_type = 'Master';
-                    } else if ($user_type == 'Hyper Super Master') {
-                        $filter_user_type = 'Super Master';
-                    } else if ($user_type == 'Admin') {
-                        $filter_user_type = 'Hyper Super Master';
-                    } else if ($user_type == 'Super Admin') {
-                        $filter_user_type = 'Admin';
+                                //***************BOOKMAKER COMM */
+                                $bookMakerbettings = $this->Betting_model->get_bookmaker_bettings_by_event_id($dataArray2);
+
+
+                                $total_bm_profit = 0;
+                                $total_bm_loss = 0;
+                                $total_bm_amt = 0;
+                                $user_bm_comm = 0;
+                                $master_bm_comm = 0;
+                                if (!empty($bookMakerbettings)) {
+                                    foreach ($bookMakerbettings as $bookMakerbetting) {
+                                        $user_bm_comm = $bookMakerbetting['master_commission'];
+                                        if ($bookMakerbetting['bet_result'] == 'Plus') {
+                                            $total_bm_profit += $bookMakerbetting['profit'];
+                                        } else if ($bookMakerbetting['bet_result'] == 'Minus') {
+                                            $total_bm_loss += $bookMakerbetting['loss'];
+                                        }
+                                    }
+                                }
+
+                                $master_bm_comm = $CommissionUser->master_commission -  $user_bm_comm;
+
+                                $total_bm_amt = $total_bm_profit - $total_bm_loss;
+
+                                if ($total_bm_amt < 0) {
+
+
+
+                                    $bm_commission_amt = (abs($total_bm_amt) * $master_bm_comm) / 100;
+                                }
+
+
+                                if ($CommissionUser->market_name == 'Bookmaker') {
+                                    $grand_total_bm_comm += $bm_commission_amt;
+                                }
+                                //***************BOOKMAKER COMM */
+
+                                // p($bm_commission_amt);
+                                //***************FANCY COMM */
+                                $fancybettings = $this->Betting_model->get_fancy_bettings_by_event_id($dataArray2);
+
+                                $total_fancy_profit = 0;
+                                $total_fancy_loss = 0;
+                                $total_fancy_amt = 0;
+                                $user_fancy_comm = 0;
+                                $master_fancy_comm = 0;
+                                if (!empty($fancybettings)) {
+                                    foreach ($fancybettings as $fancybetting) {
+
+                                        $user_fancy_comm = $fancybetting['sessional_commission'];
+                                        if ($fancybetting['bet_result'] == 'Plus') {
+                                            $total_fancy_profit += $fancybetting['profit'];
+                                        } else if ($fancybetting['bet_result'] == 'Minus') {
+                                            $total_fancy_loss += $fancybetting['loss'];
+                                        }
+                                    }
+                                }
+
+                                $master_fancy_comm = $CommissionUser->sessional_commission -  $user_fancy_comm;
+
+                                $total_fancy_amt = $total_fancy_profit - $total_fancy_loss;
+
+                                $total_fancy_stake = 0;
+
+                                if ($market_name = 'Fancy') {
+
+                                    $total_fancy_stake = $this->Betting_model->count_total_session_stake(
+                                        $CommissionUser->client_user_id,
+                                        $report['match_id']
+                                    );
+                                }
+
+
+                                if ($total_fancy_stake > 0) {
+
+
+
+                                    $fancy_commission_amt = (abs($total_fancy_stake) * $CommissionUser->sessional_commission) / 100;
+
+                                    // p($master_fancy_comm,0);
+                                }
+
+                                if ($CommissionUser->betting_type == 'Fancy') {
+                                    $grand_total_fancy_comm += $fancy_commission_amt;
+                                }
+
+                                //***************FANCY COMM */
+
+
+                            }
+                        }
+
+
+
+                        if ($betting_type == 'fancy') {
+                            $commission = $grand_total_fancy_comm;
+                            $p_l -= $grand_total_fancy_comm;
+                        } else {
+                            $commission = $grand_total_mo_comm + $grand_total_bm_comm;
+                            $p_l -= $grand_total_mo_comm;
+                            $p_l -= $grand_total_bm_comm;
+                        }
+
+                        $reports[$betting_type] = array(
+                            'match_id' => $report['match_id'],
+                            'event_name' => $report['event_name'],
+                            'market_name' => $market_name,
+                            'market_id' => $marketId,
+                            'p_l' => $p_l,
+                            'comm_pl' => $commission,
+                            'created_at' => $report['created_at']
+                        );
                     }
-
-
-
-
-
-
-                    $p_l = $reportData['total_pl'];
-                    $p_l = $p_l * $reportData['total_share'] / 100;
-
-
-                    $commission = 0;
-                    $reports[] = array(
-                        'match_id' => $reportData['match_id'],
-                        'event_name' => $reportData['event_name'],
-                        'market_name' => 'Fancy',
-                        'market_id' =>  $reportData['market_id'],
-                        'p_l' => $p_l,
-                        'comm_pl' => $commission,
-                        'created_at' => $reportData['created_at']
-                    );
                 }
             }
+
+            // p($reports);
         } else if ($user_type == 'Super Master' || $user_type == 'Hyper Super Master' || $user_type == 'Admin' || $user_type == 'Super Admin') {
 
             $dataArray['pstatus'] = 'Settled';
-            $dataArray['market_id'] = $market_id;
 
             $reports = array();
 
-
-            $parent_user_type = '';
-            $self_user_type = '';
-
-            if ($user_type == 'Super Master') {
-                $parent_user_type = 'Hyper Super Master';
-                $self_user_type = $user_type;
-            } else if ($user_type == 'Hyper Super Master') {
-                $parent_user_type = 'Admin';
-                $self_user_type = $user_type;
-            } else if ($user_type == 'Admin') {
-                $parent_user_type = 'Super Admin';
-                $self_user_type = $user_type;
-            }
-
-            $dataArray['parent_user_type'] = $parent_user_type;
-            $dataArray['self_user_type'] = $self_user_type;
-
-
-
-
-            $reportsData = $this->Report_model->get_profit_loss_events_market_details($dataArray);
-
-
+            $reportsData = $this->Report_model->get_bet_history_bettings_list($dataArray);
+            // $getCommssion = $this->Ledger_model->get_commission_amt_by_event_id(array(
+            //     'user_id' => $user_id,
+            //     'match_id' => $report['match_id']
+            // ));
 
             if (!empty($reportsData)) {
+                foreach ($reportsData as $report) {
 
-                foreach ($reportsData as $reportData) {
-
-
-                    $filter_user_type = '';
-
-
-                    if ($user_type == 'Master') {
-                        $filter_user_type = 'User';
-                    } else if ($user_type == 'Super Master') {
-                        $filter_user_type = 'Master';
-                    } else if ($user_type == 'Hyper Super Master') {
-                        $filter_user_type = 'Super Master';
-                    } else if ($user_type == 'Admin') {
-                        $filter_user_type = 'Hyper Super Master';
-                    } else if ($user_type == 'Super Admin') {
-                        $filter_user_type = 'Admin';
+                    if ($report['match_id'] != $event_id) {
+                        continue;
                     }
 
 
 
-                    $total_commission = $this->Betting_model->count_match_market_wise_masters_commission(array(
-                        'match_id' => $reportData['match_id'],
-                        'market_id' => $reportData['market_id'],
+                    $marketId = $report['market_id'];
+                    $betting_type = strtolower($report['betting_type']);
+                    $market_id = str_replace('.', '_', $marketId);
 
-                        'user_id' => $user_id,
-                        'user_type' => $filter_user_type
+                    if (isset($reports[$betting_type])) {
+                        if ($betting_type == 'fancy') {
+                            $market_name = 'Fancy';
+                        } else {
+                            $market_name = $report['market_name'];
+                        }
 
-                    ));
+                        $p_l = 0;
 
+                        if ($report['bet_result'] == 'Minus') {
 
-                    $p_l = $reportData['total_pl'];
-                    $p_l = $p_l * $reportData['total_share'] / 100;
+                            $p_l =  $reports[$betting_type]['p_l'] + $report['profit'];
+                        } else if ($report['bet_result'] == 'Plus') {
 
-
-                    $commission = $total_commission->total_commission * $reportData['total_share'] / 100;
-
-
-
-
-
-
-                    $reports[] = array(
-                        'match_id' => $reportData['match_id'],
-                        'event_name' => $reportData['event_name'],
-                        'market_name' => $reportData['market_name'],
-                        'market_id' =>  $reportData['market_id'],
-                        'p_l' => $p_l,
-                        'comm_pl' => $commission,
-                        'created_at' => $reportData['created_at']
-                    );
-                }
-            }
+                            // p($reports[$betting_type]['p_l'] +  $report['loss'] * -1);
+                            $p_l = $reports[$betting_type]['p_l'] +  $report['loss'] * -1;
+                        }
 
 
 
-            $reportsData = $this->Report_model->get_profit_loss_events_fancy_details($dataArray);
+                        $reports[$betting_type]["match_id"] = $report['match_id'];
+                        $reports[$betting_type]["event_name"] = $report['event_name'];
+                        $reports[$betting_type]["market_name"] = $report['market_name'];
+                        $reports[$betting_type]["market_id"] = $report['marketId'];
+                        $reports[$betting_type]["match_id"] = $report['match_id'];
+                        $reports[$betting_type]["p_l"] = $p_l;
 
 
 
-            if (!empty($reportsData)) {
+                        // = array(
+                        //     'match_id' => $report['match_id'],
+                        //     'event_name' => $report['event_name'],
+                        //     'market_name' => $market_name,
+                        //     'market_id' => $marketId,
 
-                foreach ($reportsData as $reportData) {
+                        //     'p_l' => $p_l,
+                        //     'commission' => 0,
+                        //     'created_at' => $report['created_at']
+                        // );
+
+                        // if ($betting_type == 'fancy') {
+                        //     $session_comm_amt = $this->Betting_model->count_total_master_session_comm($user_id,$report['match_id']);
+
+                        //     $tmp_comm_value =  $session_comm_amt;
 
 
-                    $filter_user_type = '';
+                        //     // p($tmp_comm_value);
+                        //  }
+                        // $comm_pl =  $reports[$betting_type]['comm_pl'] + $tmp_comm_value;
+                        // if ($betting_type == 'fancy') {
+                        //  }
+                        // $reports[$betting_type]['comm_pl'] =  $comm_pl;
+                    } else {
+                        if ($betting_type == 'fancy') {
+                            $market_name = 'Fancy';
+                        } else {
+                            $market_name = $report['market_name'];
+                        }
 
 
-                    if ($user_type == 'Master') {
-                        $filter_user_type = 'User';
-                    } else if ($user_type == 'Super Master') {
-                        $filter_user_type = 'Master';
-                    } else if ($user_type == 'Hyper Super Master') {
-                        $filter_user_type = 'Super Master';
-                    } else if ($user_type == 'Admin') {
-                        $filter_user_type = 'Hyper Super Master';
-                    } else if ($user_type == 'Super Admin') {
-                        $filter_user_type = 'Admin';
+                        $p_l = 0;
+
+                        if ($report['bet_result'] == 'Plus') {
+                            $p_l = $report['loss']  * -1;
+                        } else if ($report['bet_result'] == 'Minus') {
+
+
+                            $p_l = $report['profit'];
+                        }
+
+
+
+                        $grand_total_mo_comm = 0;
+                        $grand_total_bm_comm = 0;
+
+                        $grand_total_fancy_comm = 0;
+
+
+                        $getCommissionUsers = $this->Betting_model->get_betting_events_user(array(
+                            'user_id' => $user_id,
+                            'match_id' => $report['match_id']
+                        ));
+
+
+
+                        if (!empty($getCommissionUsers)) {
+                            foreach ($getCommissionUsers as $CommissionUser) {
+
+                                $bet_user_type = '';
+
+                                if ($user_type == 'Super Master') {
+                                    $bet_user_type = 'Master';
+                                } else if ($user_type == 'Hyper Super Master') {
+                                    $bet_user_type = 'Super Master';
+                                } else if ($user_type == 'Admin') {
+                                    $bet_user_type = 'Hyper Super Master';
+                                } else if ($user_type == 'Super Admin') {
+                                    $bet_user_type = 'Admin';
+                                }
+
+                                $dataArray2 = array(
+                                    'user_id' => $CommissionUser->client_user_id,
+                                    'match_id' => $report['match_id'],
+                                    'user_type' => $bet_user_type
+                                );
+
+                                //***************MATCH ODDS COMM */
+                                $matchOddsbettings = $this->Betting_model->get_masters_wise_match_odds_bettings_by_event_id($dataArray2);
+
+
+                                $total_mo_profit = 0;
+                                $total_mo_loss = 0;
+                                $total_mo_amt = 0;
+                                $user_mo_comm = 0;
+                                $master_mo_comm = 0;
+                                if (!empty($matchOddsbettings)) {
+                                    foreach ($matchOddsbettings as $matchOddsbetting) {
+                                        $user_mo_comm = $matchOddsbetting['master_commission'];
+                                        if ($matchOddsbetting['bet_result'] == 'Plus') {
+                                            $total_mo_profit += $matchOddsbetting['profit'];
+                                        } else if ($matchOddsbetting['bet_result'] == 'Minus') {
+                                            $total_mo_loss += $matchOddsbetting['loss'];
+                                        }
+                                    }
+                                }
+
+                                $master_mo_comm = $CommissionUser->master_commission -  $user_mo_comm;
+
+                                $total_mo_amt = $total_mo_profit - $total_mo_loss;
+
+                                if ($total_mo_amt < 0) {
+
+                                    $commission_amt = (abs($total_mo_amt) * $CommissionUser->master_commission) / 100;
+                                }
+
+                                $mo_commission_amt = (abs($total_mo_amt) * $master_mo_comm) / 100;
+
+                                $grand_total_mo_comm += $mo_commission_amt;
+                                //***************MATCH ODDS COMM */
+
+
+                                //***************BOOKMAKER COMM */
+                                $bookMakerbettings = $this->Betting_model->get_masters_wise_bookmaker_bettings_by_event_id($dataArray2);
+
+
+
+
+                                $total_bm_profit = 0;
+                                $total_bm_loss = 0;
+                                $total_bm_amt = 0;
+                                $user_bm_comm = 0;
+                                $master_bm_comm = 0;
+                                if (!empty($bookMakerbettings)) {
+                                    foreach ($bookMakerbettings as $bookMakerbetting) {
+                                        $user_bm_comm = $bookMakerbetting['master_commission'];
+                                        if ($bookMakerbetting['bet_result'] == 'Plus') {
+                                            $total_bm_profit += $bookMakerbetting['profit'];
+                                        } else if ($bookMakerbetting['bet_result'] == 'Minus') {
+                                            $total_bm_loss += $bookMakerbetting['loss'];
+                                        }
+                                    }
+                                }
+
+                                $master_bm_comm = $CommissionUser->master_commission -  $user_bm_comm;
+
+                                $total_bm_amt = $total_bm_profit - $total_bm_loss;
+
+                                if ($total_bm_amt < 0) {
+
+
+
+                                    $bm_commission_amt = (abs($total_bm_amt) * $master_bm_comm) / 100;
+                                }
+
+                                $grand_total_bm_comm += $bm_commission_amt;
+                                //***************BOOKMAKER COMM */
+
+                                // p($bm_commission_amt);
+                                //***************FANCY COMM */
+                                $fancybettings = $this->Betting_model->get_fancy_bettings_by_event_id($dataArray2);
+
+                                $total_fancy_profit = 0;
+                                $total_fancy_loss = 0;
+                                $total_fancy_amt = 0;
+                                $user_fancy_comm = 0;
+                                $master_fancy_comm = 0;
+                                if (!empty($fancybettings)) {
+                                    foreach ($fancybettings as $fancybetting) {
+
+                                        $user_fancy_comm = $fancybetting['sessional_commission'];
+                                        if ($fancybetting['bet_result'] == 'Plus') {
+                                            $total_fancy_profit += $fancybetting['profit'];
+                                        } else if ($fancybetting['bet_result'] == 'Minus') {
+                                            $total_fancy_loss += $fancybetting['loss'];
+                                        }
+                                    }
+                                }
+
+                                $master_fancy_comm = $CommissionUser->sessional_commission -  $user_fancy_comm;
+
+                                $total_fancy_amt = $total_fancy_profit - $total_fancy_loss;
+
+                                if ($total_fancy_amt < 0) {
+
+
+
+                                    $fancy_commission_amt = (abs($total_fancy_amt) * $master_fancy_comm) / 100;
+                                }
+
+                                $grand_total_fancy_comm += $fancy_commission_amt;
+                                //***************FANCY COMM */
+
+
+                            }
+                        }
+
+
+                        if ($market_name == 'Bookmaker') {
+                            $commission =   $grand_total_bm_comm;
+                        } else if ($market_name == 'Fancy') {
+                            $commission =   $grand_total_fancy_comm;
+                        } else {
+                            $commission = $grand_total_mo_comm;
+                        }
+
+
+                        $p_l -= $grand_total_mo_comm;
+                        $p_l -= $grand_total_bm_comm;
+                        $p_l -= $grand_total_fancy_comm;
+
+
+
+                        $reports[$betting_type] = array(
+                            'match_id' => $report['match_id'],
+                            'event_name' => $report['event_name'],
+                            'market_name' => $market_name,
+                            'market_id' => $marketId,
+                            'p_l' => $p_l,
+                            'comm_pl' => $commission,
+                            'created_at' => $report['created_at']
+                        );
+                        // $comm_pl = 0;
+                        // $sessional_commission = 2;
+
+                        // $getCommssion = $this->Ledger_model->get_commission_amt_by_event_id(array(
+                        //     'user_id' => $user_id,
+                        //     'match_id' => $report['match_id']
+                        // ));
+
+
+                        ///COMMENT ON 23 AUG
+                        // if ($betting_type == 'fancy') {
+                        //     $session_comm_amt = $this->Betting_model->count_total_master_session_comm($user_id, $report['match_id']);
+
+                        //     $tmp_comm_value =  $session_comm_amt;
+
+
+                        //     // p($tmp_comm_value);
+                        // } else {
+
+                        //     $match_comm_amt = $this->Betting_model->count_total_master_match_comm($user_id, $report['match_id']);
+                        //     $tmp_comm_value =  $match_comm_amt;
+                        // }
+
+
+                        // // p($tmp_comm_value);
+                        // $comm_pl =  $reports[$betting_type]['comm_pl'] + $tmp_comm_value;
+                        // if ($betting_type == 'fancy') {
+                        // }
+                        // $reports[$betting_type]['comm_pl'] =  $comm_pl;
+                        //COMMENT ON 23 UAG
                     }
-
-
-
-
-
-
-                    $p_l = $reportData['total_pl'];
-                    $p_l = $p_l * $reportData['total_share'] / 100;
-
-
-                    $commission = 0;
-                    $reports[] = array(
-                        'match_id' => $reportData['match_id'],
-                        'event_name' => $reportData['event_name'],
-                        'market_name' => 'Fancy',
-                        'market_id' =>  $reportData['market_id'],
-                        'p_l' => $p_l,
-                        'comm_pl' => $commission,
-                        'created_at' => $reportData['created_at']
-                    );
                 }
             }
         } else {
             $dataArray['pstatus'] = 'Settled';
-            $dataArray['market_id'] = $market_id;
-
             $reports = array();
             $reportsData = $this->Betting_model->get_event_wise_profit_loss(array(
                 'user_id' => $user_id,
-                'event_id' => $event_id,
-                'market_id' => $market_id
+                'event_id' => $event_id
             ));
 
 
@@ -9209,9 +13777,115 @@ class   Reports extends My_Controller
                         'comm_pl' => $report['plus_commission'] - $report['minus_commission'],
                         'created_at' => $report['created_at']
                     );
+
+
+
+
+                    // p($report);
+
+
+                    // $marketId = $report['market_id'];
+                    // $betting_type = strtolower($report['betting_type']);
+                    // $market_id = str_replace('.', '_', $marketId);
+
+                    // if (isset($reports[$betting_type])) {
+                    //     if ($betting_type == 'fancy') {
+                    //         $market_name = 'Fancy';
+                    //     } else {
+                    //         $market_name = $report['market_name'];
+                    //     }
+
+                    //     // if ($report['market_name'] == 'Bookmaker') {
+                    //     //     $betting_type = 'Bookmaker';
+                    //     //                             }
+
+                    //     $p_l = 0;
+
+                    //     if ($report['bet_result'] == 'Plus') {
+
+                    //         $p_l =  $reports[$betting_type]['p_l'] + $report['profit'];
+                    //     } else if ($report['bet_result'] == 'Minus') {
+
+                    //         // p($reports[$betting_type]['p_l'] +  $report['loss'] * -1);
+                    //         $p_l = $reports[$betting_type]['p_l'] +  $report['loss'] * -1;
+                    //     }
+
+
+
+                    //     $reports[$betting_type]['match_id'] = $report['match_id'];
+                    //     $reports[$betting_type]['event_name'] = $report['event_name'];
+                    //     $reports[$betting_type]['market_name'] = $market_name;
+                    //     $reports[$betting_type]['market_id'] = $marketId;
+
+                    //     $reports[$betting_type]['p_l'] = $p_l;
+
+                    //     $reports[$betting_type]['created_at'] = $report['created_at'];
+                    // } else {
+                    //     if ($betting_type == 'fancy') {
+                    //         $market_name = 'Fancy';
+                    //     } else {
+                    //         $market_name = $report['market_name'];
+                    //     }
+
+                    //     // if ($report['market_name'] == 'Bookmaker') {
+                    //     //     $betting_type = 'Bookmaker';
+                    //     //                             }
+
+
+                    //     $p_l = 0;
+
+                    //     if ($report['bet_result'] == 'Plus') {
+                    //         $p_l = $report['profit'];
+                    //     } else if ($report['bet_result'] == 'Minus') {
+
+
+                    //         $p_l = $report['loss'] * -1;
+                    //     }
+
+
+                    //     if ($market_name == 'Bookmaker') {
+                    //         $getCommssion = $this->Ledger_model->get_user_bookmaker_commission_amt_by_event_id(array(
+                    //             'user_id' => $user_id,
+                    //             'match_id' => $report['match_id']
+                    //         ));
+                    //     } else if ($market_name == 'Fancy') {
+                    //         $getCommssion = $this->Ledger_model->get_user_fancy_commission_amt_by_event_id(array(
+                    //             'user_id' => $user_id,
+                    //             'match_id' => $report['match_id']
+                    //         ));
+                    //     } else {
+                    //         $getCommssion = $this->Ledger_model->get_user_match_odds_commission_amt_by_event_id(array(
+                    //             'user_id' => $user_id,
+                    //             'match_id' => $report['match_id']
+                    //         ));
+                    //     }
+
+
+
+
+
+
+                    //     if (!empty($getCommssion)) {
+                    //         $p_l += $getCommssion->total_commission;
+                    //     }
+
+
+                    //     // p($getCommssion);
+
+                    //     $reports[$betting_type] = array(
+                    //         'match_id' => $report['match_id'],
+                    //         'event_name' => $report['event_name'],
+                    //         'market_name' => $market_name,
+                    //         'market_id' => $marketId,
+                    //         'p_l' => $p_l,
+                    //         'comm_pl' => $getCommssion->total_commission,
+                    //         'created_at' => $report['created_at']
+                    //     );
+                    // }
                 }
             }
         }
+
 
 
         $dataArray['user_id'] = $user_id;
@@ -9239,8 +13913,8 @@ class   Reports extends My_Controller
         if ($sportid != 0) {
             $dataArray['sportid']  = 5;
         }
-        $dataArray['toDate'] = get_today_end_datetime();
-        $dataArray['fromDate'] = get_yesterday_datetime();
+        $dataArray['toDate'] = date('Y-m-d');
+        $dataArray['fromDate'] = date('Y-m-d');
 
         $search = '';
         $dataArray = array(
@@ -9248,10 +13922,10 @@ class   Reports extends My_Controller
             'user_id' => $user_id
         );
 
-
-        $dataArray['fromDate'] = get_yesterday_datetime();
-        $dataArray['toDate'] = get_today_end_datetime();
-
+        if (!empty($fdate) && !empty($tdate)) {
+            $dataArray['toDate'] = date('Y-m-d', strtotime($tdate));
+            $dataArray['fromDate'] = date('Y-m-d', strtotime($fdate));
+        }
 
         $dataArray['pstatus'] = 'Settled';
 
@@ -9260,39 +13934,11 @@ class   Reports extends My_Controller
         $user_type = $user_detail->user_type;
 
 
-
         if ($user_type != 'User') {
 
 
             $dataArray['pstatus'] = 'Settled';
-
-
-            if ($user_type == 'Master') {
-
-                $reportsData = $this->Report_model->get_profit_loss_events_list($dataArray);
-            } else {
-
-                $parent_user_type = '';
-                $self_user_type = '';
-
-                if ($user_type == 'Super Master') {
-                    $parent_user_type = 'Hyper Super Master';
-                    $self_user_type = $user_type;
-                } else if ($user_type == 'Hyper Super Master') {
-                    $parent_user_type = 'Admin';
-                    $self_user_type = $user_type;
-                } else if ($user_type == 'Admin') {
-                    $parent_user_type = 'Super Admin';
-                    $self_user_type = $user_type;
-                }
-
-                $dataArray['parent_user_type'] = $parent_user_type;
-                $dataArray['self_user_type'] = $self_user_type;
-
-                $reportsData = $this->Report_model->get_profit_loss_events_list_new($dataArray);
-            }
-
-
+            $reportsData = $this->Report_model->get_profit_loss_events_list($dataArray);
 
 
 
@@ -9315,8 +13961,8 @@ class   Reports extends My_Controller
 
                     // p($report);
 
-                    // $match_comm = 0;
-                    // $session_comm = 0;
+                    $match_comm = 0;
+                    $session_comm = 0;
 
                     $match_pl = $profit - $loss;
                     $session_pl = $total_fancy_profit - $total_fancy_loss;
@@ -9324,87 +13970,27 @@ class   Reports extends My_Controller
 
 
 
-
-                    // if ($match_pl < 0) {
-                    //     $match_comm = abs($match_pl * $master_commission / 100);
-                    // }
-
-
-                    // if ($total_fancy_stake > 0) {
-                    //     $session_comm = abs($total_fancy_stake * $sessional_commission / 100);
-                    // }
-
-                    $filter_user_type = '';
-
-
-                    if ($user_type == 'Master') {
-                        $filter_user_type = 'User';
-                    } else if ($user_type == 'Super Master') {
-                        $filter_user_type = 'Master';
-                    } else if ($user_type == 'Hyper Super Master') {
-                        $filter_user_type = 'Super Master';
-                    } else if ($user_type == 'Admin') {
-                        $filter_user_type = 'Hyper Super Master';
-                    } else if ($user_type == 'Super Admin') {
-                        $filter_user_type = 'Admin';
+                    if ($match_pl < 0) {
+                        $match_comm = abs($match_pl * $master_commission / 100);
                     }
 
 
-
-
-                    if ($report['is_casino'] == 'Yes') {
-
-                        $total_commission = $this->Betting_model->count_match_market_wise_masters_commission(array(
-                            'match_id' => $report['match_id'],
-                            'user_id' => $user_id,
-                            'user_type' => $filter_user_type,
-                            'market_id' => $report['market_id'],
-
-                        ));
-                    } else {
-                        $total_commission = $this->Betting_model->count_match_wise_masters_commission(array(
-                            'match_id' => $report['match_id'],
-                            'user_id' => $user_id,
-                            'user_type' => $filter_user_type
-
-                        ));
+                    if ($total_fancy_stake > 0) {
+                        $session_comm = abs($total_fancy_stake * $sessional_commission / 100);
                     }
-
 
 
 
                     $p_l = 0;
 
 
-                    $p_l = (($match_pl + $total_commission->total_commission) * $report['total_share'] / 100) + ($session_pl  * $report['total_share'] / 100);
+                    $p_l = ($match_pl + $match_comm) + ($session_pl + $session_comm);
 
-
-
-                    if ($report['is_casino'] == 'Yes') {
-
-                        $market_id = explode('__', $report['market_id']);
-
-
-                        if (!empty($market_id)) {
-                            $market_id = $market_id[1];
-                            $market_id = explode('_', $market_id);
-
-                            if (!empty($market_id)) {
-
-                                $market_id  = $market_id[0];
-                            }
-                        }
-
-                        $event_name = $event_name . ' / ' . $report['market_name'] . ' / ' . $market_id;
-                    }
 
                     // p($p_l);
-                    $reports[] = array(
+                    $reports[$report['match_id']] = array(
                         'match_id' => $match_id,
                         'event_name' => $event_name,
-                        'is_casino' => $report['is_casino'],
-                        'market_id' => $report['market_id'],
-
 
                         'p_l' => $p_l,
                         'commission' => 0,
@@ -9415,46 +14001,100 @@ class   Reports extends My_Controller
         } else {
             $dataArray['pstatus'] = 'Settled';
             $reports = array();
-
-
-
             $reportsData = $this->Betting_model->get_user_profit_loss($dataArray);
-
 
             if (!empty($reportsData)) {
                 foreach ($reportsData as $report) {
 
-                    $event_name = $report['event_name'];
-                    if ($report['is_casino'] == 'Yes') {
 
-                        $market_id = explode('__', $report['market_id']);
-
-
-                        if (!empty($market_id)) {
-                            $market_id = $market_id[1];
-                            $market_id = explode('_', $market_id);
-
-                            if (!empty($market_id)) {
-
-                                $market_id  = $market_id[0];
-                            }
-                        }
-
-                        $event_name = $event_name . ' / ' . $report['market_name'] . ' / ' . $market_id;
-                    }
-
-
-                    $reports[] = array(
+                    $reports[$report['match_id']] = array(
                         'match_id' => $report['match_id'],
-                        'event_name' => $event_name,
-                        'is_casino' => $report['is_casino'],
-                        'market_id' => $report['market_id'],
-                        'p_l' => $report['total_p_l'] + $report['total_commission_pl'],
-                        // 'p_l' => $report['total_p_l'],
+                        'event_name' => $report['event_name'],
 
+                        'p_l' => $report['total_p_l'] + $report['total_commission_pl'],
                         'commission' => 0,
                         'created_at' => $report['created_at']
                     );
+
+
+                    // if (isset($reports[$report['match_id']])) {
+                    //     if ($betting_type == 'fancy') {
+                    //         $market_name = 'Fancy';
+                    //     } else {
+                    //         $market_name = $report['market_name'];
+                    //     }
+
+
+
+                    //     $p_l =  $reports[$report['match_id']]['p_l'];
+
+
+                    //     if ($report['betting_is_tie'] == 'No') {
+                    //         if ($report['bet_result'] == 'Plus') {
+                    //             $p_l =  $reports[$report['match_id']]['p_l'] + $report['profit'];
+                    //         } else if ($report['bet_result'] == 'Minus') {
+                    //             $p_l = $reports[$report['match_id']]['p_l'] +  $report['loss'] * -1;
+                    //         }
+                    //     }
+
+
+
+
+
+                    //     $reports[$report['match_id']] = array(
+                    //         'match_id' => $report['match_id'],
+                    //         'event_name' => $report['event_name'],
+                    //         'market_name' => $market_name,
+                    //         'market_id' => $marketId,
+
+                    //         'p_l' => $p_l,
+                    //         'commission' => 0,
+                    //         'created_at' => $report['created_at']
+                    //     );
+                    // } else {
+                    //     if ($betting_type == 'fancy') {
+                    //         $market_name = 'Fancy';
+                    //     } else {
+                    //         $market_name = $report['market_name'];
+                    //     }
+
+
+                    //     $p_l = 0;
+
+                    //     if ($report['betting_is_tie'] == 'No') {
+                    //         if ($report['bet_result'] == 'Plus') {
+                    //             $p_l = $report['profit'];
+                    //         } else if ($report['bet_result'] == 'Minus') {
+                    //             $p_l = $report['loss'] * -1;
+                    //         }
+                    //     }
+
+                    //     $getCommssion = $this->Ledger_model->get_commission_amt_by_event_id(array(
+                    //         'user_id' => $user_id,
+                    //         'match_id' => $report['match_id']
+                    //     ));
+
+
+                    //     // p($getCommssion);
+
+
+                    //     if (!empty($getCommssion)) {
+                    //         $p_l += $getCommssion->total_commission;
+                    //     }
+
+                    //     // p($p_l);
+                    //     // p($report);
+                    //     $reports[$report['match_id']] = array(
+                    //         'match_id' => $report['match_id'],
+                    //         'event_name' => $report['event_name'],
+                    //         'market_name' => $market_name,
+                    //         'market_id' => $marketId,
+
+                    //         'p_l' => $p_l,
+                    //         'commission' => 0,
+                    //         'created_at' => $report['created_at']
+                    //     );
+                    // }
                 }
             }
         }
@@ -9482,51 +14122,5 @@ class   Reports extends My_Controller
 
         $dataArray['profit_loss']  = $this->load->viewPartial('/profit-loss-list-html', $dataArray);
         $this->load->view('/profit-loss', $dataArray);
-    }
-
-    public function income_report()
-    {
-        $dataArray['local_css'] = array(
-            'jquery.dataTables.bootstrap',
-            'jquery-ui'
-        );
-
-        $dataArray['local_js'] = array(
-            'jquery.dataTables',
-            'jquery.dataTables.bootstrap',
-            'dataTables.fnFilterOnReturn',
-            'moment',
-            'jquery.validate',
-            'jquery-ui'
-        );
-        $user_id = get_user_id();
-        $day_wise_income = $this->Ledger_model->get_all_deposit_withdraw_of_admin_by_day($user_id);
-        $month_wise_income = $this->Ledger_model->get_all_deposit_withdraw_of_admin_by_month($user_id);
-        $year_wise_income = $this->Ledger_model->get_all_deposit_withdraw_of_admin_by_year($user_id);
-        // p($day_wise_income);
-        $final_income_report_arr = array();
-        foreach ($year_wise_income as $year_row) {
-            $year_month_day_array = array();
-
-            foreach ($month_wise_income as $month_row) {
-                $month_day_array = array();
-
-
-                foreach ($day_wise_income as $day_row) {
-                    if ($month_row['year'] == $day_row['year'] and $month_row['month'] == $day_row['month']) {
-                        $month_day_array[] = $day_row;
-                    }
-                }
-
-                $month_row['month_day_array'] = $month_day_array;
-                $year_month_day_array[] = $month_row;
-            }
-
-            $year_row['year_month_day_array'] = $year_month_day_array;
-            $final_income_report_arr[] = $year_row;
-        }
-
-        $dataArray['final_income_report_arr'] = $final_income_report_arr;
-        $this->load->view('/income-report', $dataArray);
     }
 }

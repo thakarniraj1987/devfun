@@ -17,8 +17,6 @@ class Bettings extends My_Controller
         $this->load->model('List_event_model');
         $this->load->model('Ledger_model');
         $this->load->model('Betting_model');
-        $this->load->model('Manual_model');
-
         $this->load->library('commonlibrary');
         $this->load->library('commonlib');
         $this->load->library('session');
@@ -79,7 +77,7 @@ class Bettings extends My_Controller
             'dataTables.responsive',
             'responsive.bootstrap4'
         );
-
+        
         $event_type_result = $this->Event_type_model->get_event_type_by_id($event_type);
         $dataArray['event_name'] = $event_type_result->name;
         $dataArray['event_type'] = $event_type_result->event_type;
@@ -90,11 +88,10 @@ class Bettings extends My_Controller
         $this->load->view('/betting-event-list', $dataArray);
     }
 
-    public function list_betting_data($event_id)
-    {
+    public function list_betting_data($event_id) {
 
 
-
+ 
         $this->load->library('Datatable');
         $arr = $this->config->config[$this->_betting_listing_headers];
         $cols = array_keys($arr);
@@ -103,7 +100,7 @@ class Bettings extends My_Controller
         $pagingParams["user_id"] = get_user_id();
 
 
-        $resultdata = $this->Betting_model->get_bettings_by_event_id($pagingParams);
+         $resultdata = $this->Betting_model->get_bettings_by_event_id($pagingParams);
         $json_output = $this->datatable->get_json_output($resultdata, $this->_betting_listing_headers);
         $this->load->setTemplate('json');
         $this->load->view('json', $json_output);
@@ -122,9 +119,9 @@ class Bettings extends My_Controller
 
         $this->load->library('Datatable');
         $table_config = array(
-            'source' => site_url('admin/bettings/list_betting_data/' . $event_id),
+            'source' => site_url('admin/bettings/list_betting_data/'.$event_id),
             'datatable_class' => $this->config->config["datatable_class"],
-            'order_by' => '[[2, "desc"]]',
+            'order_by'=> '[[2, "desc"]]',
         );
         $dataArray = array(
             'table' => $this->datatable->make_table($this->_betting_listing_headers, $table_config),
@@ -147,7 +144,7 @@ class Bettings extends My_Controller
         $dataArray['winner_selection_id'] = $list_event->winner_selection_id;
         $dataArray['list_event_id'] = $list_event_id;
 
-        //         p($dataArray);
+//         p($dataArray);
         $this->load->view('/all-betting-list', $dataArray);
     }
 
@@ -155,7 +152,7 @@ class Bettings extends My_Controller
     {
         $betting =  $this->Betting_model->get_betting_by_betting_id($betting_id);
 
-        if (!empty($betting)) {
+         if (!empty($betting)) {
 
             $this->Betting_model->delete_bet_by_id($betting_id);
             $this->Ledger_model->delete_ledget_by_betting_id($betting_id);
@@ -173,8 +170,8 @@ class Bettings extends My_Controller
                 $user_id = $this->User_model->addUser($data);
             } else  if ($betting['status'] == 'Settled') {
 
-
-                if ($betting['bet_result'] == 'Plus') {
+            
+                 if ($betting['bet_result'] == 'Plus') {
 
                     $user_details = $this->User_model->getUserById($betting['user_id']);
 
@@ -183,7 +180,7 @@ class Bettings extends My_Controller
                         $winnings = $user_details->winings - $betting['profit'];
 
 
-                        $balance = $user_details->balance  - $betting['profit'];
+                         $balance = $user_details->balance  - $betting['profit'];
 
                         $data = array(
                             'user_id' => $betting['user_id'],
@@ -202,7 +199,7 @@ class Bettings extends My_Controller
                         $winnings = $user_details->winings + $betting['loss'];
                         $balance = $user_details->balance  + $betting['loss'];
 
-                        $data = array(
+                         $data = array(
                             'user_id' => $betting['user_id'],
                             'is_balance_update' =>  'Yes',
                             'is_exposure_update' =>  'Yes',
@@ -212,6 +209,8 @@ class Bettings extends My_Controller
                     }
                 }
             }
+         
+
         }
 
 
@@ -219,95 +218,29 @@ class Bettings extends My_Controller
     }
 
     public function ajxdeletebet()
-    {
+    {   
 
+        
         $bettings = $this->input->post('bettings');
+        $password = $this->input->post('password');
 
+        if($password != 'HBEGd2Er')
+        {
+            $data = array(
+                'success' => false,
+                'message' => 'Password not matched'
+            );
+            echo json_encode($data);
+            exit;
+        }
+
+             
         if (!empty($bettings)) {
             foreach ($bettings as $betting_id) {
-                $betting =  $this->Betting_model->get_betting_by_betting_id($betting_id);
-
-                $this->Betting_model->cancel_bet_by_id($betting_id);
-                $this->Ledger_model->delete_ledget_by_betting_id($betting_id);
-
-                if ($betting['status'] == 'Open') {
-                    $user_details = $this->User_model->getUserById($betting['user_id']);
-
-                    $data = array(
-                        'user_id' => $betting['user_id'],
-                        'is_balance_update' =>  'Yes',
-                        'is_exposure_update' =>  'Yes',
-                        'is_winnings_update' =>  'Yes',
-
-                    );
-                    $user_id = $this->User_model->addUser($data);
-                } else  if ($betting['status'] == 'Settled') {
-                    if ($betting['bet_result'] == 'Plus') {
-
-                        $user_details = $this->User_model->getUserById($betting['user_id']);
-
-                        if (!empty($user_details)) {
-
-                            $winnings = $user_details->winings - $betting['profit'];
-                            $balance = $user_details->balance  - $betting['profit'];
-
-                            $data = array(
-                                'user_id' => $betting['user_id'],
-                                'is_balance_update' =>  'Yes',
-                                'is_exposure_update' =>  'Yes',
-                                'is_winnings_update' =>  'Yes',
-
-
-                            );
-                            $user_id = $this->User_model->addUser($data);
-                        }
-                    } else  if ($betting['bet_result'] == 'Minus') {
-                        $user_details = $this->User_model->getUserById($betting['user_id']);
-
-                        if (!empty($user_details)) {
-
-                            $winnings = $user_details->winings + $betting['loss'];
-                            $balance = $user_details->balance  + $betting['loss'];
-
-                            $data = array(
-                                'user_id' => $betting['user_id'],
-                                'is_balance_update' =>  'Yes',
-                                'is_exposure_update' =>  'Yes',
-                                'is_winnings_update' =>  'Yes',
-
-
-                            );
-                            $user_id = $this->User_model->addUser($data);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public function ajxdeletebetby_runner()
-    {
-        $postData = $this->input->post();
-
-        $bettings = $this->Betting_model->get_betting_by_runner_id($postData);
-        $this->Manual_model->update_manual_market_book_odds_runner(array(
-            'event_id' => $postData['match_id'],
-            'market_id' => $postData['market_id'],
-            'selection_id' => $postData['selection_id'],
-            'is_cancel' => 'Yes'
-        ));
-
-        if (!empty($bettings)) {
-
-          
-
-
-            foreach ($bettings as $betting) {
-                $betting_id = $betting['betting_id'];
-                $betting =  $this->Betting_model->get_betting_by_betting_id($betting_id);
-
-                $this->Betting_model->cancel_bet_by_id($betting_id);
-                $this->Ledger_model->delete_ledget_by_betting_id($betting_id);
+               $betting =  $this->Betting_model->get_betting_by_betting_id($betting_id);
+               $this->Ledger_model->delete_ledget_by_betting_id($betting_id);
+              
+                $this->Betting_model->delete_bet_by_id($betting_id);
 
                 if ($betting['status'] == 'Open') {
                     $user_details = $this->User_model->getUserById($betting['user_id']);
@@ -317,61 +250,56 @@ class Bettings extends My_Controller
                         'is_balance_update' =>  'Yes',
                         'is_exposure_update' =>  'Yes',
                         'is_winnings_update' =>  'Yes',
-
                     );
                     $user_id = $this->User_model->addUser($data);
                 } else  if ($betting['status'] == 'Settled') {
                     if ($betting['bet_result'] == 'Plus') {
 
                         $user_details = $this->User_model->getUserById($betting['user_id']);
-
+    
                         if (!empty($user_details)) {
-
+    
                             $winnings = $user_details->winings - $betting['profit'];
                             $balance = $user_details->balance  - $betting['profit'];
-
+    
                             $data = array(
                                 'user_id' => $betting['user_id'],
                                 'is_balance_update' =>  'Yes',
                                 'is_exposure_update' =>  'Yes',
                                 'is_winnings_update' =>  'Yes',
-
-
+    
                             );
                             $user_id = $this->User_model->addUser($data);
                         }
                     } else  if ($betting['bet_result'] == 'Minus') {
                         $user_details = $this->User_model->getUserById($betting['user_id']);
-
+    
                         if (!empty($user_details)) {
-
+    
                             $winnings = $user_details->winings + $betting['loss'];
                             $balance = $user_details->balance  + $betting['loss'];
-
+    
                             $data = array(
                                 'user_id' => $betting['user_id'],
                                 'is_balance_update' =>  'Yes',
                                 'is_exposure_update' =>  'Yes',
                                 'is_winnings_update' =>  'Yes',
-
-
+    
                             );
                             $user_id = $this->User_model->addUser($data);
                         }
                     }
                 }
+
+
             }
-            $dataArrayRes = array(
-                'success' => true,
-                'message' => 'Bet Canceled Successfully'
-            );
-            echo json_encode($dataArrayRes);
-        } else {
-            $dataArrayRes = array(
-                'success' => true,
-                'message' => 'No Bets'
-            );
-            echo json_encode($dataArrayRes);
         }
+
+
+        $data = array(
+            'success' => true,
+            'message' => 'Bettings deleted successfully'
+        );
+        echo json_encode($data);
     }
 }

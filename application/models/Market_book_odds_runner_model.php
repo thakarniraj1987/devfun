@@ -30,13 +30,4 @@ class Market_book_odds_runner_model extends My_Model
         $return = $this->db->get()->result();
         return $return;
     }
-
-    public function get_manual_runner($dataValues  = array())
-    {
-        $this->db->select('*');
-        $this->db->from('manual_market_book_odds_runner');
-        $this->db->where($dataValues);
-        $return = $this->db->get()->row();
-        return $return;
-    }
 }

@@ -1,4 +1,6 @@
-
+<link href="<?php echo base_url(); ?>assets/app/bootstrap-datetimepicker.min.css" rel="stylesheet">
+<script src="<?php echo base_url(); ?>assets/app/moment.min2.js"></script>
+<script src="<?php echo base_url(); ?>assets/app/bootstrap-datetimepicker.min.js"></script>
 <div class="main-content" role="main">
     <div class="main-inner">
 
@@ -40,26 +42,38 @@
         </section>
     </div>
 </div>
+
 <script src="https://www.365exch.vip/assets/js/serialize_json.js"></script>
 
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         $('#example').DataTable();
     });
 
-    $('#from-date').daterangepicker({
-        singleDatePicker: true,
-        showDropdowns: true,
-        format: 'YYYY-MM-DD'
-    });
-    $('#to-date').daterangepicker({
-        singleDatePicker: true,
-        showDropdowns: true,
-        format: 'YYYY-MM-DD'
+
+    $(".datetimepicker").datetimepicker({
+        format: 'YYYY-MM-DD HH:mm:ss',
+        widgetPositioning: {
+            horizontal: "auto",
+            vertical: "auto"
+        }
     });
 
+    // $('#from-date').daterangepicker({
+    //     singleDatePicker: true,
+    //     showDropdowns: true,
+    //     format: 'YYYY-MM-DD'
+    // });
+    // $('#to-date').daterangepicker({
+    //     singleDatePicker: true,
+    //     showDropdowns: true,
+    //     format: 'YYYY-MM-DD'
+    // });
+
     function blockUI() {
-        $.blockUI({message: ' <img src="<?php echo base_url() ?>spinner.gif" />'});
+        $.blockUI({
+            message: ' <img src="<?php echo base_url() ?>spinner.gif" />'
+        });
     }
 
     function filterdata() {
@@ -76,20 +90,20 @@
                 tdate: tdate,
                 fdate: fdate,
                 user_id: <?php echo $userId; ?>
+
             },
             type: "POST",
             dataType: 'json',
-            beforeSend: function () {
+            beforeSend: function() {
                 blockUI();
             },
-            complete: function () {
+            complete: function() {
                 $.unblockUI();
             },
-            success: function (res) {
+            success: function(res) {
                 $('#stack').html('');
                 $('#stack').html(res);
             }
         });
     }
-
 </script>

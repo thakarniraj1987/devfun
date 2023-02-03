@@ -66,10 +66,10 @@ if ($fltrselct == 1) {
                 </div>
                 <div class="row form-horizontal">
                     <div class="col-md-2 col-xs-6">
-                        <input type="text" name="fdate" id="fdate" value="<?php echo get_yesterday_datetime(); ?>" class="form-control" placeholder="From Date" autocomplete="off">
+                        <input type="text" name="fdate" id="fdate" value="" class="form-control" placeholder="From Date" autocomplete="off">
                     </div>
                     <div class="col-md-2 col-xs-6">
-                        <input type="text" name="tdate" id="tdate" value="<?php echo get_today_end_datetime(); ?>" class="form-control" placeholder="To Date" autocomplete="off">
+                        <input type="text" name="tdate" id="tdate" value="" class="form-control" placeholder="To Date" autocomplete="off">
                     </div>
                     <div class="col-md-3 col-xs-6">
                         <input type="text" name="searchTerm" id="searchTerm" value="" class="form-control" placeholder="Search" autocomplete="off">
@@ -133,7 +133,7 @@ if ($fltrselct == 1) {
             },
             success: function(res) {
                 $('#filterdata').html(res);
-            }            
+            }
         });
     }
 
@@ -144,13 +144,11 @@ if ($fltrselct == 1) {
     $('#fdate').daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
-        format: 'YYYY-MM-DD H:mm:ss',
-        timePicker: true,
+        format: 'YYYY-MM-DD',
     });
     $('#tdate').daterangepicker({
         singleDatePicker: true,
         showDropdowns: true,
-        format: 'YYYY-MM-DD H:mm:ss',
-        timePicker: true,
+        format: 'YYYY-MM-DD',
     });
 </script>

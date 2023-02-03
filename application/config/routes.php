@@ -6,8 +6,7 @@ $route['default_controller'] =  'login/Admin/login';
 $route['login'] = 'login/Admin/login';
 $route['logout'] = 'login/Admin/logout';
 $route['changepassword'] = 'admin/ChangePassword/changepassword';
-$route['sign-up'] =  'login/Admin/signUp';
-$route['forgot-password'] =  'login/Admin/forgot_password';
+
 
 $route['admin/dashboard'] = 'admin/Dashboard/index';
 
@@ -28,7 +27,6 @@ $route['admin/deleteplayer/(:num)'] = 'admin/Players/deleteplayer/$1';
 
 /***************************Employees******************************/
 $route['admin/users/?(:any)'] = 'admin/User/listUsers/$1';
-$route['getUserBalance'] = 'admin/User/getUserBalance';
 $route['admin/downline/?(:any)/?(:any)'] = 'admin/User/downline/$1/$2';
 
 $route['admin/adduser'] = 'admin/User/addUser';
@@ -96,7 +94,6 @@ $route['new_chipsummary/(:num)'] = 'admin/Reports/chip_summarynew1/$1';
 $route['old_chipsummary/(:num)'] = 'admin/Reports/chip_summary/$1';
 
 $route['my_market'] = 'admin/My_market/index';
-$route['refreshMarketAnalysis'] = 'admin/My_market/refreshMarketAnalysis';
 $route['clientpl'] = 'admin/reports/client_pl';
 
 $route['marketpl'] = 'admin/reports/market_pl';
@@ -189,74 +186,9 @@ $route['change-password'] = 'admin/User/changePasswordForm';
 $route['clientpl/(:any)'] = 'admin/reports/client_pl/$1';
 
 
-$route['dashboard/getEventsMarketExpsure/(:any)'] = 'admin/Dashboard/getEventsMarketExpsure/$1';
-
-
-$route['dashboard/tvEventDetail/(:any)'] = 'admin/Dashboard/tvEventDetail/$1';
-
-$route['admin/manual/event-types'] =  'admin/Manual/eventTypes';
-$route['admin/manual/events/(:num)'] =  'admin/Manual/eventsLists/$1';
-$route['admin/manual/eventbets/(:num)'] =  'admin/Manual/eventBets/$1';
-
-$route['admin/manual/market-types/(:num)/(:num)'] =  'admin/Manual/marketTypes/$1/$2';
-$route['admin/manual/market-book-runners/(:num)/(:any)'] =  'admin/Manual/marketBookRunners/$1/$2';
-
-
-// Payments  Admin
-$route['payment-methods'] = 'admin/Payments/paymentMethods';
-$route['add-payment-method'] = 'admin/Payments/addPaymentMethod';
-$route['add-payment-method/(:num)'] = 'admin/Payments/addPaymentMethod/$1';
-$route['delete-payment-method/(:num)'] = 'admin/Payments/deletePaymentMethod/$1';
-$route['change-payment-method-status/(:any)/(:num)'] = 'admin/Payments/changePaymentMethodStatus/$1/$2';
-
-
-$route['deposit-requests'] = 'admin/Payments/depositRequests';
-$route['withdraw-requests'] = 'admin/Payments/withdrawRequests';
-$route['confirm-withdraw/(:num)/(:num)/(:any)'] = 'admin/User/confirm_withdraw/$1/$2/$3';
-$route['confirm-deposit/(:num)/(:num)/(:any)'] = 'admin/User/confirm_deposit/$1/$2/$3';
-$route['change-withdraw-request-status/(:any)/(:num)/(:any)'] = 'admin/Payments/changeWithdrawRequestStatus/$1/$2/$3';
-
-$route['change-deposit-request-status/(:any)/(:num)/(:any)'] = 'admin/Payments/changeDepositRequestStatus/$1/$2/$3';
 
 
 
-// Payments User
-$route['get-payment-detail'] = "admin/Payments/get_payment_detail";
-$route['deposituser'] = "admin/Payments/addPaymentRequest/Deposit";
-$route['withdrawuser'] = "admin/Payments/addPaymentRequest/Withdraw";
-$route['online_bank_transfer'] = "admin/Payments/online_bank_transfer";
-
-//tranasction 
-$route['transaction-history'] = "admin/Transactions/get_transaction_history";
-$route['transaction-history/(:any)'] = "admin/Transactions/get_transaction_history/$1";
-
-$route['transaction-history-admin'] = "admin/Transactions/get_transaction_history_admin";
-$route['transaction-history-admin/(:any)'] = "admin/Transactions/get_transaction_history_admin/$1";
 
 
-// refer 
-$route['refer-and-earn'] = "admin/Refer/refer_and_earn";
-$route['refered-users'] = 'admin/Refer/refered_users_list';
-$route['refered-users/(:num)'] = 'admin/Refer/refered_users_list/$1';
 
-// $route['refered-users'] = 'admin/Refer/listReferedUsers';
-// $route['refered-users/(:num)'] = 'admin/Refer/listReferedUsers/$1';
-
-$route['welcome-note-banner'] = 'admin/Dashboard/welcome_note_banner';
-$route['delete-welcome-note-banner/(:num)'] = 'admin/Dashboard/delete_welcome_note_banner/$1';
-
-$route['user-detail/(:num)'] = 'admin/User/get_user_detail/$1';
-$route['income-report'] = 'admin/Reports/income_report';
-
-$route['cancel-withdraw-request-status/(:num)'] = 'admin/Payments/cancelWithdrawRequestStatus/$1';
-
-//bonus
-$route['bonus-settings'] = 'admin/Bonus/bonus_setting';
-
-
-//header banners 
-$route['header-banners'] = 'admin/Banner/header_banners';
-$route['add-header-banner'] = 'admin/Banner/add_header_banner';
-$route['add-header-banner/(:num)'] = 'admin/Banner/add_header_banner/$1';
-$route['change-header-banner-status/(:any)/(:num)'] = 'admin/Banner/change_header_banner_status/$1/$2';
-$route['delete-header-banner/(:num)'] = 'admin/Banner/delete_header_banner/$1';

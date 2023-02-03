@@ -37,13 +37,62 @@
                         <div id="chip-summary-data">
 
                             <?php
+                            $total_lena = 0;
+                            $total_dena = 0;
+                            $total_clear = 0;
+                            $total_master_commision = 0;
+                            $total_parent_partership_amt = 0;
+                            $total_parent_master_commision = 0;
+
+
+                            if (!empty($minus_acc)) {
+                                foreach ($minus_acc as $pc) {
+                                    $master_comission =  $pc['master_comission'];
+                                    $total_master_commision += $master_comission;
+
+                                    if ($pc['type'] == 'User') {
+                                        $total_minus_amount += $pc['amount'];
+                                    }
+
+                                    $master_partership_amt = $pc['amount'] * ($pc["partnership"] / 100);
+
+                                    // p($master_partership_amt);
+                                    $total_parent_partership_amt += $pc['amount'] - $master_partership_amt;
+
+                                    if ($pc['type'] == 'User') {
+                                        if ($pc['amount'] < 0) {
+                                            $total_lena += $pc['amount'];
+                                        }
+                                    } else {
+
+
+                                        // p($pc);
+                                        //    p($pc);
+                                        if ($pc['amount'] > 0) {
+                                            $total_lena += $pc['amount'];
+                                        }
+                                    }
+                                }
+                            }
+
+                            // p($total_lena);
+
+                            // $total_lena += $pc['amount'];
 
 
 
+                            if (!empty($plus_acc)) {
+                                // p($plus_acc);
+                                foreach ($plus_acc as $pc) {
+                                    $master_commision = $pc['master_comission'];
+                                    $total_parent_master_commision += $pc['parent_comission'];
+                                    $total_master_commision += $master_commision;
 
-
-
-
+                                    // if ($pc['type'] == 'User') {
+                                    $total_dena += $pc['amount'];
+                                    // }
+                                }
+                            }
 
                             ?>
 
@@ -65,32 +114,103 @@
                                             </thead>
                                             <tbody>
                                                 <?php
+                                                $total_master_commision = 0;
+                                                $total_minus_amount = 0;
+                                                $total_parent_partership_amt = 0;
 
-
-                                                $total_plus_amount = 0;
                                                 if (!empty($plus_acc)) {
                                                     foreach ($plus_acc as $pc) {
+                                                        // $total_lena += $pc['amount'];
+                                                        $master_comission =  $pc['master_comission'];
+                                                        $total_master_commision += $master_comission;
 
+                                                        if ($pc['type'] == 'User') {
+                                                            $total_minus_amount += $pc['amount'];
+                                                        }
 
-                                                        if ($pc['amount'] >= 0) {
-                                                            $total_plus_amount += abs($pc['amount']);
+                                                        $master_partership_amt = $pc['amount'] * ($pc["partnership"] / 100);
+
+                                                        // p($master_partership_amt);
+                                                        $total_parent_partership_amt += $pc['amount'] - $master_partership_amt;
+
+                                                        if ($pc['type'] == 'User') {
+                                                            if ($pc['amount'] > 0) {
+
 
                                                 ?>
+                                                                <tr id="user_row_47978">
+                                                                    <td class="balance_sheet_user_name ">
+                                                                        <?php
+
+                                                                        if ($pc['type'] == 'User') { ?>
+                                                                            <?php echo $pc['name'] ?>
+                                                                        <?php } else { ?>
+                                                                                                                 
+                                                                <?php
+
+if($pc['type'] != 'Parent')
+{ ?>
+  <a href="<?php echo base_url(); ?>new_chipsummary/<?php echo $pc['user_id']; ?>"><?php echo $pc['name'] ?></a>
+<?php } 
+else{ ?>
+   <?php echo $pc['name'] ?>
+<?php } ?>
+                                                                        <?php  }
+
+                                                                        ?>
+                                                                    </td>
+                                                                    <td>
+
+
+                                                                        <?php
+
+                                                                        if ($pc['type'] != 'Parent') { ?>
+                                                                            <?php echo $pc['user_name'] ?> A/c
+                                                                        <?php } else { ?>
+                                                                            <strong>Cash</strong>
+                                                                        <?php } ?>
+                                                                    </td>
+                                                                    <td class=" " style="color:red;"><?php echo number_format(abs($pc['amount']), 2) ?></td>
+
+
+                                                                    <td class=" ">
+
+                                                                        <?php
+
+                                                                        if ($pc['type'] != 'Parent') { ?>
+                                                                            <a class="btn btn-xs btn-primary" href="<?php echo base_url(); ?>admin/acStatement/7/<?php echo $pc['user_id']; ?>"><i aria-hidden="true">History</i></a>
+
+                                                                            <a class="btn btn-xs btn-success btn-submitClearChip" href="javascript:;" title="Close Settlement" onclick="settlement('Plus', '<?php echo $pc['user_id']; ?>', '<?php echo $pc['user_name']; ?>',<?php echo $pc['amount']; ?>);"><i aria-hidden="true">Settlement</i></a>
+                                                                        <?php } ?>
+
+                                                                    </td>
+
+                                                                </tr>
+                                                            <?php
+                                                            }
+                                                        } else {
+                                                            ?>
                                                             <tr id="user_row_47978">
                                                                 <td class="balance_sheet_user_name ">
                                                                     <?php
+
 
                                                                     if ($pc['type'] == 'User') { ?>
                                                                         <?php echo $pc['name'] ?>
                                                                     <?php } else { ?>
 
-                                                                        <?php
+                                                                                           
+                                                                <?php
 
-                                                                        if ($pc['type'] != 'Parent') { ?>
-                                                                            <a href="<?php echo base_url(); ?>new_chipsummary/<?php echo $pc['user_id']; ?>"><?php echo $pc['name'] ?></a>
-                                                                        <?php } else { ?>
-                                                                            <?php echo $pc['name'] ?>
-                                                                        <?php } ?>
+if($pc['type'] != 'Parent')
+{ ?>
+  <a href="<?php echo base_url(); ?>new_chipsummary/<?php echo $pc['user_id']; ?>"><?php echo $pc['name'] ?></a>
+<?php } 
+else{ ?>
+   <?php echo $pc['name'] ?>
+<?php } ?>
+
+                                                                        
                                                                     <?php  }
 
                                                                     ?>
@@ -106,17 +226,17 @@
                                                                         <strong>Cash</strong>
                                                                     <?php } ?>
                                                                 </td>
-                                                                <td class=" " style="color:green;" data-value="<?php echo $pc['amount'] ?>"><?php echo number_format(abs($pc['amount']), 2) ?></td>
-                                                                <td class=" ">
+                                                                <td class=" " style="color:green;"><?php echo number_format(abs($pc['amount']), 2) ?></td>
 
+                                                                <td class=" ">
                                                                     <?php
 
                                                                     if ($pc['type'] != 'Parent') { ?>
                                                                         <a class="btn btn-xs btn-primary" href="<?php echo base_url(); ?>admin/acStatement/7/<?php echo $pc['user_id']; ?>"><i aria-hidden="true">History</i></a>
 
                                                                         <a class="btn btn-xs btn-success btn-submitClearChip" href="javascript:;" title="Close Settlement" onclick="settlement('Plus', '<?php echo $pc['user_id']; ?>', '<?php echo $pc['user_name']; ?>',<?php echo $pc['amount']; ?>);"><i aria-hidden="true">Settlement</i></a>
-                                                                    <?php } ?>
 
+                                                                    <?php } ?>
                                                                 </td>
 
                                                             </tr>
@@ -126,124 +246,13 @@
                                                 } ?>
 
 
-                                                <?php
-
-                                                if ($self_profit_and_loss > 0) {
-
-
-
-                                                    $total_plus_amount += abs($self_profit_and_loss);
-
-                                                ?>
-                                                    <tr>
-                                                        <td class="balance_sheet_user_name ">
-                                                            My sharing
-                                                        </td>
-                                                        <td>
-                                                            P/L
-                                                        </td>
-                                                        <td class=" " style="color:green;" data-value="<?php echo $pc['amount'] ?>"><?php echo number_format(abs($self_profit_and_loss), 2) ?></td>
-
-                                                        <td class=" ">
-
-                                                        </td>
-
-                                                    </tr>
-                                                <?php }
-
-                                                ?>
-
-
-                                                <?php
-
-                                                if ($upline_profit_and_loss > 0) {
-
-                                                    $total_plus_amount += abs($upline_profit_and_loss);
-
-
-                                                ?>
-                                                    <tr>
-                                                        <td class="balance_sheet_user_name ">
-                                                            Upline sharing
-                                                        </td>
-                                                        <td>
-                                                            P/L
-                                                        </td>
-                                                        <td class=" " style="color:green;" data-value="<?php echo $pc['amount'] ?>"><?php echo number_format(abs($upline_profit_and_loss), 2) ?></td>
-
-                                                        <td class=" ">
-
-                                                        </td>
-
-                                                    </tr>
-                                                <?php }
-
-                                                ?>
-
-
-                                                <?php
-
-                                                if ($cash_from_clients < 0) {
-
-
-                                                    $total_plus_amount += abs($cash_from_clients);
-
-
-                                                ?>
-                                                    <tr>
-                                                        <td class="balance_sheet_user_name ">
-                                                            Cash to downline
-                                                        </td>
-                                                        <td>
-                                                            P/L
-                                                        </td>
-                                                        <td class=" " style="color:green;" data-value="<?php echo $cash_from_clients ?>"><?php echo number_format(abs($cash_from_clients), 2) ?></td>
-
-                                                        <td class=" ">
-
-                                                        </td>
-
-                                                    </tr>
-                                                <?php }
-
-                                                ?>
-
-
-                                                <?php
-
-                                                if ($cash_from_upline > 0) {
-
-
-                                                    $total_plus_amount += abs($cash_from_upline);
-
-
-                                                ?>
-                                                    <tr>
-                                                        <td class="balance_sheet_user_name ">
-                                                            Cash to upline
-                                                        </td>
-                                                        <td>
-                                                            P/L
-                                                        </td>
-                                                        <td class=" " style="color:green;" data-value="<?php echo $cash_from_upline ?>"><?php echo number_format(abs($cash_from_upline), 2) ?></td>
-
-                                                        <td class=" ">
-
-                                                        </td>
-
-                                                    </tr>
-                                                <?php }
-
-                                                ?>
-
-
                                             </tbody>
                                             <tfoot>
                                                 <tr>
                                                     <td>Total</td>
                                                     <td></td>
 
-                                                    <td> <?php echo number_format(abs($total_plus_amount), 2); ?></td>
+                                                    <td><?php echo number_format(abs($total_dena), 2); ?></td>
                                                     <td></td>
                                                 </tr>
                                             </tfoot>
@@ -275,21 +284,52 @@
                                             <tbody>
 
 
-
                                                 <?php
+
+                                                $total_master_commision = 0;
+                                                $total_parent_master_commision = 0;
 
                                                 $total_minus_amount = 0;
 
+
+                                                if (!empty($minus_acc)) {
+                                                    // p($plus_acc);
+                                                    foreach ($plus_acc as $pc) {
+                                                        $master_commision = $pc['master_comission'];
+                                                        $total_parent_master_commision += $pc['parent_comission'];
+                                                        $total_master_commision += $master_commision;
+
+                                                        if ($pc['type'] == 'User') {
+                                                            $total_minus_amount += $pc['amount'];
+                                                        }
+                                                    }
+                                                } ?>
+
+                                                <?php
+                                                $total_master_commision = 0;
+                                                $total_parent_master_commision = 0;
+
+                                                $total_minus_amount = 0;
+
+                                                $total_parent_partership_amt = 0;
                                                 if (!empty($minus_acc)) {
                                                     foreach ($minus_acc as $pc) {
 
+                                                        // p($pc);
+                                                        $master_commision = $pc['master_comission'];
+                                                        $total_dena += $pc['amount'];
+                                                        $total_parent_master_commision += $pc['parent_comission'];
+                                                        $total_master_commision += $master_commision;
 
+                                                        if ($pc['type'] == 'User') {
+                                                            $total_minus_amount += $pc['amount'];
+                                                        }
+                                                        $master_partership_amt = $pc['amount'] * ($pc["partnership"] / 100);
+                                                        $total_parent_partership_amt += $pc['amount'] - $master_partership_amt;
 
                                                         if ($pc['type'] == 'User') {
 
                                                             if ($pc['amount'] < 0) {
-
-                                                                $total_minus_amount += abs($pc['amount']);
                                                 ?>
                                                                 <tr id="user_row_47978">
                                                                     <td class="balance_sheet_user_name ">
@@ -298,14 +338,16 @@
                                                                         if ($pc['type']  == 'User') { ?>
                                                                             <?php echo $pc['name'] ?>
                                                                         <?php } else { ?>
+                                                                                                                 
+                                                                <?php
 
-                                                                            <?php
-
-                                                                            if ($pc['type'] != 'Parent') { ?>
-                                                                                <a href="<?php echo base_url(); ?>new_chipsummary/<?php echo $pc['user_id']; ?>"><?php echo $pc['name'] ?></a>
-                                                                            <?php } else { ?>
-                                                                                <?php echo $pc['name'] ?>
-                                                                            <?php } ?>
+if($pc['type'] != 'Parent')
+{ ?>
+  <a href="<?php echo base_url(); ?>new_chipsummary/<?php echo $pc['user_id']; ?>"><?php echo $pc['name'] ?></a>
+<?php } 
+else{ ?>
+   <?php echo $pc['name'] ?>
+<?php } ?>
                                                                         <?php  }
 
                                                                         ?>
@@ -313,17 +355,19 @@
 
                                                                     <td>
 
+                                                                                       
+                                                                <?php
 
-                                                                        <?php
-
-                                                                        if ($pc['type'] != 'Parent') { ?>
-                                                                            <?php echo $pc['user_name'] ?> A/c
-                                                                        <?php } else { ?>
-                                                                            <strong>Cash</strong>
-                                                                        <?php } ?>
+if($pc['type'] != 'Parent')
+{ ?>
+  <?php echo $pc['user_name'] ?> A/c
+<?php } 
+else{ ?>
+    <strong>Cash</strong>
+<?php } ?>
                                                                     </td>
 
-                                                                    <td class=" " style="color:red;" data-value="<?php echo $pc['amount'] ?>"><?php echo number_format($pc['amount'], 2) ?></td>
+                                                                    <td class=" " style="color:green;"><?php echo number_format($pc['amount'], 2) ?></td>
 
                                                                     <td class=" ">
                                                                         <?php
@@ -340,8 +384,6 @@
                                                             <?php
                                                             }
                                                         } else {
-
-                                                            $total_minus_amount += abs($pc['amount']);
                                                             ?>
 
                                                             <tr id="user_row_47978">
@@ -351,14 +393,16 @@
                                                                     if ($pc['type']  == 'User') { ?>
                                                                         <?php echo $pc['name'] ?>
                                                                     <?php } else { ?>
+                                                                                                            
+                                                                <?php
 
-                                                                        <?php
-
-                                                                        if ($pc['type'] != 'Parent') { ?>
-                                                                            <a href="<?php echo base_url(); ?>new_chipsummary/<?php echo $pc['user_id']; ?>"><?php echo $pc['name'] ?></a>
-                                                                        <?php } else { ?>
-                                                                            <?php echo $pc['name'] ?>
-                                                                        <?php } ?>
+if($pc['type'] != 'Parent')
+{ ?>
+  <a href="<?php echo base_url(); ?>new_chipsummary/<?php echo $pc['user_id']; ?>"><?php echo $pc['name'] ?></a>
+<?php } 
+else{ ?>
+   <?php echo $pc['name'] ?>
+<?php } ?>
                                                                     <?php  }
 
                                                                     ?>
@@ -373,7 +417,7 @@
                                                                         <strong>Cash</strong>
                                                                     <?php } ?>
                                                                 </td>
-                                                                <td class=" " style="color:red;" data-value="<?php echo $pc['amount'] ?>"><?php echo number_format($pc['amount'], 2) ?></td>
+                                                                <td class=" " style="color:red;"><?php echo number_format($pc['amount'], 2) ?></td>
 
                                                                 <td class=" ">
                                                                     <?php
@@ -381,7 +425,7 @@
                                                                     if ($pc['type'] != 'Parent') { ?>
                                                                         <a class="btn btn-xs btn-primary" href="<?php echo base_url(); ?>admin/acStatement/7/<?php echo $pc['user_id']; ?>"><i aria-hidden="true">History</i></a>
 
-                                                                        <a class="btn btn-xs btn-danger btn-submitClearChip" href="javascript:;" title="Close Settlement" onclick="settlement('Plus', '<?php echo $pc['user_id']; ?>', '<?php echo $pc['user_name']; ?>',<?php echo $pc['amount']; ?>);"><i aria-hidden="true">Settlement</i></a>
+                                                                        <a class="btn btn-xs btn-danger btn-submitClearChip" href="javascript:;" title="Close Settlement" onclick="settlement('Minus', '<?php echo $pc['user_id']; ?>', '<?php echo $pc['user_name']; ?>',<?php echo $pc['amount']; ?>);"><i aria-hidden="true">Settlement</i></a>
 
                                                                     <?php } ?>
                                                                 </td>
@@ -395,107 +439,6 @@
 
 
 
-                                                <?php
-
-                                                if ($self_profit_and_loss < 0) {
-                                                    $total_minus_amount += abs($self_profit_and_loss);
-                                                ?>
-                                                    <tr>
-                                                        <td class="balance_sheet_user_name ">
-                                                            My sharing
-                                                        </td>
-                                                        <td>
-                                                            P/L
-                                                        </td>
-                                                        <td class=" " style="color:green;" data-value="<?php echo $pc['amount'] ?>"><?php echo number_format(abs($self_profit_and_loss), 2) ?></td>
-
-                                                        <td class=" ">
-
-                                                        </td>
-
-                                                    </tr>
-                                                <?php }
-
-                                                ?>
-
-
-                                                <?php
-
-                                                if ($upline_profit_and_loss < 0) {
-                                                    $total_minus_amount += abs($upline_profit_and_loss);
-                                                ?>
-                                                    <tr>
-                                                        <td class="balance_sheet_user_name ">
-                                                            Upline sharing
-                                                        </td>
-                                                        <td>
-                                                            P/L
-                                                        </td>
-                                                        <td class=" " style="color:green;" data-value="<?php echo $pc['amount'] ?>"><?php echo number_format(abs($upline_profit_and_loss), 2) ?></td>
-
-                                                        <td class=" ">
-
-                                                        </td>
-
-                                                    </tr>
-                                                <?php }
-
-                                                ?>
-
-
-                                                <?php
-
-                                                if ($cash_from_clients > 0) {
-                                                    // p($total_minus_amount);;
-                                                    $total_minus_amount += abs($cash_from_clients);
-                                                ?>
-                                                    <tr>
-                                                        <td class="balance_sheet_user_name ">
-                                                            Cash from downline
-                                                        </td>
-                                                        <td>
-                                                            P/L
-                                                        </td>
-                                                        <td class=" " style="color:red;" data-value="<?php echo $cash_from_clients ?>"><?php echo number_format(abs($cash_from_clients), 2) ?></td>
-
-                                                        <td class=" ">
-
-                                                        </td>
-
-                                                    </tr>
-                                                <?php }
-
-                                                ?>
-
-
-                                                <?php
-
-                                                if ($cash_from_upline > 0) {
-
-
-                                                    $total_plus_amount += abs($cash_from_upline);
-
-
-                                                ?>
-                                                    <tr>
-                                                        <td class="balance_sheet_user_name ">
-                                                            Cash to upline
-                                                        </td>
-                                                        <td>
-                                                            P/L
-                                                        </td>
-                                                        <td class=" " style="color:red;" data-value="<?php echo $cash_from_upline ?>"><?php echo number_format(abs($cash_from_upline), 2) ?></td>
-
-                                                        <td class=" ">
-
-                                                        </td>
-
-                                                    </tr>
-                                                <?php }
-
-                                                ?>
-
-
                                             </tbody>
 
                                             <tfoot>
@@ -503,7 +446,7 @@
                                                     <td>Total</td>
                                                     <td></td>
 
-                                                    <td><?php echo number_format(abs($total_minus_amount), 2); ?></td>
+                                                    <td><?php echo number_format($total_lena, 2); ?></td>
                                                     <td></td>
 
                                                 </tr>

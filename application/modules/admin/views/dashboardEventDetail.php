@@ -3,68 +3,13 @@
         transports: ['websocket'],
         rememberUpgrade: false
     });
-    let BLOCKED = false;
 </script>
 
-<style>
-    #toTop {
-        display: none;
-        text-decoration: none;
-        position: fixed;
-        bottom: 20px;
-        right: 2%;
-        overflow: hidden;
-        z-index: 999;
-        width: 32px;
-        height: 32px;
-        border: none;
-        text-indent: 100%;
-        background: url(<?php echo base_url() . 'assets/images/arr.png'; ?>) no-repeat 0px 0px;
-        background-size: 32px;
-    }
-
-    html {
-        scroll-behavior: smooth;
-    }
-
-    iframe {
-        width: 1px;
-        min-width: 100%;
-    }
-
-    .float {
-        position: fixed;
-        width: 51px;
-        height: 42px;
-        bottom: 44%;
-        right: 6px;
-        background-color: #0C9;
-        color: #000;
-        border-radius: 50px;
-        text-align: center;
-        text-decoration: none;
-        box-shadow: 2px 2px 3px #999;
-        z-index: 99999;
-        display: grid;
-        place-items: center;
-        font-size: 19px;
-    }
-
-    .my-float {
-        margin-top: 22px;
-    }
-</style>
 
 
 <main id="main" class="main-content">
     <div class="main-inner">
         <section class="match-content">
-            <?php if (isMobile()) { ?>
-                <a href="#allbet" class="float">
-                    Bets
-                </a>
-
-            <?php } ?>
             <div id="UpCommingData" style="display: none;"></div>
             <div id="MatchOddInfo">
 
@@ -75,28 +20,6 @@
 
                         <div class="match-odds-tittle match-tittle">
 
-
-                            <?php
-                            if (get_user_type() == 'Admin') { ?>
-                                <div class="marketTitle">
-
-
-                                    <?php
-
-                                    // p($is_ball_running);
-                                    if ($is_ball_running == 'Yes') { ?>
-                                        <button class="btn btn-success btn-sm pull-right" style="float:right;font-weight:bold;" onclick="changeBallRunningStatus()" id="changeStatus" data-event-id="<?php echo $event_id; ?>" data-status="Yes">Un-Block</button>
-
-                                    <?php } else { ?>
-                                        <button class="btn btn-success btn-sm pull-right" style="float:right;font-weight:bold;" onclick="changeBallRunningStatus()" id="changeStatus" data-event-id="<?php echo $event_id; ?>" data-status="No">Block</button>
-
-                                    <?php } ?>
-
-
-
-                                </div>
-                            <?php }
-                            ?>
 
 
                             <div class="marketTitle">
@@ -130,8 +53,6 @@ h81.92V199.936z"></path>
                                     <g></g>
                                     <g></g>
                                 </svg>
-                                <br />
-                                <span style="color:white;font-weight:bold;position: absolute;margin: 32px 0 0 -5px;">Live Tv</span>
                                 <span class="match-name-team"><?php echo $event_name; ?>
                                 </span>
 
@@ -139,50 +60,28 @@ h81.92V199.936z"></path>
                                 <!--?php// } ?-->
 
 
-                                <!-- <div class="hidden-lg">                             -->
-                                <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
-                                    <time><img src="<?php echo base_url(); ?>assets/app/live-tv.png"></time><span style="color:white;font-weight:bold">Scorecard</span>
-                                </a>
-                                <!-- <div class="mobile-tv-show">
-                                        <span id="close" class="cls-btn " onclick="showAnimated()">x</span>
-                                        <div id="Moblivetv" class="MatchLiveTvHideShow">
-                                            <iframe class="animated_scoreboard" id="mobilePlayer" allowfullscreen="true" frameborder="0" scrolling="" style="overflow: scroll; width: 100%; max-width:100% ; max-height: 247px;" height="188"></iframe>
-                                        </div>
-                                    </div>
-                                </div> -->
-
-                            </div>
-
-                            <div class="panel-collapse collapse" id="collapseExample">
-                                <!-- <div class="panel-body animated_scoreboard_div" style="padding:0px;position:relative;">
-                                    <iframe class="animated_scoreboard" style="height:100%;width:100%" id="mobilePlayer"></iframe>
-                                </div> -->
-                                <div data-v-581c39a4="" id="scoreboard-box" style="display:none;">
-                                    <div data-v-581c39a4="" class="scorecard scorecard-mobile">
-                                        <div data-v-581c39a4="" class="score-inner">
-                                            <div data-v-581c39a4="" class="container-fluid container-fluid-5">
-                                                <p data-v-581c39a4="" class="team-1 row row5"><span data-v-581c39a4="" class="team-name col-6" id="team_1"></span> <span data-v-581c39a4="" class="team-name col-6 text-right" style="float:right;" id="team_2"></span></p>
-                                            </div>
-                                            <div data-v-581c39a4="" class="container-fluid container-fluid-5">
-                                                <p data-v-581c39a4="" class="match-status row row5"><span data-v-581c39a4="" class="col-9">
-                                                    </span></p>
-                                                <div data-v-581c39a4="" class="match-status row row5" style="width:100%;margin-left:1px;"><span data-v-581c39a4="" class="col-3"><span data-v-581c39a4="" id="current_rr">
-                                                        </span>
-                                                    </span> <span data-v-581c39a4="" class="col-3">
-                                                    </span> <span data-v-581c39a4="" id="last_balls" class="text-right col-6" style="float:right;"></span></div>
-                                            </div>
-                                        </div>
+                                <div class="hidden-lg">
+                                    <!-- <div class="select-tv-ico">
+                                        <time><img onclick="showAnimated();" src="<?php echo base_url(); ?>assets/app/live-tv.png"></time> <span>Animation</span>
+                                    </div> -->
+                                    <div class="mobile-tv-show">
+                                        <span id="close" class="cls-btn">x</span>
+                                        <div id="Moblivetv" class="MatchLiveTvHideShow"><iframe id="mobilePlayer" allowfullscreen="true" frameborder="0" scrolling="" style="overflow: scroll; width: 100%; max-width: 100%  max-height: 247px;" src="<?php echo json_decode(matchScore($event_id))->animation; ?>" height="188"></iframe></div>
                                     </div>
                                 </div>
+
+
+
+
                             </div>
 
                             <?php
                             if (!empty($live_tv_url)) { ?>
                                 <div id="collapseTwo" class="panel-collapse collapse">
-                                    <div class="panel-body" style="padding:0px;position:relative;">
+                                    <div class="panel-body" style="padding:0px;">
 
-                                        <span onclick="goToFull()" style="position:absolute;right:15px;top:15px;"><i class="fa fa-expand" style="color:#000;font-size:21px;" aria-hidden="true"></i></span>
-                                        <iframe id="tvPlayer" src="<?php echo $live_tv_url; ?>" frameborder="0" scrolling="auto"></iframe>
+
+                                        <iframe id="tvPlayer" src="<?php echo $live_tv_url; ?>" style="border-radius: 1px;width:100%;height:220px;overflow:hidden !important;position:relative;"></iframe>
                                     </div>
                                 </div>
                             <?php }
@@ -223,7 +122,7 @@ h81.92V199.936z"></path>
                         <div class="score_area"><span style="" class="matchScore" id="matchScore_31057636">
                                 <div class="score_main">
                                     <?php if ($event_type == 4) { ?>
-                                        <!-- <div class="cricket-score">
+                                        <div class="cricket-score">
                                             <div class="row">
                                                 <div class="col-md-4 col-xs-4 col">
                                                     <div class="teamtype"> <img id="team_1_status" class="" src="<?php echo base_url(); ?>assets/images/cricket-bat.svg">
@@ -267,7 +166,7 @@ h81.92V199.936z"></path>
                                                     <div class="commantry-status"><span class="commantry"></span></div>
                                                 </div>
                                             </div>
-                                        </div> -->
+                                        </div>
                                 </div>
                             <?php } ?>
                             </span>
@@ -314,7 +213,7 @@ h81.92V199.936z"></path>
                 <div class="mod-header tab_bets betsheading" style="">
                     <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
                         <li class="nav-item betdata active all-bet-tab-menu">
-                            <a class="allbet" id="allbet" href="javascript:void(0);" onclick="getDataByType('all','all-bet-tab-menu');"><span class="bet-label">All Bet</span>
+                            <a class="allbet" href="javascript:void(0);" onclick="getDataByType('all','all-bet-tab-menu');"><span class="bet-label">All Bet</span>
                                 <span class="bat_counter" id="cnt_row">(0)</span></a>
                         </li>
                         <!-- <li class="nav-item betdata">
@@ -325,12 +224,6 @@ h81.92V199.936z"></path>
                             <a class="unmatchbet" href="javascript:void(0);" onclick="getDataByType('fancy','fancy-bet-tab-menu');"><span class="bet-label">Fancy Bet</span>
                                 <span class="bat_counter" id="cnt_row3">(0)</span> </a>
                         </li>
-
-                        <li class="nav-item betdata unmatch-bet-tab-menu">
-                            <a class="unmatchbet" href="javascript:void(0);" onclick="getDataByType('unmatch','unmatch-bet-tab-menu');"><span class="bet-label">Unmatch Bet</span>
-                                <span class="bat_counter" id="cnt_row4">(0)</span> </a>
-                        </li>
-
                         <li class="nav-item full-screen">
 
                             <a class="btn full-btn" onclick="viewAllMatch()" href="javascript:void(0);"><i class="fas fa-compress"></i></a>
@@ -340,11 +233,9 @@ h81.92V199.936z"></path>
                 <div class="" id="MatchUnMatchBetaData">
                     <script>
                         $(document).ready(function() {
-
                             // $('.UnMachShowHide').hide();
-                            //  $('.MachShowHide').hide();                     
+                            //  $('.MachShowHide').hide();
                         });
-
                         $(".MatchBetHide").click(function() {
                             $(".MachShowHide").slideToggle("fast");
                             $(this).find(".matchbetupdown").toggleClass("down up");
@@ -425,13 +316,6 @@ h81.92V199.936z"></path>
                                                 <td>User</td>
                                             <?php }
                                             ?>
-                                            <?php
-                                            if (get_user_type() == 'User') { ?>
-                                                <td>Delete</td>
-
-                                            <?php }
-                                            ?>
-
                                             <td>Runner</td>
                                             <td>Bhaw</td>
                                             <td>Amount</td>
@@ -442,10 +326,6 @@ h81.92V199.936z"></path>
                                             <td>Time</td>
                                             <td>ID</td>
                                             <td> IP</td>
-                                            <td>Unmatch</td>
-
-
-
                                         </tr>
                                     </thead>
                                     <tbody id="all-betting-data">
@@ -513,7 +393,9 @@ h81.92V199.936z"></path>
                                 type: 'get',
                                 dataType: 'html',
                                 success: function(output) {
-
+                                    //console.log("viewMAtchUnMAtch"+output);
+                                    //alert("reset")
+                                    //console.log(output);
                                     $("#MatchUnMatchBetaData").show();
                                     $("#MatchUnMatchBetaData").html(output);
                                 }
@@ -532,7 +414,8 @@ h81.92V199.936z"></path>
                                 type: 'get',
                                 dataType: 'html',
                                 success: function(output) {
-
+                                    //console.log(output);
+                                    //alert("reset")
                                     $("#MatchUnMatchBetaData").show();
                                     $("#MatchUnMatchBetaData").html(output);
 
@@ -543,22 +426,157 @@ h81.92V199.936z"></path>
                 </div>
 
 
-                <a href="#" id="toTop" style="display: inline;"><span id="toTopHover"></span><span id="toTopHover"></span></a>
+                <div id="footerimg" style="margin-bottom: 30px;width: 100%; float: left; margin-top: 10px;">
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/footer01.jpg">
 
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/footer02.jpg">
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/3PT.jpg">
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/7U7D.jpg">
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/32C.jpg">
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <img style="width: 100%;" src="aaa.jpg">
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/AB.jpg">
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/dt.jpg">
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/P.jpg">
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/HL.jpg">
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/SPP.jpg">
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/TT20.jpg">
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/WM.jpg">
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <a href="http://pdmexch.bet/dashboard"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/3CD.jpg"></a>
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <a href="http://pdmexch.bet/dashboard"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/AR.jpg"></a>
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <a href="http://pdmexch.bet/dashboard"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/BJ.jpg"></a>
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <a href="http://pdmexch.bet/dashboard"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/CB.jpg"></a>
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <a href="http://pdmexch.bet/dashboard"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/CM.jpg"></a>
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <a href="http://pdmexch.bet/dashboard"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/CQ.jpg"></a>
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <a href="http://pdmexch.bet/dashboard"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/CT.jpg"></a>
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <a href="http://pdmexch.bet/dashboard"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/CW.jpg"></a>
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <a href="http://pdmexch.bet/dashboard"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/DC.jpg"></a>
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <a href="http://pdmexch.bet/dashboard"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/FS.jpg"></a>
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <a href="http://pdmexch.bet/dashboard"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/GTH.jpg"></a>
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <a href="http://pdmexch.bet/dashboard"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/L7.jpg"></a>
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <a href="http://pdmexch.bet/dashboard"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/MB.jpg"></a>
+
+
+                    </div>
+                    <div style="width:15%;float:left;margin-top:10px;margin-right:10px;">
+                        <a href="http://pdmexch.bet/dashboard"><img style="width: 100%;" src="<?php echo base_url(); ?>assets/app/SSB.jpg"></a>
+
+
+                    </div>
+                </div>
             <?php } ?>
         </section>
         <div id="betSidenav" class="betsidenav">
             <a href="javascript:void(0)" class="closebtn" onclick="betcloseNav()">×</a>
             <section class="right-bet-content">
-                <div id="livetv">
-                    <!-- <div class="mod-header">
+                <!-- <div id="livetv">
+                    <div class="mod-header">
                         <div class="select-tv-ico">
                             <time><img onclick="showAnimated();" src="<?php echo base_url(); ?>assets/app/live-tv.png"></time> <span>Live Tv</span>
                         </div>
                         <span id="close" class="cls-btn">x</span>
-                    </div> -->
-                    <!-- <div class="MatchLiveTvHideShow animated_scoreboard"><iframe id="mobilePlayer" allowfullscreen="true" frameborder="0" scrolling=""></iframe></div> -->
-                </div>
+                    </div>
+                    <div class="MatchLiveTvHideShow"><iframe id="mobilePlayer" allowfullscreen="true" frameborder="0" scrolling="" style="overflow: scroll; width: 100%; max-width: 100%  max-height: 247px;" src="<?php echo json_decode(matchScore($event_id))->animation; ?>" height="188"></iframe></div>
+                </div> -->
                 <div id="tv-box-popup"></div>
 
                 <div class="betSlipBox" style="">
@@ -626,7 +644,7 @@ h81.92V199.936z"></path>
                                         <div class="btn brt_btn"><button class=" " type="button" onclick="ClearStack( );">Clear</button></div>
                                     </div>
                                     <div class="bet-box-footer">
-                                        <button class="btn cancle-bet" type="button" onclick="ClearAllSelection();"> Cancel</button>
+                                        <button class="btn cancle-bet" type="button" onclick="ClearAllSelection();"> Reset Bet</button>
                                         <button class="btn place-bet" type="button" onclick="PlaceBet();"> Place Bet</button>
                                         <!-- <button class="btn multi-bet" type="button" onclick="PlaceMultiBet();"> Place Multiple Bet</button> -->
                                         <!-- <button class="btn btn-success CommanBtn placefancy" type="button" onclick="PlaceBet();" style="display:none"> Place Bet</button> -->
@@ -785,10 +803,6 @@ h81.92V199.936z"></path>
                                 <a class="unmatchbet" href="javascript:void(0);" onclick="getDataByType('fancy','fancy-bet-tab-menu');"><span class="bet-label">Fancy Bet</span>
                                     <span class="bat_counter" id="cnt_row3">(0)</span> </a>
                             </li>
-                            <li class="nav-item betdata unmatch-bet-tab-menu">
-                                <a class="unmatchbet" href="javascript:void(0);" onclick="getDataByType('unmatch','unmatch-bet-tab-menu');"><span class="bet-label">Unmatch Bet</span>
-                                    <span class="bat_counter" id="cnt_row4">(0)</span> </a>
-                            </li>
                             <li class="nav-item full-screen">
 
                                 <a class="btn full-btn" onclick="viewAllMatch()" href="javascript:void(0);"><i class="fas fa-compress"></i></a>
@@ -882,12 +896,6 @@ h81.92V199.936z"></path>
                                                     <td>User</td>
                                                 <?php }
                                                 ?>
-                                                <?php
-                                                if (get_user_type() == 'User') { ?>
-                                                    <td>Delete</td>
-
-                                                <?php }
-                                                ?>
                                                 <td>Runner</td>
                                                 <td>Bhaw</td>
                                                 <td>Amount</td>
@@ -898,9 +906,6 @@ h81.92V199.936z"></path>
                                                 <td>Time</td>
                                                 <td>ID</td>
                                                 <td> IP</td>
-                                                <td>Unmatch</td>
-
-
                                             </tr>
                                         </thead>
                                         <tbody id="all-betting-data">
@@ -968,7 +973,9 @@ h81.92V199.936z"></path>
                                     type: 'get',
                                     dataType: 'html',
                                     success: function(output) {
-
+                                        //console.log("viewMAtchUnMAtch"+output);
+                                        //alert("reset")
+                                        //console.log(output);
                                         $("#MatchUnMatchBetaData").show();
                                         $("#MatchUnMatchBetaData").html(output);
                                     }
@@ -987,7 +994,8 @@ h81.92V199.936z"></path>
                                     type: 'get',
                                     dataType: 'html',
                                     success: function(output) {
-
+                                        //console.log(output);
+                                        //alert("reset")
                                         $("#MatchUnMatchBetaData").show();
                                         $("#MatchUnMatchBetaData").html(output);
 
@@ -1039,8 +1047,27 @@ h81.92V199.936z"></path>
                 </div>
                 <div class="content_popup">
                     <div class="popup_form_row">
-                        <div class="modal-body" id="all-profit-loss-data">
+                        <div class="modal-body">
+                            <table class="table table-striped jambo_table bulk_action">
+                                <thead>
+                                    <tr class="headings">
+                                        <th style="width:30%;">Account</th>
+                                        <?php
+                                        if (!empty($runners)) {
+                                            foreach ($runners as $runner) { ?>
+                                                <th class="text-center">
+                                                    <span id="ContentPlaceHolder1_team01"><?php echo $runner['runner_name']; ?></span>
+                                                </th>
 
+                                        <?php }
+                                        }
+                                        ?>
+                                    </tr>
+                                </thead>
+                                <tbody id="all-profit-loss-data">
+
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -1089,6 +1116,51 @@ h81.92V199.936z"></path>
     </div>
 </div>
 
+<div id="addUser" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header mod-header"><button type="button" class="close" data-dismiss="modal">×</button>
+                <h4 class="modal-title">Chip Setting</h4>
+            </div>
+            <div class="modal-body">
+                <div id="addUserMsg"></div>
+                <form id="stockez_add" method="post" class="form-inline">
+                    <input type="hidden" name="user_id" class="form-control" required value="<?php echo get_user_id(); ?>" />
+                    <div class="modal-body" id="chip-moddal-body">
+                        <?php
+                        if (!empty($chips)) {
+                            $i = 0;
+                            foreach ($chips as $chip) {
+                                $i++;
+                        ?>
+                                <div class="fullrow">
+                                    <input type="hidden" name="user_chip_id[]" class="form-control" required value="<?php echo $chip['user_chip_id']; ?>" />
+                                    <div class="col-md-6 col-sm-6col-xs-6">
+                                        <div class="form-group"><label for="email">Chips Name <?php echo $i; ?>:</label><input type="text" name="chip_name[]" class="form-control" required value="<?php echo $chip['chip_name']; ?>"></div>
+                                    </div>
+                                    <div class=" col-md-6 col-sm-6col-xs-6">
+                                        <div class="form-group"><label for="pwd">Chip Value <?php echo $i; ?>:</label><input type="number" name="chip_value[]" class="form-control" required value="<?php echo $chip['chip_value']; ?>"></div>
+                                    </div>
+                                </div>
+                        <?php }
+                        }
+                        ?>
+
+                    </div>
+                    <div class="modal-footer">
+                        <div class="text-center" id="button_change">
+                            <div class="text-center" id="button_change">
+                                <button type="button" class="btn btn-success" id="updateUserChip" onclick="add_new_chip()" style="margin-bottom:10px;">Add New Chip </button>
+                                <button type="button" style="margin-bottom:10px;" class="btn btn-success" id="updateUserChip" onclick="submit_update_chip()"> Update Chip Setting </button>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 
 </html>
@@ -1205,7 +1277,7 @@ h81.92V199.936z"></path>
 
                         exchangeHtml += '<div class="block_box_btn">';
                         exchangeHtml += '<button class="btn btn-primary btn-xs" onclick="getCurrentBets(' + event.event_id + ')">Bets</button>';
-
+                        exchangeHtml += '<button class="btn btn-primary btn-xs" onclick="closeBetBox(' + event.event_id + ')">X</button>';
                         exchangeHtml += '</div>';
                         exchangeHtml += '</div>';
                         exchangeHtml += '</div>';
@@ -1532,7 +1604,7 @@ h81.92V199.936z"></path>
             fancyHtml += '<div class="fancyAPI">';
             $.each(data.fancy_data, function(index, fancy) {
 
-                fancyHtml += '<div class="block_box f_m_' + fancy.match_id + ' fancy_' + fancy.selection_id + ' f_m_31236 fancy-rows" data-id="' + fancy.selection_id + '">';
+                fancyHtml += '<div class="block_box f_m_' + fancy.match_id + ' fancy_' + fancy.selection_id + ' f_m_31236" data-id="31236">';
 
                 fancyHtml += '<ul class="sport-high fancyListDiv">';
                 fancyHtml += '<li>';
@@ -1554,7 +1626,7 @@ h81.92V199.936z"></path>
 
                 fancyHtml += '<td class="fancy_back" onclick="betfancy(`' + fancy.match_id + '`,`' + fancy.selection_id + '`,`' + 1 + '`);">';
 
-                fancyHtml += '<button class="back-cell cell-btn fancy_back_price_' + fancy.selection_id + '" id="BackYes_' + fancy.selection_id + '" >' + parseFloat(fancy.back_price1) + '</button>';
+                fancyHtml += '<button class="back-cell cell-btn fancy_back_price_' + fancy.selection_id + '" id="BackYes_' + fancy.selection_id + '">' + parseFloat(fancy.back_price1) + '</button>';
 
                 fancyHtml += '<button id="YesValume_' + fancy.selection_id + '" class="disab-btn fancy_back_size_' + fancy.selection_id + '">' + fancy.back_size1 + '</button>';
                 fancyHtml += '</td>';
@@ -1651,14 +1723,8 @@ h81.92V199.936z"></path>
 
                 var fancyLength = $('.fancy-bet-slip').length;
 
-                var unmatchLength = $('.unmatch-bet-slip').length;
-
-
 
                 $('#cnt_row3').text('(' + fancyLength + ')');
-
-                $('#cnt_row4').text('(' + unmatchLength + ')');
-
                 $("#pills-tab").find(".active").find("a").click();
 
             }
@@ -1669,10 +1735,7 @@ h81.92V199.936z"></path>
     function getOddValue(matchId, marketId, back_layStatus, placeName, elementId, selectionId, MarketTypes = '', target) {
         $("#ShowBetPrice.odds-input").attr("style", "color:#000 !important")
         var priceVal = $('#' + elementId).text();
-        if (priceVal <= 0) {
-            ClearAllSelection();
-            return false;
-        }
+
         $('#betting_type').val('Match');
         <?php
         $user_type = $_SESSION['my_userdata']['user_type'];
@@ -1682,7 +1745,7 @@ h81.92V199.936z"></path>
         <?php }
         ?>
         $("#stakeValue").blur();
-        if (back_layStatus != 0) {
+        if (back_layStatus == 0) {
             $("#placeBetSilp").css("background-color", "#a7d8fd");
         } else {
             $("#placeBetSilp").css("background-color", "#f9c9d4");
@@ -1911,13 +1974,7 @@ h81.92V199.936z"></path>
         }
     }
 
-    function showloader() {
-        $(".loader").css('display', "");
-    }
-
     function PlaceBet() {
-
-        showloader();
         clearTimeout(betSlip);
 
         var stake = parseFloat($("#stakeValue").val());
@@ -2047,46 +2104,23 @@ h81.92V199.936z"></path>
 
                             var betting_details = {
                                 'bet_details': {},
-                                'users': superior_arr
+                                'users': ['140', "138"]
                             }
                             socket.emit('betting_placed', {
                                 betting_details: betting_details
                             });
                             //  getFancyData();
-
-                            if (data.message == 'Unmatch Bet Placed Successfully') {
-                                new PNotify({
-                                    title: 'Success',
-                                    text: data.message,
-                                    type: 'notice',
-                                    styling: 'bootstrap3',
-                                    delay: 1000
-                                });
-                            } else {
-                                new PNotify({
-                                    title: 'Success',
-                                    text: data.message,
-                                    type: 'success',
-                                    styling: 'bootstrap3',
-                                    delay: 1000
-                                });
-                            }
+                            new PNotify({
+                                title: 'Success',
+                                text: data.message,
+                                type: 'success',
+                                styling: 'bootstrap3',
+                                delay: 1000
+                            });
 
 
-
-
-                            setIntervalX(function() {
-                                fetchBttingList();
-                                getFancysExposure();
-                                getEventsMarketExpsure(<?php echo $event_id; ?>);
-                            }, 5000, 2);
-
-
-                            // setTimeout(function() {
-
-                            //     getFancysExposure();
-                            // }, 2000);
-                            // fetchBttingList();
+                            getFancysExposure();
+                            fetchBttingList();
 
                         }
                     },
@@ -2348,40 +2382,6 @@ h81.92V199.936z"></path>
 
 
 
-
-        socket.on("connect", () => {
-            console.log('socket connecteds ::::::::::::::::::::::' + new Date(), socket);
-            console.log(socket.connected); // true
-
-            socket.emit("join_room", {
-                username: userName,
-                roomName: room
-            });
-        });
-
-
-
-        socket.on("disconnect", (reason) => {
-            console.log('SOCKET DISCONNECTING REASON ::::::::::::::::::::::' + new Date(), reason);
-            if (reason === "io server disconnect") {
-                // the disconnection was initiated by the server, you need to reconnect manually
-                socket.connect();
-
-
-            } else {
-
-                console.log('SOCKET CONNECTING REQUEST SEND ::::::::::::::::::::::' + new Date());
-
-
-                // socket.connect();
-
-
-            }
-            // else the socket will automatically try to reconnect
-        });
-
-
-
         <?php
 
 
@@ -2391,19 +2391,10 @@ h81.92V199.936z"></path>
 
 
 
-        socket.on('<?php
-                    if ($event_type == 4) {
-                        echo "cricket_market_update";
-                    } else if ($event_type == 2) {
-                        echo "tennis_market_update";
-                    } else if ($event_type == 1) {
-                        echo "soccer_market_update";
-                    }
-                    ?>', function(data) {
+        socket.on('market_update', function(data) {
             //events   
             var MarketId = $('#MarketId').val();
             var matchId = "<?php echo $event_id; ?>";
-            // console.log(matchId);
             // if (MarketId) {
             // var market = data.marketodds[matchId]
 
@@ -2411,209 +2402,170 @@ h81.92V199.936z"></path>
 
                 var market = data.marketodds.find(o => o.event_id == matchId);
 
-
-                // console.log('SOCKET UPDATE', new Date());
                 if (market) {
-                    market.is_ball_running = BLOCKED ? 'Yes' : market.is_ball_running;
-                    // console.log('market',market);
                     if (market.market_types.length > 0) {
                         $.each(market.market_types, function(index, market_type) {
                             $.each(market_type.runners, function(index, runner) {
+                                if (runner.status == 'OPEN' || runner.status == 'ACTIVE') {
 
-                                if (market_type.market_name == 'Toss') {
-                                    if (runner.back_1_price == 1.95) {
-                                        runner.back_1_price = 1.97;
-                                    }
-                                }
+                                    // $('.overlay_matchBoxs_' + market_type.market_id.replace('.', '')).fadeOut();
+
+                                    $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().removeClass('overlay');
+                                } else {
 
 
-                                if (runner.status == "CLOSE") {
-                                    $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent().append("<h6>CLOSED</h6>");
+                                    // $('.overlay_matchBoxs_' + market_type.market_id.replace('.', '')).fadeIn();
+
+                                    $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
 
                                     $('.status_matchBoxs_' + market_type.market_id.replace('.', '')).text(market_type.status);
-                                } else {
-                                    if (runner.status == 'OPEN' || runner.status == 'ACTIVE') {
-                                        $(`#availableToLay1_price_${runner.market_id.replace('.', '')}_${runner.selection_id}`).parent().find('h6').remove();
-                                        // $('.overlay_matchBoxs_' + market_type.market_id.replace('.', '')).fadeOut();
-
-                                        $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().removeClass('overlay');
-                                    } else {
-
-                                        $(`#availableToLay1_price_${runner.market_id.replace('.', '')}_${runner.selection_id}`).parent().find('h6').remove();
-                                        // $('.overlay_matchBoxs_' + market_type.market_id.replace('.', '')).fadeIn();
-
-                                        $('#availableToBack3_size_' + market_type.market_id.replace('.', '') + '_' + runner.selection_id).parent().parent().addClass('overlay');
-
-                                        $('.status_matchBoxs_' + market_type.market_id.replace('.', '')).text(market_type.status);
-                                    }
-
-                                    //  if (j == 0) {
-
-                                    ///*************Available To Bck */
-                                    // $('#availableToBack3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent()[0].closest( "h6" ).remove();
-
-
-                                    if (runner.status == 'SUSPENDED' || market.is_ball_running == 'Yes') {
-
-
-                                        if (market.is_ball_running == 'Yes') {
-                                            ClearAllSelection(1);
-
-                                        }
-
-                                        if (market.is_ball_running == 'Yes') {
-
-
-                                            <?php
-                                            if ($event_type == 4) { ?>
-                                                $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent().append("<h6>Ball Running</h6>");
-                                            <?php  } else { ?>
-                                                $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent().append("<h6>SUSPENDED</h6>");
-                                            <?php } ?>
-
-
-
-                                        } else {
-                                            $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent().append("<h6>SUSPENDED</h6>");
-                                        }
-
-
-                                        if (parseFloat($('#availableToBack3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.back_3_price)) {
-                                            $('#availableToBack3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
-
-                                        } else {
-                                            $('#availableToBack3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
-                                        }
-
-
-                                        if (parseFloat($('#availableToBack2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.back_2_price)) {
-                                            $('#availableToBack2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
-
-                                        } else {
-                                            $('#availableToBack2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
-                                        }
-
-                                        if (parseFloat($('#availableToBack1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.back_1_price)) {
-                                            $('#availableToBack1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
-
-                                        } else {
-                                            $('#availableToBack1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
-                                        }
-
-
-                                        if (parseFloat($('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.lay_1_price)) {
-                                            $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
-
-                                        } else {
-                                            $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
-                                        }
-
-                                        if (parseFloat($('#availableToLay2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.lay_2_price)) {
-                                            $('#availableToLay2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
-
-                                        } else {
-                                            $('#availableToLay2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
-                                        }
-
-                                        if (parseFloat($('#availableToLay3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.lay_3_price)) {
-                                            $('#availableToLay3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
-
-                                        } else {
-                                            $('#availableToLay3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
-                                        }
-
-                                    } else {
-                                        if (parseFloat($('#availableToBack3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.back_3_price)) {
-                                            $('#availableToBack3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.back_3_price));
-
-                                        } else {
-                                            $('#availableToBack3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.back_3_price));
-                                        }
-
-
-                                        if (parseFloat($('#availableToBack2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.back_2_price)) {
-                                            $('#availableToBack2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.back_2_price));
-
-                                        } else {
-                                            $('#availableToBack2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.back_2_price));
-                                        }
-
-                                        if (parseFloat($('#availableToBack1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.back_1_price)) {
-                                            $('#availableToBack1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.back_1_price));
-
-                                        } else {
-                                            $('#availableToBack1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.back_1_price));
-                                        }
-
-
-                                        if (parseFloat($('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.lay_1_price)) {
-                                            $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.lay_1_price));
-
-                                        } else {
-                                            $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.lay_1_price));
-                                        }
-
-                                        if (parseFloat($('#availableToLay2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.lay_2_price)) {
-                                            $('#availableToLay2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.lay_2_price));
-
-                                        } else {
-                                            $('#availableToLay2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.lay_2_price));
-                                        }
-
-                                        if (parseFloat($('#availableToLay3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.lay_3_price)) {
-                                            $('#availableToLay3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.lay_3_price));
-
-                                        } else {
-                                            $('#availableToLay3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.lay_3_price));
-                                        }
-
-                                    }
                                 }
+
+                                //  if (j == 0) {
+
+                                ///*************Available To Bck */
+                                // $('#availableToBack3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent()[0].closest( "h6" ).remove();
+
+                                $(`#availableToLay1_price_${runner.market_id.replace('.', '')}_${runner.selection_id}`).parent().find('h6').remove();
+                                if (runner.status == 'SUSPENDED') {
+                                    $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).parent().append("<h6>SUSPENDED</h6>");
+
+                                    if (parseFloat($('#availableToBack3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.back_3_price)) {
+                                        $('#availableToBack3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
+
+                                    } else {
+                                        $('#availableToBack3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
+                                    }
+
+
+                                    if (parseFloat($('#availableToBack2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.back_2_price)) {
+                                        $('#availableToBack2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
+
+                                    } else {
+                                        $('#availableToBack2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
+                                    }
+
+                                    if (parseFloat($('#availableToBack1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.back_1_price)) {
+                                        $('#availableToBack1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
+
+                                    } else {
+                                        $('#availableToBack1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
+                                    }
+
+
+                                    if (parseFloat($('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.lay_1_price)) {
+                                        $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
+
+                                    } else {
+                                        $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
+                                    }
+
+                                    if (parseFloat($('#availableToLay2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.lay_2_price)) {
+                                        $('#availableToLay2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
+
+                                    } else {
+                                        $('#availableToLay2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
+                                    }
+
+                                    if (parseFloat($('#availableToLay3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.lay_3_price)) {
+                                        $('#availableToLay3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
+
+                                    } else {
+                                        $('#availableToLay3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(0);
+                                    }
+
+                                } else {
+                                    if (parseFloat($('#availableToBack3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.back_3_price)) {
+                                        $('#availableToBack3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.back_3_price));
+
+                                    } else {
+                                        $('#availableToBack3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.back_3_price));
+                                    }
+
+
+                                    if (parseFloat($('#availableToBack2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.back_2_price)) {
+                                        $('#availableToBack2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.back_2_price));
+
+                                    } else {
+                                        $('#availableToBack2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.back_2_price));
+                                    }
+
+                                    if (parseFloat($('#availableToBack1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.back_1_price)) {
+                                        $('#availableToBack1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.back_1_price));
+
+                                    } else {
+                                        $('#availableToBack1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.back_1_price));
+                                    }
+
+
+                                    if (parseFloat($('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.lay_1_price)) {
+                                        $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.lay_1_price));
+
+                                    } else {
+                                        $('#availableToLay1_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.lay_1_price));
+                                    }
+
+                                    if (parseFloat($('#availableToLay2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.lay_2_price)) {
+                                        $('#availableToLay2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.lay_2_price));
+
+                                    } else {
+                                        $('#availableToLay2_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.lay_2_price));
+                                    }
+
+                                    if (parseFloat($('#availableToLay3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.lay_3_price)) {
+                                        $('#availableToLay3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.lay_3_price));
+
+                                    } else {
+                                        $('#availableToLay3_price_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(parseFloat(runner.lay_3_price));
+                                    }
+
+                                }
+
 
                                 /************************Size */
 
                                 if (parseFloat($('#availableToBack3_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.back_3_size)) {
-                                    $('#availableToBack3_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.back_3_size).parent().parent().addClass('yellow');
+                                    $('#availableToBack3_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.back_3_size).parent().addClass('yellow');
 
                                 } else {
-                                    $('#availableToBack3_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.back_3_size).parent().parent().removeClass('yellow');
+                                    $('#availableToBack3_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.back_3_size).parent().removeClass('yellow');
                                 }
 
 
                                 if (parseFloat($('#availableToBack2_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.back_2_size)) {
-                                    $('#availableToBack2_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.back_2_size).parent().parent().addClass('yellow');
+                                    $('#availableToBack2_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.back_2_size).parent().addClass('yellow');
 
                                 } else {
-                                    $('#availableToBack2_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.back_2_size).parent().parent().removeClass('yellow');
+                                    $('#availableToBack2_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.back_2_size).parent().removeClass('yellow');
                                 }
 
-                                if (parseFloat($('#availableToBack1_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(kFormatter(runner.back_1_size))) {
-                                    $('#availableToBack1_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(kFormatter(runner.back_1_size)).parent().parent().addClass('yellow');
+                                if (parseFloat($('#availableToBack1_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.back_1_size)) {
+                                    $('#availableToBack1_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.back_1_size).parent().addClass('yellow');
 
                                 } else {
-                                    $('#availableToBack1_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(kFormatter(runner.back_1_size)).parent().parent().removeClass('yellow');
+                                    $('#availableToBack1_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.back_1_size).parent().removeClass('yellow');
                                 }
 
 
-                                if (parseFloat($('#availableToLay1_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(kFormatter(runner.lay_1_size))) {
-                                    $('#availableToLay1_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(kFormatter(runner.lay_1_size)).parent().parent().addClass('yellow');
+                                if (parseFloat($('#availableToLay1_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.lay_1_size)) {
+                                    $('#availableToLay1_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.lay_1_size).parent().addClass('yellow');
 
                                 } else {
-                                    $('#availableToLay1_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(kFormatter(runner.lay_1_size)).parent().parent().removeClass('yellow');
+                                    $('#availableToLay1_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.lay_1_size).parent().removeClass('yellow');
                                 }
 
                                 if (parseFloat($('#availableToLay2_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.lay_2_size)) {
-                                    $('#availableToLay2_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.lay_2_size).parent().parent().addClass('yellow');
+                                    $('#availableToLay2_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.lay_2_size).parent().addClass('yellow');
 
                                 } else {
-                                    $('#availableToLay2_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.lay_2_size).parent().parent().removeClass('yellow');
+                                    $('#availableToLay2_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.lay_2_size).parent().removeClass('yellow');
                                 }
 
                                 if (parseFloat($('#availableToLay3_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text()) !== parseFloat(runner.lay_3_size)) {
-                                    $('#availableToLay3_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.lay_3_size).parent().parent().addClass('yellow');
+                                    $('#availableToLay3_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.lay_3_size).parent().addClass('yellow');
 
                                 } else {
-                                    $('#availableToLay3_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.lay_3_size).parent().parent().removeClass('yellow');
+                                    $('#availableToLay3_size_' + runner.market_id.replace('.', '') + '_' + runner.selection_id).text(runner.lay_3_size).parent().removeClass('yellow');
                                 }
 
 
@@ -2627,6 +2579,8 @@ h81.92V199.936z"></path>
         });
 
         socket.on('fancy_update', function(data) {
+
+            console.log("Here");
             var MarketId = $('#MarketId').val();
             var matchId = "<?php echo $event_id; ?>";
             <?php
@@ -2640,17 +2594,17 @@ h81.92V199.936z"></path>
                 if (data.fantacy.length > 0) {
                     var fancys = data.fantacy.find(o => o.event_id == matchId);
                     if (fancys) {
-                        fancy_event = fancys;
+
                         fancys = fancys.fancy_data;
-                        fancy_event.is_ball_running = BLOCKED ? 'Yes' : fancy_event.is_ball_running;
+
+
                         if (fancys.length) {
-                            filterRemoveFancy(fancys);
                             for (var j = 0; j < fancys.length; j++) {
                                 if (fancys[j].cron_disable == 'Yes') {
                                     // ClearAllSelection(1);
 
 
-                                    $('.fancy_lay_price_' + fancys[j].selection_id).parent().parent().parent().parent().parent().fadeOut();
+                                    $('.fancy_lay_price_' + fancys[j].selection_id).parent().parent().fadeOut();
                                 } else {
                                     if (fancys[j]) {
                                         var block_market_fancys = fancys[j].block_market;
@@ -2665,7 +2619,7 @@ h81.92V199.936z"></path>
 
                                         if (find_fancy_all_block.length > 0) {
                                             // ClearAllSelection(1);
-                                            $('.fancy_lay_price_' + fancys[j].selection_id).parent().parent().parent().parent().parent().fadeOut();
+                                            $('.fancy_lay_price_' + fancys[j].selection_id).parent().parent().fadeOut();
 
 
 
@@ -2678,19 +2632,19 @@ h81.92V199.936z"></path>
 
                                             if (find_fancy_block.length > 0) {
                                                 // ClearAllSelection(1);
-                                                $('.fancy_lay_price_' + fancys[j].selection_id).parent().parent().parent().parent().parent().fadeOut();
+                                                $('.fancy_lay_price_' + fancys[j].selection_id).parent().parent().fadeOut();
 
 
 
                                             } else {
-                                                $('.fancy_lay_price_' + fancys[j].selection_id).parent().parent().parent().parent().parent().fadeIn();
+                                                $('.fancy_lay_price_' + fancys[j].selection_id).parent().parent().fadeIn();
                                                 var fancyHtml = '';
 
                                                 if (!$('.fancy_' + fancys[j].selection_id).length) {
 
-                                                    fancyHtml += '<div class="block_box f_m_' + fancys[j].match_id + ' fancy_' + fancys[j].selection_id + ' f_m_31236 fullrow margin_bottom fancybox fancy-rows" data-id="' + fancys[j].selection_id + '">';
+                                                    fancyHtml += '<div class="block_box f_m_' + fancys[j].match_id + ' fancy_' + fancys[j].selection_id + ' f_m_31236 fullrow margin_bottom fancybox" id="fancyLM_31057636">';
 
-                                                    fancyHtml += '<div class=" list-item fancy_220239 f_m_31057636 f_m_undefined" data-id="220239">';
+                                                    fancyHtml += '<div class="fancy-rows list-item fancy_220239 f_m_31057636 f_m_undefined" data-id="220239">';
                                                     fancyHtml += '<div class="event-sports event-sports-name"><input type="hidden" value="LM" class="fancyType220239"><input type="hidden" value="1.190470637" class="fancyMID220239">';
                                                     fancyHtml += '<span  onclick="getPosition(' + fancys[j].selection_id + ')"  class="event-name fancyhead' + fancys[j].selection_id + '" id="fancy_name' + fancys[j].selection_id + '">' + fancys[j].runner_name + '</span>';
 
@@ -2711,13 +2665,13 @@ h81.92V199.936z"></path>
                                                     fancyHtml += '<div class="fancy_div">';
                                                     fancyHtml += '<div class="fancy_buttone">';
                                                     fancyHtml += '<div class="fancy-lays bet-button lay mark-lay" id="fancy_lay_' + fancys[j].selection_id + '" onclick="betfancy(`' + fancys[j].match_id + '`,`' + fancys[j].selection_id + '`,`' + 0 + '`);">';
-                                                    fancyHtml += '<strong id="LayNO_' + fancys[j].selection_id + '" class=" fancy_lay_price_' + fancys[j].selection_id + '" >' + parseFloat(fancys[j].lay_price1) + '</strong>';
+                                                    fancyHtml += '<strong id="LayNO_' + fancys[j].selection_id + '">' + parseFloat(fancys[j].lay_price1) + '</strong>';
                                                     fancyHtml += '<div class="size">';
                                                     fancyHtml += '<span id="NoValume_' + fancys[j].selection_id + '" class="disab-btn fancy_lay_size_' + fancys[j].selection_id + '">' + fancys[j].lay_size1 + '</span>';
                                                     fancyHtml += '</div>';
                                                     fancyHtml += '</div>';
                                                     fancyHtml += '<div class="fancy-backs bet-button back mark-back"   onclick="betfancy(`' + fancys[j].match_id + '`,`' + fancys[j].selection_id + '`,`' + 1 + '`);">';
-                                                    fancyHtml += '<strong id="BackYes_' + fancys[j].selection_id + '" class=" fancy_back_price_' + fancys[j].selection_id + '">' + parseFloat(fancys[j].back_price1) + '</strong>';
+                                                    fancyHtml += '<strong id="BackYes_' + fancys[j].selection_id + '">' + parseFloat(fancys[j].back_price1) + '</strong>';
                                                     fancyHtml += '<div class="size">';
                                                     fancyHtml += '<span id="YesValume_' + fancys[j].selection_id + '" class="disab-btn fancy_back_size_' + fancys[j].selection_id + '">' + fancys[j].back_size1 + '</span>';
                                                     fancyHtml += '</div>';
@@ -2775,6 +2729,7 @@ h81.92V199.936z"></path>
                                                     // fancyHtml += '</ul></div>';
 
 
+                                                    // console.log('fancyHtml', fancyHtml);
                                                     $('.fancyAPI').append(fancyHtml);
                                                 }
 
@@ -2787,7 +2742,7 @@ h81.92V199.936z"></path>
                                                 //     $('.fancy_back_size_' + fancys[j].selection_id).text(fancys[j].back_size1);
                                                 // }
                                                 $(`#fancy_lay_${fancys[j].selection_id}`).parent().find('h6').remove();
-                                                if (fancys[j].game_status == 'Ball Running' || fancy_event.is_ball_running == 'Yes') {
+                                                if (fancys[j].game_status == 'Ball Running') {
 
                                                     $(`#fancy_lay_${fancys[j].selection_id}`).parent().append("<h6>Ball Running</h6>");
 
@@ -2827,11 +2782,11 @@ h81.92V199.936z"></path>
 
 
                                     } else {
-                                        $('.fancy_lay_price_' + fancys[j].selection_id).parent().parent().parent().parent().parent().fadeIn();
+                                        $('.fancy_lay_price_' + fancys[j].selection_id).parent().parent().fadeIn();
                                         var fancyHtml = '';
 
                                         if (!$('.fancy_' + fancys[j].selection_id).length) {
-                                            fancyHtml += '<div class="block_box f_m_' + fancys[j].match_id + ' fancy_' + fancys[j].selection_id + ' fancy-rows" data-id="' + fancys[j].selection_id + '">';
+                                            fancyHtml += '<div class="block_box f_m_' + fancys[j].match_id + ' fancy_' + fancys[j].selection_id + ' f_m_31236" data-id="31236">';
 
                                             fancyHtml += '<ul class="sport-high fancyListDiv">';
                                             fancyHtml += '<li>';
@@ -2847,7 +2802,7 @@ h81.92V199.936z"></path>
 
                                             fancyHtml += '<td class="fancy_lay" id="fancy_lay_' + fancys[j].selection_id + '" onclick="betfancy(`' + fancys[j].match_id + '`,`' + fancys[j].selection_id + '`,`' + 0 + '`);">';
 
-                                            fancyHtml += '<button class="lay-cell cell-btn fancy_lay_price_' + fancys[j].selection_id + '" id="LayNO_' + fancys[j].selection_id + '" >' + parseFloat(fancys[j].lay_price1) + '</button>';
+                                            fancyHtml += '<button class="lay-cell cell-btn fancy_lay_price_' + fancys[j].selection_id + '" id="LayNO_' + fancys[j].selection_id + '">' + parseFloat(fancys[j].lay_price1) + '</button>';
 
                                             fancyHtml += '<button id="NoValume_' + fancys[j].selection_id + '" class="disab-btn fancy_lay_size_' + fancys[j].selection_id + '">' + fancys[j].lay_size1 + '</button></td>';
 
@@ -2901,65 +2856,17 @@ h81.92V199.936z"></path>
         });
 
 
-
         socket.on('betting_placed', function(data) {
+            fetchBttingList();
+            getFancysExposure();
 
-            let usersArr = data.betting_details.users;
-            let user_id = <?php echo get_user_id(); ?>;
-
-            if (usersArr.length > 0) {
-                if (usersArr.includes(user_id.toString())) {
-
-
-                    setIntervalX(function() {
-                        fetchBttingList();
-                        getFancysExposure();
-                        getEventsMarketExpsure(<?php echo $event_id; ?>);
-                    }, 2000, 2);
-
-
-
-
-                    // setTimeout(function() {
-                    //     fetchBttingList();
-                    //     getFancysExposure();
-                    //     getEventsMarketExpsure(<?php echo $event_id; ?>);
-                    // }, 2500);
-
-
-
-                    <?php
-
-                    if (get_user_type() == 'Master') { ?>
-                        //  fetchProfitLossList();
-                    <?php   }
-
-                    ?>
-                } else {
-
-                }
-            }
+            // fetchMatchOddsPositionList();
 
         });
 
-
-
         socket.on('betting_settle', function(data) {
-
-            var bet_len = $('#user_row_' + data.betting_detail.betting_id);
-
-            if (bet_len.length) {
-
-                fetchBttingList();
-                getFancysExposure();
-                getEventsMarketExpsure(<?php echo $event_id; ?>);
-                // fetchMatchOddsPositionList();
-            }
-
-
-
-            // fetchBttingList();
-            // getFancysExposure();
+            fetchBttingList();
+            getFancysExposure();
             // fetchMatchOddsPositionList();
         });
     });
@@ -3139,57 +3046,119 @@ h81.92V199.936z"></path>
         });
 
         socket.on('line_guru_score', function(data) {
-
-            var event_type = '<?php echo $event_type ?>';
-            if (event_type == "4") {
-                if (data.score.event_id == '<?php echo $event_id; ?>') {
-
-                    if (data.score.message != "Not Found!") {
-
-
-                        $('#scoreboard-box').show();
-
-
-                    }
-
-
-                    $('#team_1').html(data.score.data.spnnation1 + ' ' + data.score.data.score1);
-                    $('#team_2').html(data.score.data.spnnation2 + ' ' + data.score.data.score2);
+            if (data.score.event_id == '<?php echo $event_id; ?>') {
 
 
 
-                    if (data.score.data.activenation1 == 1) {
-                        $('#current_rr').html('CRR ' + data.score.data.spnrunrate1);
+                // if (data.score.message != "Not Found!") {
+                //     $('#scoreboard-box').show();
 
-                    } else if (data.score.data.activenation2 == 1) {
-                        $('#current_rr').html('CRR ' + data.score.data.spnrunrate2);
-
-                    }
+                // }
+                // $('#scoreboard-box').show();
 
 
+                var home = JSON.parse(data.score.result.home);
 
 
-                    var pb = data.score.data.balls;
+                console.log('home', home);
+
+                var batsman_a_detail = home.b1s.split(',');
+                var batsman_b_detail = home.b2s.split(',');
 
 
-                    var balls_html = '';
-                    if (pb.length > 0) {
-                        for (let i = pb.length - 6; i < pb.length; i++) {
+                $('#score_player_1').html(home.p1 + ' ' + batsman_a_detail[0] + '(' + batsman_a_detail[1] + ')');
+                $('#score_player_2').html(home.p2 + ' ' + batsman_b_detail[0] + '(' + batsman_b_detail[1] + ')');
+
+                $('#score_player_3').html(home.bw);
+
+                $('#team_1_name').html(home.t1.f);
+                $('#team_2_name').html(home.t2.f);
+
+                if (home.i == "i1") {
+                    $('.currunt_sc').html(home.i1.sc + '-' + home.i1.wk);
+                    $('.currunt_over').html('(' + home.i1.ov + ')');
+
+                    console.log('Heree');
+                    $('#team_1_status').addClass('active');
+                    $('#team_2_status').removeClass('active');
 
 
-                            // text += cars[i] + "<br>";
-                            if (i > 0) {
-                                balls_html += '<span class="ball-runs mr-1 four">' + pb[i] + '</span>';
 
-                            }
-                        }
-                        // text += cars[i] + "<br>";
-                    }
-                    $('#last_balls').html(balls_html);
+                } else if (home.i == "i2") {
+                    $('.currunt_sc').html(home.i2.sc + '-' + home.i2.wk);
+                    $('.currunt_over').html('(' + home.i2.ov + ')');
 
-                    return false;
+                    $('#team_2_status').addClass('active');
+                    $('#team_1_status').removeClass('active');
+
                 }
+
+
+
+
+                $('#score_batsman_a_r').html(batsman_a_detail[0]);
+                $('#score_batsman_a_b').html(batsman_a_detail[1]);
+                $('#score_batsman_a_4s').html(batsman_a_detail[2]);
+                $('#score_batsman_a_6s').html(batsman_a_detail[3]);
+
+                $('#score_batsman_b_r').html(batsman_b_detail[0]);
+                $('#score_batsman_b_b').html(batsman_b_detail[1]);
+                $('#score_batsman_b_4s').html(batsman_b_detail[2]);
+                $('#score_batsman_b_6s').html(batsman_b_detail[3]);
+                var msg = home.cs.msg;
+                var msg1 = home.cs.msg;
+
+
+                if (msg == 'BR') {
+                    msg = 'Ball Running';
+                } else if (msg == 'B') {
+                    msg = 'Ball Running';
+                } else if (msg == 'W') {
+                    msg = 'Wicket';
+                } else if (msg == 'OC') {
+                    msg = 'Over Complete';
+                } else {
+                    msg = msg1 + '';
+                }
+
+
+                $('#ball-status').html(msg);
+                // console.clear();
+
+                var team_a = '';
+                var team_b = '';
+
+                team_a += home.t1.n + ' ' + home.i1.sc + '-' + home.i1.wk + " (" + home.i1.ov + ")";
+                team_b += home.t2.n + ' ' + home.i2.sc + '-' + home.i2.wk + " (" + home.i2.ov + ")";
+
+                $('#team_a').html(team_a);
+                $('#team_b').html(team_b);
+
+                $('.commantry').html(home.cs.msg);
+                var pb = home.pb.split(',');
+
+
+                var balls_html = '<li><p>Over </p></li>';
+                if (pb.length > 0) {
+                    for (let i = pb.length - 6; i < pb.length; i++) {
+
+
+                        // text += cars[i] + "<br>";
+                        if (i > 0) {
+                            balls_html += '<li class="' + pb[i].toLowerCase() + '-color six-balls"><span>' + pb[i] + '</span></li>';
+
+                        }
+                    }
+                    // text += cars[i] + "<br>";
+                }
+
+
+
+                $('#score-over').html(balls_html);
             }
+
+
+
         });
     })
 
@@ -3255,12 +3224,10 @@ h81.92V199.936z"></path>
     }
 
 
-
-
     setInterval(function() {
         getFancysExposure();
 
-    }, 15000);
+    }, 10000);
 
 
     function getFancysExposure() {
@@ -3280,6 +3247,7 @@ h81.92V199.936z"></path>
             dataType: 'json',
             async: false,
             success: function(output) {
+                console.log('output', output);
 
                 if (output) {
                     $.each(output, function(index, fancy) {
@@ -3295,393 +3263,6 @@ h81.92V199.936z"></path>
     }
 
     function showTv() {
-        // openFullscreen();
-        // openFullscreen();
-
-        if ($(window).width() < 780) {
-            $('#collapseTwo').toggle();
-
-            // var tvHtml = '<iframe id="tvPlayer" src="<?php echo $live_tv_url; ?>" style="border-radius: 1px;width:100%;height:100%;overflow:hidden !important;position:relative; display: block; width: 100vh; height: 100vw; border: none;transform: translateY(100vh) rotate(-90deg); transform-origin: top left;"  frameBorder="0" allowtransparency="true" frameborder="0" scrolling="no" allowfullscreen mozallowfullscreen webkitallowfullscreen oallowfullscreen  msallowfullscreen></iframe>';
-
-        } else {
-
-            // alert("Here");
-
-
-
-            var tvHtml = '<iframe id="tvPlayer" src="<?php echo $live_tv_url; ?>" style="border-radius: 1px;width:100%;height:100%;overflow:hidden !important;position:relative; display: block; "  frameBorder="0" allowtransparency="true" frameborder="0" scrolling="no" allowfullscreen mozallowfullscreen webkitallowfullscreen oallowfullscreen  msallowfullscreen></iframe>';
-
-            var myWindow = window.open("", "<?php echo $event_name; ?>", "width=100%,height=calc(100vh)");
-
-
-            myWindow.document.write(tvHtml);
-        }
-
-
-
-
-
-
-    }
-
-    // setInterval(function() {
-
-    //     iFrameResize({ log: true   }, '#tvPlayer')
-    // },1000)
-
-
-
-    function resizeIFrameToFitContent(iFrame) {
-
-        // iFrame.width  = iFrame.contentWindow.document.body.scrollWidth;
-        // iFrame.height = iFrame.contentWindow.document.body.scrollHeight;
-    }
-
-    window.addEventListener('DOMContentLoaded', function(e) {
-
-        var iFrame = document.getElementById('tvPlayer');
-
-        resizeIFrameToFitContent(iFrame);
-
-
-        // or, to resize all iframes:
-        // var iframes = document.querySelectorAll("iframe");
-        // for( var i = 0; i < iframes.length; i++) {
-        //     resizeIFrameToFitContent( iframes[i] );
-        // }
-    })
-
-
-    window.addEventListener('message', event => {
-        // IMPORTANT: check the origin of the data! 
-
-        if (event.origin.startsWith('http://your-first-site.com')) {
-            // The data was sent from your site.
-            // Data sent with postMessage is stored in event.data:
-        } else {
-            // The data was NOT sent from your site! 
-            // Be careful! Do not use it. This else branch is
-            // here just for clarity, you usually shouldn't need it.
-            return;
-        }
-    });
-
-
-    setTimeout(function() {
-        getEventsMarketExpsure(<?php echo $event_id; ?>);
-
-    }, 2000);
-
-    function getEventsMarketExpsure(MatchId) {
-        $.ajax({
-            url: '<?php echo base_url(); ?>dashboard/getEventsMarketExpsure/' + MatchId,
-
-            type: 'get',
-            dataType: 'json',
-            success: function(output) {
-
-                var markets = output;
-                $.each(markets, function(marketKey, marketsRunner) {
-                    $.each(marketsRunner, function(runner_key, runner_value) {
-
-
-                        marketKey = marketKey.replace('.', '');
-
-                        if (runner_value < 0) {
-
-
-                            $('#' + runner_key + '_maxprofit_loss_runner_' + marketKey).text(Math.abs(runner_value)).css("color", "red");
-
-                            $('#' + runner_key + '_maxprofit_loss_runner_' + marketKey).attr('data-val', runner_value);
-
-                            $('.loss_profit_' + marketKey + '_' + runner_key).val(runner_value);
-
-                        } else {
-
-                            $('#' + runner_key + '_maxprofit_loss_runner_' + marketKey).text(Math.abs(runner_value)).css("color", "green");
-
-                            $('#' + runner_key + '_maxprofit_loss_runner_' + marketKey).attr('data-val', runner_value);
-
-
-
-                            $('.loss_profit_' + marketKey + '_' + runner_key).val(runner_value);
-                        }
-
-
-                    });
-                })
-
-
-            }
-        });
-    }
-
-
-    function openFullscreen() {
-        var iframe = document.getElementById("tvPlayer");
-        var elem = iframe.contentWindow.document.getElementsByTagName("video")[0];
-
-        // document.getElementById("h5live-playerDiv");
-
-        return false;
-
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) {
-            /* Safari */
-            elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) {
-            /* IE11 */
-            elem.msRequestFullscreen();
-        }
-    }
-
-    function goToFull() {
-        if ($(window).width() < 780) {
-
-            var tvHtml = '<iframe id="tvPlayer" src="<?php echo $live_tv_url; ?>" style="border-radius: 1px;width:100%;height:100%;overflow:hidden !important;position:relative; display: block; width: 100vh; height: 100vw; border: none;transform: translateY(100vh) rotate(-90deg); transform-origin: top left;"  frameBorder="0" allowtransparency="true" frameborder="0" scrolling="no" allowfullscreen mozallowfullscreen webkitallowfullscreen oallowfullscreen  msallowfullscreen></iframe>';
-            var myWindow = window.open("", "<?php echo $event_name; ?>", "width=100%,height=calc(100vh)");
-
-
-            myWindow.document.write(tvHtml);
-        } else {
-
-            // alert("Here");
-
-
-
-            var tvHtml = '<iframe id="tvPlayer" src="<?php echo $live_tv_url; ?>" style="border-radius: 1px;width:100%;height:100%;overflow:hidden !important;position:relative; display: block; "  frameBorder="0" allowtransparency="true" frameborder="0" scrolling="no" allowfullscreen mozallowfullscreen webkitallowfullscreen oallowfullscreen  msallowfullscreen></iframe>';
-
-            var myWindow = window.open("", "<?php echo $event_name; ?>", "width=100%,height=calc(100vh)");
-
-
-            myWindow.document.write(tvHtml);
-        }
-    }
-
-    function changeBallRunningStatus() {
-        var event_id = $('#changeStatus').attr('data-event-id');
-        var status = $('#changeStatus').attr('data-status');
-        $('.lay').each(function(index, value) {
-            if ($(this).hasClass('fancy-lays')) {
-                if (status == 'No') {
-                    $(this).parent().append("<h6>Ball Running</h6>");
-                } else {
-                    $(this).parent().find('h6').remove();
-                }
-
-            } else {
-                if (status == 'No') {
-                    $(this).append("<h6>Ball Running</h6>");
-                } else {
-                    $(this).find('h6').remove()
-                }
-            }
-        });
-        BLOCKED = status == 'Yes' ? false : true;
-
-        $.ajax({
-            url: '<?php echo base_url(); ?>admin/events/changeBallRunningStatus',
-            data: {
-                event_id: event_id,
-                status: status == 'Yes' ? 'No' : 'Yes',
-            },
-            type: 'post',
-            dataType: 'json',
-            success: function(output) {
-                if (output.success) {
-                    if (status == 'Yes') {
-                        $('#changeStatus').attr('data-status', 'No')
-                        $('#changeStatus').html('Block');
-                    } else {
-                        $('#changeStatus').attr('data-status', 'Yes')
-                        $('#changeStatus').html('Un-Block');
-
-
-                    }
-                } else {
-                    new PNotify({
-                        title: 'Error',
-                        text: output.message,
-                        type: 'error',
-                        styling: 'bootstrap3',
-                        delay: 1000
-                    });
-                }
-            }
-        })
-
-    }
-
-    function deleteBet(betting_id) {
-        $.ajax({
-            url: '<?php echo base_url(); ?>admin/events/deleteBet',
-            data: {
-                betting_id: betting_id,
-            },
-            type: 'post',
-            dataType: 'json',
-            success: function(data) {
-                fetchBttingList();
-                getFancysExposure();
-                getEventsMarketExpsure(<?php echo $event_id; ?>);
-                if (!data.success) {
-
-                    new PNotify({
-                        title: 'Error',
-                        text: data.message,
-                        type: 'error',
-                        styling: 'bootstrap3',
-                        delay: 1000
-                    });
-                } else {
-                    new PNotify({
-                        title: 'Success',
-                        text: data.message,
-                        type: 'success',
-                        styling: 'bootstrap3',
-                        delay: 1000
-                    });
-                }
-
-                fetchBttingList();
-
-            }
-        })
-    }
-
-    setInterval(function() {
-        fetchBttingList();
-        getEventsMarketExpsure(<?php echo $event_id; ?>);
-    }, 30000);
-
-
-    function checkUnmatchBetStatusChange() {
-
-        $(".unmatch-bet-slip").each(function(i) {
-            var selection_id = $(this).attr('data-selection-id');
-            var bet_id = $(this).attr('id');
-
-            var market_id = $(this).attr('data-market-id');
-            var match_id = $(this).attr('data-match-id');
-            var is_back = $(this).attr('data-is-back');
-            var bet_price_val = $(this).attr('data-price-val');
-            var market_name = $(this).attr('data-market-name');
-
-
-
-            if (is_back == 1) {
-
-
-
-                var p_v = $('#availableToBack1_price_' + market_id.replace('.', '') + '_' + selection_id).text();
-
-                if (market_name == 'Bookmaker') {
-                    p_v = (p_v / 100) + 1;
-
-                }
-                if (parseFloat(bet_price_val) <= parseFloat(p_v)) {
-                    console.log("BET MATCHED", bet_id)
-                    console.log(p_v + "  --bbb-- " + bet_price_val)
-
-
-                    fetchBttingList();
-                    getEventsMarketExpsure(<?php echo $event_id; ?>);
-                }
-            } else {
-
-
-                var p_v = $('#availableToLay1_price_' + market_id.replace('.', '') + '_' + selection_id).text();
-                if (market_name == 'Bookmaker') {
-                    p_v = (p_v / 100) + 1
-
-                }
-
-                if (parseFloat(bet_price_val) >= parseFloat(p_v)) {
-                    console.log("BET MATCHED", bet_id)
-                    console.log(p_v + "  --bbb-- " + bet_price_val)
-
-                    fetchBttingList();
-                    getEventsMarketExpsure(<?php echo $event_id; ?>);
-                }
-
-
-
-            }
-
-
-
-        });
-
-    }
-    setInterval(function() {
-        checkUnmatchBetStatusChange();
-    }, 2000)
-
-    function filterRemoveFancy(fancys) {
-        $(".fancy-rows").each(function(i) {
-            var selection_id = $(this).attr('data-id');
-
-            var check_fancy_exists = fancys.filter((x) => {
-                return x.selection_id == selection_id;
-            })
-
-
-            if (!check_fancy_exists.length) {
-                // console.log('fancys', check_fancy_exists);
-
-                $('.fancy_' + selection_id).remove();
-                // console.log('selection_id', selection_id);
-            }
-
-
-
-        })
-    }
-
-
-    function kFormatter(num) {
-        return num;
-        // return Math.abs(num) > 999 ? Math.sign(num) * ((Math.abs(num) / 1000).toFixed(1)) + 'k' : Math.sign(num) * Math.abs(num)
-    }
-
-    $('.close-score').click(function() {
-        $('.mobile-tv-show').hide();
-    })
-
-    function get_live_animation_scoreboard() {
-        $.ajax({
-            url: '<?php echo base_url(); ?>admin/events/get_live_animation_scoreboard',
-            data: {
-                event_id: <?php echo $event_id ?>,
-            },
-            type: 'post',
-            // dataType: 'json',
-            success: function(animated_scoreboard_link) {
-                console.log("hii");
-                console.log(animated_scoreboard_link);
-                $('.animated_scoreboard').attr('src', animated_scoreboard_link);
-            }
-        })
-    }
-
-
-    $(document).ready(function() {
-
-        // get_live_animation_scoreboard();
-
-    });
-    window.addEventListener("message", (event) => {
-        if (event.origin == "https://central.satsport247.com'")
-            console.log("dont remove", "socre width")
-        setScoreIframeHeight(event.data.scoreWidgetHeight)
-    }, false);
-
-    function setScoreIframeHeight(height) {
-        // console.log('hii', height);
-        // document.getElementsByClassName("animated_scoreboard").style.height = height;
-        $('.animated_scoreboard').css('height', height + 2);
-        $('.animated_scoreboard_div').css('height', height);
-
+        $('#collapseTwo').toggle();
     }
 </script>

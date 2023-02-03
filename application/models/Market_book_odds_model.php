@@ -37,16 +37,4 @@ class Market_book_odds_model extends My_Model
         ));
         return true;
     }
-
-
-    public function check_market_inplay($event_id)
-    {
-        $this->db->select('COUNT(market_id) as total_inplay');
-        $this->db->from('market_book_odds');
-        $this->db->where('event_id', $event_id);
-        $this->db->where('inplay', 1);
-
-        $return = $this->db->get()->row_array();
-        return $return;
-    }
 }

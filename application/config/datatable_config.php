@@ -844,7 +844,7 @@ $config['masters_listing_headers_1'] = array(
     ),
     'balance' => array(
         'jsonField' => 'user_id',
-        'isSortable' => TRUE,
+        'isSortable' => FALSE,
         'callBack' => TRUE,
         'callBackType' => 'helper',
         'callBackClass' => 'common_helper',
@@ -1114,7 +1114,7 @@ $config['users_listing_headers_1'] = array(
     ),
     'balance' => array(
         'jsonField' => 'user_id',
-        'isSortable' => TRUE,
+        'isSortable' => FALSE,
         'callBack' => TRUE,
         'callBackType' => 'helper',
         'callBackClass' => 'common_helper',
@@ -1213,7 +1213,7 @@ $config['users_listing_headers'] = array(
     ),
     'balance' => array(
         'jsonField' => 'user_id',
-        'isSortable' => TRUE,
+        'isSortable' => FALSE,
         'callBack' => TRUE,
         'callBackType' => 'helper',
         'callBackClass' => 'common_helper',
@@ -1490,124 +1490,4 @@ $config['betting_listing_headers'] = array(
         'callBackClass' => 'common_helper',
         'callBackFunction' => 'get_betting_delete_link'
     )
-);
-$config['betting_listing_headers_new'] = array(
-    'betting_check_box' => array(
-        'fieldtype' => "CheckBox",
-        'fieldtype_attributes' => array('class' => 'betting_select_all'),
-        'isSortable' => FALSE,
-        'jsonField' => 'betting_id',
-        'width' => '5%',
-        'callBack' => TRUE,
-        'callBackType' => 'helper',
-        'callBackClass' => 'common_helper',
-        'callBackFunction' => 'get_betting_check_box',
-    ),
-    'sn' => array(
-        'isSortable' => TRUE,
-        'jsonField' => 'sn',
-        'width' => '1%',
-    ),
-    'betting_id' => array(
-        'isSortable' => TRUE,
-        'jsonField' => 'betting_id',
-        'width' => '15%',
-    ),
-    'place_name' => array(
-        'isSortable' => TRUE,
-        'jsonField' => 'place_name',
-        'width' => '15%'
-    ),
-    'user_name' => array(
-        'isSortable' => TRUE,
-        'jsonField' => 'user_name',
-        'width' => '15%'
-    ),
-    'created_at' => array(
-        'isSortable' => TRUE,
-        'jsonField' => 'bat_dt',
-        'width' => '15%'
-    ),
-    'stake' => array(
-        'isSortable' => TRUE,
-        'jsonField' => 'stake',
-        'width' => '10%'
-    ),
-    'price_val' => array(
-        'isSortable' => TRUE,
-        'jsonField' => 'price_val',
-        'width' => '10%'
-    ),
-    'bet_result' => array(
-        'isSortable' => TRUE,
-        'jsonField' => 'bet_result',
-        'width' => '20%'
-    ),
-    // 'Action' => array(
-    //     'isSortable' => FALSE,
-    //     'systemDefaults' => TRUE,
-    //     'jsonField' => 'betting_id',
-    //     'linkParams' => array('betting_id', 'list_event_id'),
-    //     'callBack' => TRUE,
-    //     'callBackType' => 'helper',
-    //     'callBackClass' => 'common_helper',
-    //     'callBackFunction' => 'get_betting_delete_link'
-    // )
-);
-
-
-$config['refered_users_listing_headers'] = array(
-    // 'user_checkbox' => array(
-    //     'jsonField' => 'user_id',
-    //     'isSortable' => FALSE,
-    //     'callBack' => TRUE,
-    //     'callBackType' => 'helper',
-    //     'callBackClass' => 'common_helper',
-    //     'callBackFunction' => 'get_user_checkbox',
-    //     'width' => '10%',
-    //     'align' => 'left'
-    // ),
-    // 'view_more' => array(
-    //     'jsonField' => 'user_id',
-    //     'isSortable' => FALSE,
-    //     'callBack' => TRUE,
-    //     'callBackType' => 'helper',
-    //     'callBackClass' => 'common_helper',
-    //     'callBackFunction' => 'get_view_more_option',
-    //     'width' => '10%',
-    //     'align' => 'left'
-    // ),
-    'user_name' => array(
-        // 'jsonField' => 'user_name',
-        // 'isLink' => true,
-        // 'linkParams' => array('user_id','user_type'),
-        // 'linkTarget' => 'admin/downline/',
-        // 'width' => '10%'
-        'jsonField' => 'user_id',
-        'isSortable' => FALSE,
-        'callBack' => TRUE,
-        'callBackType' => 'helper',
-        'callBackClass' => 'common_helper',
-        'callBackFunction' => 'get_refered_user_link',
-        'width' => '10%',
-        'align' => 'left'
-    ),
-   
-    'total_deposit_count' => array(
-        'isSortable' => false,
-        'jsonField' => 'total_deposit_count',
-        'width' => '10%'
-    ),
-
-    'balance' => array(
-        'jsonField' => 'user_id',
-        'isSortable' => FALSE,
-        'callBack' => TRUE,
-        'callBackType' => 'helper',
-        'callBackClass' => 'common_helper',
-        'callBackFunction' => 'get_user_balance',
-        'width' => '10%',
-        'align' => 'left'
-    ),
-   
 );

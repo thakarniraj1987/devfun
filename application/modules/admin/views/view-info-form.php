@@ -65,8 +65,9 @@
                                 }
                             }
 
-                             if (get_user_type() == 'Super Admin' || get_user_type($user_id) == 'Admin') {
-                                
+
+
+                            if (get_user_type() == 'Super Admin') {
                                 if ($info['sport_id'] == 999) { ?>
                                     <div class="sub_heading"><span id="tital_change" class="tital_change"><?php echo $info['sport_name']; ?> </span> </div>
                                     <div class="row">
@@ -302,7 +303,7 @@
 
                                             <div class="col-md-4 col-xs-4">
                                                 <label> BET DELAY</label>
-                                                <input type="text" name="bet_delay" class="form-control" id="<?php echo $sport_id; ?>_bet_delay" value="<?php echo $info['bet_delay']; ?>" min="<?php echo $findMasterSetting['bet_delay']; ?>">
+                                                <input type="text" name="bet_delay" class="form-control" id="<?php echo $sport_id; ?>_bet_delay" value="<?php echo $info['bet_delay']; ?>" max="<?php echo $findMasterSetting['bet_delay']; ?>">
                                                 <span id="<?php echo $sport_id; ?>_bet_delayN" class="errmsg"></span>
                                             </div>
 
@@ -358,7 +359,7 @@
                                             </div>
                                             <div class="col-md-4 col-xs-6">
                                                 <label> BET DELAY</label>
-                                                <input type="text" name="bet_delay" class="form-control" id="<?php echo $sport_id; ?>_bet_delay" value="<?php echo $info['bet_delay']; ?>" min="<?php echo $findMasterSetting['bet_delay']; ?>">
+                                                <input type="text" name="bet_delay" class="form-control" id="<?php echo $sport_id; ?>_bet_delay" value="<?php echo $info['bet_delay']; ?>" max="<?php echo $findMasterSetting['bet_delay']; ?>">
                                                 <span id="<?php echo $sport_id; ?>_bet_delayN" class="errmsg"></span>
                                             </div>
                                             <div class="col-md-4 col-xs-6">
@@ -436,7 +437,7 @@
                                             </div>
                                             <div class="col-md-4 col-xs-6">
                                                 <label> BET DELAY</label>
-                                                <input type="text" name="bet_delay" class="form-control" id="<?php echo $sport_id; ?>_bet_delay" value="<?php echo $info['bet_delay']; ?>" min="<?php echo $findMasterSetting['bet_delay']; ?>">
+                                                <input type="text" name="bet_delay" class="form-control" id="<?php echo $sport_id; ?>_bet_delay" value="<?php echo $info['bet_delay']; ?>" max="<?php echo $findMasterSetting['bet_delay']; ?>">
                                                 <span id="<?php echo $sport_id; ?>_bet_delayN" class="errmsg"></span>
                                             </div>
                                             <div class="col-md-4 col-xs-6">
@@ -909,57 +910,6 @@
         return false;
 
     })
-
-    $(document).on("click", ".7_button", function() {
-
-event.preventDefault();
-if (($("#7_setting").valid())) {
-    i = 0;
-    if (i == 0) {
-        var datastring = $('#7_setting').serializeJSON();
-        console.log(datastring);
-        $.ajax({
-            type: "post",
-            url: '<?php echo base_url(); ?>admin/User/updateviewinfo',
-            data: datastring,
-            cache: false,
-            success: function success(output) {
-
-                output = $.parseJSON(output);
-                console.log(output);
-
-                if (output.success) {
-                    $("#divLoading").show();
-                    $("#divLoading").html("<span class='succmsg'>" + output.message + "</span>");
-                    $("#divLoading").fadeOut(3000);
-                    new PNotify({
-                        title: 'Success',
-                        text: output.message,
-                        type: 'success',
-                        styling: 'bootstrap3',
-                        delay: 2000
-                    });
-                } else {
-                    $("#divLoading").show();
-                    $("#divLoading").html("<span class='errmsg'>" + output.message + "</span>");
-                    $("#divLoading").fadeOut(3000);
-                    new PNotify({
-                        title: 'Error',
-                        text: output.message,
-                        type: 'error',
-                        styling: 'bootstrap3',
-                        delay: 2000
-                    });
-                }
-            }
-        });
-    }
-    i++;
-    return false;
-}
-return false;
-
-})
 
 
 

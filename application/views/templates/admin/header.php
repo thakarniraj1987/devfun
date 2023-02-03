@@ -163,35 +163,17 @@
 
                   <?php
                   if (get_user_type() == 'User') { ?>
-                     <div class="user_bal" style="display: flex;
-    justify-content: space-between;">
+                     <div class="user_bal">
                         <a href="<?php echo base_url(); ?>gameclientbet"><span>Exposure</span><span class="liability"> <?php echo number_format(count_total_exposure(get_user_id()), 2); ?></span></a>
-                        <!-- <a><span>Bonus</span><span class=""> <?php echo number_format(count_total_bonus(get_user_id()), 2); ?></span></a> -->
                      </div>
                   <?php }
 
                   ?>
-
-
-                  <?php
-                  $isDemo =  $_SESSION['is_demo'];
-
-                  if ($isDemo == "No") {
-                  ?>
-                     <div class="log-pass-div">
-                        <a class="logout_btn" href="<?php echo base_url(); ?>change-password">
-                           Change Password
-                        </a>
-                     </div>
-                  <?php } else { ?>
-                     <div style="display: none;" class="log-pass-div">
-                        <a class="logout_btn" href="<?php echo base_url(); ?>change-password">
-                           Change Password
-                        </a>
-                     </div>
-                  <?php } ?>
-
-
+                  <div class="log-pass-div">
+                     <a class="logout_btn" href="<?php echo base_url(); ?>change-password">
+                        Change Password
+                     </a>
+                  </div>
                   <div class="log-pass-div">
                      <a class="logout_btn active" href="<?php echo base_url(); ?>logout">
                         Log Out
@@ -201,7 +183,7 @@
                <div class="sidebar-menu user-card_box boxs-left">
                   <ul class="nav">
                      <li class=""><a class="head-link endcooki" href="<?php echo base_url(); ?>dashboard"> <span><i class="fas fa-home"></i>Home</span></a></li>
-
+                      
                      <?php
                      if (get_user_type() != 'User') { ?>
                         <li class="sidebar-dropdown">
@@ -268,57 +250,35 @@
                      ?>
 
                      <?php
-                     if (get_user_type() == 'Super Admin' || get_user_id() == '32222') { ?>
-                        <li class="sidebar-dropdown">
-                           <a href="#"> <span><i class="fas fa-inr"></i></span>Payments</a>
-                           <div class="sidebar-submenu">
-                              <ul>
-                                 <li><a href="<?php echo base_url('payment-methods'); ?>">Payment Setup</a></li>
-                                 <li><a href="<?php echo base_url('deposit-requests'); ?>">Deposit Requests</a></li>
-                                 <li><a href="<?php echo base_url('withdraw-requests'); ?>">Withdraw Requests</a></li>
-                              </ul>
-                           </div>
-                        </li>
-                     <?php } ?>
-                     <?php
                      if (get_user_type() != 'User') { ?>
                         <li class="sidebar-dropdown">
                            <a href="#"> <span><i class="fas fa-cog"></i></span>Setting</a>
                            <div class="sidebar-submenu">
                               <ul>
-                                 <?php
 
-
-                                 if (get_user_type() == 'Super Admin'  || get_user_id() == '32222') { ?>
-                                    <li><a href="<?php echo base_url(); ?>admin/manual/event-types">Manual Odds</a></li>
-                                 <?php }
-                                 ?>
                                  <li><a href="<?php echo base_url(); ?>admin/blockmarket">Block Market</a></li>
 
                                  <?php
-                                 if (get_user_type() == 'Super Admin'  || get_user_id() == '32222') { ?>
+                                 if (get_user_type() == 'Admin') { ?>
                                     <li><a href="<?php echo base_url(); ?>admin/chip">Chip</a></li>
                                  <?php }
                                  ?>
                                  <?php
-                                 if (get_user_type() == 'Super Admin'  || get_user_id() == '32222') { ?>
+                                 if (get_user_type() == 'Admin') { ?>
                                     <li><a href="<?php echo base_url(); ?>admin/bettings/listmarkets">Bettings</a></li>
                                  <?php }
                                  ?>
 
                                  <?php
-                                 if (get_user_type() == 'Super Admin'  || get_user_id() == '32222') { ?>
+                                 if (get_user_type() == 'Admin') { ?>
                                     <li><a href="<?php echo base_url(); ?>news">News</a></li>
                                  <?php }
                                  ?>
 
-                                 <?php
-                                 if (get_user_type() == 'Super Admin' || get_user_id() == '32222') { ?>
-                                    <li><a href="<?php echo base_url(); ?>addfunds">Add Funds</a></li>
-                                    <li><a href="<?php echo base_url('bonus-settings'); ?>">Bonus Setting</a></li>
-                                    <li><a href="<?php echo base_url('welcome-note-banner'); ?>">Welcome Note Banner</a></li>
-                                    <li><a href="<?php echo base_url('header-banners'); ?>">Header Banners</a></li>
 
+                                 <?php
+                                 if (get_user_type() == 'Admin') { ?>
+                                    <li><a href="<?php echo base_url(); ?>addfunds">Add Funds</a></li>
                                  <?php }
                                  ?>
 
@@ -327,19 +287,9 @@
                         </li>
                      <?php }
                      ?>
-                     <?php
-                     if (get_user_type() == 'User') { ?>
-                        <li class=""><a class="head-link endcooki" href="<?php echo base_url('online_bank_transfer'); ?>"> <span><i class="fas fa-inr"></i>Online Bank Transfer</span></a></li>
-                        <li class=""><a class="head-link endcooki" href="<?php echo base_url('deposituser'); ?>"> <span><i class="fas fa-inr"></i>Deposit</span></a></li>
-                        <li class=""><a class="head-link endcooki" href="<?php echo base_url('withdrawuser'); ?>"> <span><i class="fas fa-inr"></i>Withdraw</span></a></li>
-                     <?php } ?>
+
                      <li><a href="<?php echo base_url(); ?>admin/my_market"><i class="fa fa-book" aria-hidden="true"></i>
                            Market Analysis</a></li>
-                     <?php
-                     if (get_user_type() == 'User') { ?>
-                        <li class=""><a class="head-link endcooki" href="<?php echo base_url('transaction-history/All'); ?>"> <span><i class="fas fa-file"></i>Transaction History</span></a></li>
-                        <li class=""><a class="head-link endcooki" href="<?php echo base_url('refered-users'); ?>"> <span><i class="fas fa-file"></i>Refered User</span></a></li>
-                     <?php } ?>
                      <li class="sidebar-dropdown">
                         <a href="javascript:;" class="user-profile dropdown-toggle"> <span><i class="fas fa-sliders-h"></i></span>Report</a>
                         <div class="sidebar-submenu">
@@ -359,14 +309,15 @@
                               <li><a href="<?php echo base_url(); ?>profitloss">Profit &amp; Loss</a> </li>
                               <li><a href="<?php echo base_url(); ?>bethistory">Bet History</a> </li>
                               <li><a href="<?php echo base_url(); ?>gameclientbet">Live game bet history</a> </li>
-                              <?php
-                              if (get_user_type() == 'Super Admin' || get_user_id() == '32222') { ?>
-                                 <li><a href="<?php echo base_url('transaction-history-admin'); ?>">Transaction History</a> </li>
-                                 <li><a href="<?php echo base_url('income-report'); ?>">Income Report</a> </li>
-                              <?php } ?>
                            </ul>
                         </div>
                      </li>
+
+
+
+
+
+
                      <li class="hidden-lg"><a class="UserChipData" href="javascript:void(0);" onclick="showEditStakeModel()"></i>
                            Edit Stake</a>
                      </li>
@@ -375,27 +326,3 @@
             </div>
          </nav>
       </div>
-
-
-      <script>
-         $(document).ready(function() {
-
-            $.ajax({
-               url: '<?php echo base_url() ?>login/Admin/get_register_Data',
-               type: 'GET',
-               dataType: 'json',
-               success: function(data) {
-                  // alert('hi');
-                  var user = data.user_list.is_demo;
-
-                  var is_Demo = "<?php echo $_SESSION['is_demo'] ?>";
-
-                  if (user != is_Demo) {
-                     window.location = "<?php echo base_url(); ?>logout";
-                  }
-
-
-               }
-            })
-         })
-      </script>

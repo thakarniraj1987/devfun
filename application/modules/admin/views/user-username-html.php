@@ -1,8 +1,8 @@
 <?php
                                   if ($user_type == 'User') { ?>
-                                    <?php echo isset($user['user_name']) ? $user['user_name'] : ""; ?>
+                                    <?php echo isset($user['user_name']) ? $user['user_name'] : ""; ?>(<?php echo isset($user['name']) ? $user['name'] : ""; ?>)
                                 <?php } else { ?>
-                                    <a href="<?php echo base_url(); ?>admin/downline/<?php echo $user['user_id']; ?>/<?php check_user_type($user['user_type']); ?>"><?php echo isset($user['user_name']) ? $user['user_name'] : ""; ?></a>
+                                    <a href="<?php echo base_url(); ?>admin/downline/<?php echo $user['user_id']; ?>/<?php check_user_type($user['user_type']); ?>"><?php echo isset($user['user_name']) ? $user['user_name'] : ""; ?>(<?php echo isset($user['name']) ? $user['name'] : ""; ?>)</a>
                                 <?php }
                                   ?>
 

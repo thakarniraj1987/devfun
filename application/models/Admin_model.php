@@ -108,31 +108,16 @@ class Admin_model extends My_Model
     }
 
 
-    // public function signin($username, $password)
-    // {
-    //     $this->db->where('user_name', $username);
-    //     $this->db->where('is_delete', "No");
-    //     $this->db->where('password', md5($password));
-
-    //     $query = $this->db->get('registered_users');
-
-
-    //     if ($query->num_rows() > 0) {
-
-    //         $row = $query->row();
-    //         return $row;
-    //     } else {
-    //         return FALSE;
-    //     }
-    // }
 
     public function signin($username, $password)
     {
+
         $this->db->where('user_name', $username);
         // $this->db->where('password', md5($password));
-        $this->db->where('is_delete', 'No');
 
         $query = $this->db->get('registered_users');
+
+
 
         if ($query->num_rows() > 0) {
 
@@ -152,14 +137,6 @@ class Admin_model extends My_Model
 
 
 
-    public function get_register_data($id)
-    {
-        $this->db->select('is_demo')
-            ->from('registered_users')
-            ->where('user_id', $id);
-        $return = $this->db->get()->row_array();
-        return $return;
-    }
 
 
     public function deleteadminbyuser_id($employee_id)
@@ -230,37 +207,5 @@ class Admin_model extends My_Model
 
         $return = $this->db->get('users')->row();
         return $return->total_user;
-    }
-
-    public function saveOtp($dataValues)
-    {
-        $return = null;
-        if (count($dataValues) > 0) {
-
-            $this->db->insert('otp_verifyer', $dataValues);
-            $return = $this->db->insert_id();
-        }
-        return $return;
-    }
-    public function updateOtp($dataValues)
-    {
-        $return = null;
-        if (count($dataValues) > 0) {
-            $this->db->where('number', $dataValues['number']);
-            $this->db->update('otp_verifyer', $dataValues);
-            $return = $this->db->insert_id();
-        }
-        return $return;
-    }
-
-    public function getSavedOtp($dataValues)
-    {
-        $return = null;
-        if (count($dataValues) > 0) {
-
-            $this->db->where('number', $dataValues['number']);
-            $return = $this->db->get("otp_verifyer")->row();
-        }
-        return $return;
     }
 }

@@ -281,7 +281,55 @@
         </div>
     </div>
 </div>
- 
+
+<div id="addUser" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header mod-header"><button type="button" class="close" data-dismiss="modal">×</button>
+                <h4 class="modal-title">Chip Setting</h4>
+            </div>
+            <div class="modal-body">
+                <div id="addUserMsg"></div>
+                <form id="stockez_add" method="post" class="form-inline">
+                    <input type="hidden" name="user_id" class="form-control" required value="<?php echo get_user_id(); ?>" />
+                    <div class="modal-body" id="chip-moddal-body">
+                        <?php
+                        if (!empty($chips)) {
+                            $i = 0;
+                            foreach ($chips as $chip) {
+                                $i++;
+                        ?>
+                                <div class="fullrow">
+                                    <input type="hidden" name="user_chip_id[]" class="form-control" required value="<?php echo $chip['user_chip_id']; ?>" />
+                                    <div class="col-md-6 col-sm-6col-xs-6">
+                                        <div class="form-group"><label for="email">Chips Name <?php echo $i; ?>:</label><input type="text" name="chip_name[]" class="form-control" required value="<?php echo $chip['chip_name']; ?>"></div>
+                                    </div>
+                                    <div class=" col-md-6 col-sm-6col-xs-6">
+                                        <div class="form-group"><label for="pwd">Chip Value <?php echo $i; ?>:</label><input type="number" name="chip_value[]" class="form-control" required value="<?php echo $chip['chip_value']; ?>"></div>
+                                    </div>
+                                </div>
+                        <?php }
+                        }
+                        ?>
+
+                    </div>
+                    <div class="modal-footer">
+                        <div class="text-center" id="button_change">
+                            <div class="text-center" id="button_change">
+                                <button type="button" class="btn btn-success" id="updateUserChip" onclick="add_new_chip()" style="margin-bottom:10px;">Add New Chip </button>
+                                <button type="button" style="margin-bottom:10px;" class="btn btn-success" id="updateUserChip" onclick="submit_update_chip()"> Update Chip Setting </button>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!--commanpopup-->
+<!-- </div>
+</div> -->
 
 
 
@@ -1389,12 +1437,11 @@
 
 
     function showEditStakeModel() {
-        $('#chipUpdate').modal('show');
+        $('#addUser').modal('show');
     }
 
     function submit_update_chip() {
 
-       
         var datastring = $("#stockez_add").serializeJSON();
 
         $.ajax({

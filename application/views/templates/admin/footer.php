@@ -1,24 +1,7 @@
-<!-- <footer style="">
-
-  <div class="copyright">
-
-    <span>@copyright 2019</span>
-
-  </div>
-
-</footer> -->
 <?php
 $chips = getUserChips();
 
 ?>
-<?php if(get_user_type() == "User")
-{
-  ?>
-<a  class="whats-app" href="https://wa.me//919530201155" target="_blank">
-    <i class="fab fa-whatsapp my-float"></i>
-</a>
-<?php
-} ?>
 <div id="chipUpdate" class="modal fade" role="dialog">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -65,38 +48,15 @@ $chips = getUserChips();
   </div>
 </div>
 
+<footer style="">
 
+  <div class="copyright">
 
+    <span>@copyright 2019</span>
 
-</div>
-<?php
-if ($_SESSION['my_userdata']['user_type'] == 'Master') { ?>
+  </div>
 
-<footer>
-    <ul class="menu-links">
-      <li class="item"><a href="<?php echo base_url('payment-methods') ?>"><i class="fa fa-credit-card fanewfont"></i><span>Payment Setup</span></a></li>
-      <li class="item"><a href="<?php echo base_url('admin/users/user') ?>"><i class="fa fa-users fanewfont"></i><span>Users</span></a></li>
-      <li class="item home_nav_icon_footer" style="top:-3px;"><a href="<?php echo base_url(); ?>dashboard" class="site_title endcooki active"><img src="<?php echo base_url(); ?>assets/exchange/home.png"><span >Home</span></a></li>
-      <li class="item"><a href="<?php echo base_url('deposit-requests'); ?>"><span class="badge badge-pill badge-primary" style="background:#000;position: absolute;right: 3px;"><?php echo empty($request_counts->count_deposit) ? "" : $request_counts->count_deposit ?></span><i class="fa fa-inr fanewfont"></i><span>Deposit Requests</span> </a></li>
-      <li class="item"><a href="<?php echo base_url('withdraw-requests'); ?>"><span class="badge badge-pill badge-primary" style="background:#000;position: absolute;right: 3px;"><?php echo empty($request_counts->count_withdraw) ? "" :   $request_counts->count_withdraw ?></span><i class="fa fa-inr fanewfont"></i><span>Withdraw Requests </span></a></li>
-    </ul>
-  </footer>
-<?php
-} elseif ($_SESSION['my_userdata']['user_type'] == 'User') {
-?>
-  <footer>    
-    <ul class="menu-links">
-      <li class="item"><a href=""><i class="fa fa-gavel fanewfont"></i><span>Rules</span></a></li>
-      <li class="item"><a href="<?php echo base_url('deposituser') ?>"><i class="fa fa-inr fanewfont"></i><span>Deposit</span></a></li>
-      <li class="item home_nav_icon_footer" style="top:-3px;"><a href="<?php echo base_url(); ?>dashboard" class="site_title endcooki active"><img src="<?php echo base_url(); ?>assets/exchange/home.png"><span >Home</span></a></li>
-      <li class="item"><a href="<?php echo base_url('withdrawuser'); ?>"><i class="fa fa-inr fanewfont"></i><span>Withdraw</span> </a></li>
-      <li class="item"><a href="<?php echo base_url('refer-and-earn'); ?>"><i class="fa fa-share-alt fanewfont"></i><span>Refer & Earn </span></a></li>
-    </ul>
-  </footer>
-<?php
-}
-?>
-
+</footer>
 
 <script src="<?php echo base_url(); ?>assets/app/bootstrap.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/app/pnotify.js"></script>
@@ -357,4 +317,7 @@ if ($_SESSION['my_userdata']['user_type'] == 'Master') { ?>
 
     $('#chip-moddal-body').append(html);
   }
+
+
+  
 </script>

@@ -56,7 +56,7 @@ $(document).ready(function() {
                     } else {
                         new PNotify({
                             title: "Error",
-                            text: data.message ? data.message : "Something went wrong please try againe later",
+                            text: "Seomething went wrong please try againe later",
                             styling: "bootstrap3",
                             type: "error",
 
@@ -135,7 +135,6 @@ function deleteChip(chip_id, chip_name) {
 /****************************Users******************************/
 
 $(document).ready(function() {
-
     $("#add-user-form").validate({
         rules: {
             name: {
@@ -144,7 +143,7 @@ $(document).ready(function() {
             user_name: {
                 required: true,
                 remote: {
-                    url: base_url + "admin/User/register_username_exists",
+                    url: base_url + "login/Admin/register_username_exists",
                     type: "post",
                     data: {
                         login: function() {
@@ -184,7 +183,7 @@ $(document).ready(function() {
         messages: {
             user_name: {
                 //   required: "Please enter your login.",
-                remote: "User Id is already taken",
+                remote: jQuery.validator.format("{0} is already taken."),
             },
         },
         submitHandler: function(form, event) {
@@ -247,7 +246,7 @@ $(document).ready(function() {
                     } else {
                         new PNotify({
                             title: "Alert",
-                            text: response.errorMessage ? response.errorMessage : "Something went wrong please try again later",
+                            text: "Something went wrong please try again later",
                             styling: "bootstrap3",
                             type: "error",
                             delay: 3000,
@@ -422,7 +421,7 @@ $(document).ready(function() {
                     } else {
                         new PNotify({
                             title: "Alert",
-                            text: data.message ? data.message : "Something went wrong please try again later",
+                            text: "Something went wrong please try again later",
                             styling: "bootstrap3",
                             type: "error",
                             delay: 3000,
@@ -502,7 +501,7 @@ $(document).ready(function() {
                     } else {
                         new PNotify({
                             title: "Alert",
-                            text: data.message ? data.message : "Something went wrong please try again later",
+                            text: "Something went wrong please try again later",
                             styling: "bootstrap3",
                             type: "error",
                             delay: 3000,
@@ -612,83 +611,74 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    var oTable = $('#masters_association_list').DataTable();
-    $("#chip-in-out-form").submit(function(e) {
-        e.preventDefault();
 
-        $("#chip-in-out-form").validate({
-            rules: {
-                ChipsValue: {
-                    required: true,
-                },
-                passwordChips: {
-                    required: true,
-                },
-            },
-            message: {},
-
-            submitHandler: function(form, event) {
-                // $(this).off(event);
-                // alert("Hello");
-                // event.preventDefault();
-                $("#changePasswordModel1").modal("hide");
-
-                $("#deposit_button").attr("disable", true);
-                $("#withdrawl_button").attr("disable", true);
-
-                var passwordChips = $("#passwordChips").val();
-                var ChipsValue = $("#ChipsValue").val();
-                var type = $("#type").val();
-                var user_id_chip = $("#user_id_chip").val();
-                var chip_master_id = $("#chip_master_id").val();
-                var remarks = $("#remarks").val();
-                $.ajax({
-                    url: base_url + "admin/User/chip_update",
-                    method: "POST",
-                    data: {
-                        user_id: user_id_chip,
-                        type: type,
-                        passwordChips: passwordChips,
-                        ChipsValue: ChipsValue,
-                        chip_master_id: chip_master_id,
-                        remarks: remarks,
-                    },
-                    dataType: "json",
-                    success: function(data) {
-                        if (data.success) {
-                            $("#changePasswordModel1").modal("hide");
-                            new PNotify({
-                                title: "Success",
-                                text: "Chip Updated successfully",
-                                styling: "bootstrap3",
-                                type: "success",
-                                delay: 3000,
-                            });
-
-                            setTimeout(function() {
-                                oTable.ajax.reload(null, false)
-                            }, 2000);
-                        } else {
-                            new PNotify({
-                                title: "Alert",
-                                text: data.message ? data.message : "Something went wrong please try again later",
-                                styling: "bootstrap3",
-                                type: "error",
-                                delay: 3000,
-                            });
-                            setTimeout(function() {
-                                oTable.ajax.reload(null, false)
-                            }, 2000);
-                        }
-                    },
-                });
-                return false;
-            },
-
-        });
-    });
     /****************************Chips******************************/
+    $("#chip-in-out-form").validate({
+        rules: {
+            ChipsValue: {
+                required: true,
+            },
+            passwordChips: {
+                required: true,
+            },
+        },
+        message: {},
 
+        submitHandler: function(form, event) {
+            $(this).off(event);
+            // alert("Hello");
+            event.preventDefault();
+            $("#changePasswordModel1").modal("hide");
+
+            $("#deposit_button").attr("disable", true);
+            $("#withdrawl_button").attr("disable", true);
+
+            var passwordChips = $("#passwordChips").val();
+            var ChipsValue = $("#ChipsValue").val();
+            var type = $("#type").val();
+            var user_id_chip = $("#user_id_chip").val();
+            var chip_master_id = $("#chip_master_id").val();
+            $.ajax({
+                url: base_url + "admin/User/chip_update",
+                method: "POST",
+                data: {
+                    user_id: user_id_chip,
+                    type: type,
+                    passwordChips: passwordChips,
+                    ChipsValue: ChipsValue,
+                    chip_master_id: chip_master_id,
+                },
+                dataType: "json",
+                success: function(data) {
+                    if (data.success) {
+                        $("#changePasswordModel1").modal("hide");
+                        new PNotify({
+                            title: "Success",
+                            text: "Chip Updated successfully",
+                            styling: "bootstrap3",
+                            type: "success",
+                            delay: 3000,
+                        });
+
+                        setTimeout(function() {
+                            window.location.reload(1);
+                        }, 2000);
+                    } else {
+                        new PNotify({
+                            title: "Alert",
+                            text: "Something went wrong please try again later",
+                            styling: "bootstrap3",
+                            type: "error",
+                            delay: 3000,
+                        });
+                        setTimeout(function() {
+                            window.location.reload(1);
+                        }, 2000);
+                    }
+                },
+            });
+        },
+    });
 });
 
 /****************************Change password Self************* */
@@ -858,7 +848,7 @@ $("#news-form").validate({
                 } else {
                     new PNotify({
                         title: "Error",
-                        text: "Something went wrong please try againe later",
+                        text: "Seomething went wrong please try againe later",
                         styling: "bootstrap3",
                         type: "error",
 
@@ -945,20 +935,11 @@ function getDataByType(type, listId) {
         $(".match-bet-slip").show();
 
     } else if (type == "match") {
-        $(".unmatch-bet-slip").hide();
-
         $(".all-bet-slip").hide();
         $(".match-bet-slip").show();
     } else if (type == "fancy") {
-        $(".unmatch-bet-slip").hide();
-
         $(".all-bet-slip").hide();
         $(".fancy-bet-slip").show();
-    } else if (type == "unmatch") {
-        $(".all-bet-slip").hide();
-        $(".fancy-bet-slip").hide();
-        $(".unmatch-bet-slip").show();
-
     }
 }
 
@@ -1005,16 +986,4 @@ function themeChange(theme_id) {
 
 function goBack() {
     window.history.back();
-}
-
-function setIntervalX(callback, delay, repetitions) {
-    var x = 0;
-    var intervalID = window.setInterval(function() {
-
-        callback();
-
-        if (++x === repetitions) {
-            window.clearInterval(intervalID);
-        }
-    }, delay);
 }

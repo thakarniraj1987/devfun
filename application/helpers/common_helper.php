@@ -3,34 +3,6 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-function getchannel($dataValues = array())
-{
-    $curl = curl_init();
-
-    // p("http://88.80.186.39/sgbet/api/Exchange_api/getMarketData/".$market_id);
-    curl_setopt_array($curl, array(
-        // CURLOPT_URL => "http://88.80.186.39/sgbet/api/Exchange_api/getMarketData/".$market_id,
-        CURLOPT_URL => "http://139.59.41.232/9e79154e7f6aa8160b6c77944135e8ca/streaminfo.php",
-
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array(
-            "Cookie: __cfduid=d5dbee86719a0b4f706c9bb85dfb833851599671724"
-        ),
-    ));
-
-    $response = curl_exec($curl);
-
-
-    curl_close($curl);
-    return json_decode($response, true);
-}
-
 function generateRandomString($length = 10)
 {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -831,39 +803,22 @@ function count_total_exposure($user_id = null)
 
     /**********************Markets******************** */
     $events = $CI->Betting_model->get_bettings_markets($user_id);
-    $manual_events = $CI->Betting_model->get_manual_bettings_markets($user_id);
-    $events = array_merge($events, $manual_events);
-
 
     $totalRiskAmt = 0;
     if (!empty($events)) {
         foreach ($events as $key => $event) {
             $exposures = get_user_market_exposure_by_marketid($event->market_id, $user_id);
 
-
-
-            //    p($exposures);
-            $totalRiskAmt +=  min($exposures) < 0 ? min($exposures) : 0;
+            $totalRiskAmt +=  min($exposures);
         }
     }
-
-
-
-    $unmatch_exposure = $CI->Betting_model->count_total_unmatch_exposure($user_id);
-
-
-    if (!empty($unmatch_exposure)) {
-        $totalRiskAmt += $unmatch_exposure->total_exposure;
-    }
-
     /**********************Markets******************** */
 
     /**********************Fancy********************** */
-    // p($totalRiskAmt);
 
     $bettingsData = $CI->Betting_model->get_fancy_group_list(array('user_id' => $user_id));
 
-    // p($bettingsData);
+
     if (!empty($bettingsData)) {
         foreach ($bettingsData as $bettingData) {
 
@@ -935,12 +890,12 @@ function count_total_exposure($user_id = null)
                     }
                 }
 
-                $totalRiskAmt +=  min($tmp_array) < 0 ? min($tmp_array) : 0;
+                $totalRiskAmt +=  min($tmp_array);
             }
         }
     }
 
-    // p($totalRiskAmt);
+
     /**********************Fancy********************** */
 
     return $totalRiskAmt >= 0 ? 0 : $totalRiskAmt;
@@ -1580,14 +1535,6 @@ function get_user_type()
     return isset($_SESSION['my_userdata']['user_type']) ? $_SESSION['my_userdata']['user_type'] : "";
 }
 
-function get_user_type_by_id($user_id)
-{
-    $CI = &get_instance();
-    $CI->load->model("User_model");
-    $data = $CI->User_model->getUserById($user_id);
-    return $data->user_type;
-}
-
 function get_master_id()
 {
     return isset($_SESSION['my_userdata']['master_id']) ? $_SESSION['my_userdata']['master_id'] : "";
@@ -1872,133 +1819,77 @@ function get_super_block_markets($data)
 
 function get_running_markets_masters()
 {
-
-
-
     $CI = &get_instance();
     $CI->load->model("Betting_model");
     $CI->load->model("Event_model");
     $CI->load->model("Masters_betting_settings_model");
     $user_id = get_user_id();
     $user = $CI->User_model->getUserById($user_id);
-
-    $open_markets = $CI->Betting_model->get_open_markets_new(array('user_id' => $user_id));
-
-
-
-
-    // $manual_open_markets = $CI->Betting_model->get_manual_open_markets(array());
-
-    // $open_markets = array_merge($open_markets, $manual_open_markets);
-
-
-    // p($open_markets);
+    $open_markets = $CI->Betting_model->get_open_markets(array());
     $x = 0;
 
     if (!empty($open_markets)) {
         foreach ($open_markets as $openMarketskey => $open_market) {
+            $all_bettings = array();
+            $market_id = $open_market->market_id;
+            $CI->load->model("Masters_betting_settings_model");
 
 
-            if ($open_market->event_type == 7) {
-                continue;
-                // $all_bettings = array();
-                // $market_id = $open_market->market_id;
-                // $CI->load->model("Masters_betting_settings_model");
+            $bettings = $CI->Masters_betting_settings_model->get_open_bettings_list(array(
+                'market_id' => $open_market->market_id,
+                'user_id' => $user_id,
+                'match_id' => $open_market->match_id
+            ));
 
-                // $total_exposure = array();
+            if (!empty($bettings)) {
+                $total_exposure = array();
+                $runners = $CI->Event_model->get_market_book_odds_runner(array('market_id' => $market_id));
 
-
-                // $runners = $CI->Event_model->get_market_book_odds_runner(array('market_id' => $market_id));
-
-                // $manual_runners = $CI->Event_model->get_manual_market_book_odds_runner(array('market_id' => $market_id));
-
-                // $runners = array_merge($runners, $manual_runners);
-
-
-                // if (!empty($runners)) {
-                //     foreach ($runners as $runner) {
-                //         $selection_id = $runner['selection_id'];
-                //         $total_exposure[$selection_id] = 0;
-                //     }
-                // }
+                if (!empty($runners)) {
+                    foreach ($runners as $runner) {
+                        $selection_id = $runner['selection_id'];
+                        $total_exposure[$selection_id] = 0;
+                    }
+                }
 
 
-                // if (get_user_type() == 'User') {
-                //     if (!empty($bettings)) {
-                //         $newexposure = get_user_market_exposure_by_marketid($market_id);
-                //     }
-                // } else {
-                //     $newexposure = get_master_market_exposure_by_marketid($market_id);
-                // }
-                // $total_exposure = $newexposure;
-
-                // $i = 0;
+                foreach ($bettings as $betting) {
 
 
-                // foreach ($total_exposure as $exposure) {
-                //     $i++;
-                //     $k = 'exposure_' . $i;
-                //     $open_markets[$openMarketskey]->exposure[] = $exposure;
-                // }
-            } else {
-                $all_bettings = array();
-                $market_id = $open_market->market_id;
-                $CI->load->model("Masters_betting_settings_model");
+                    foreach ($total_exposure as $runnerKey => $exposure) {
+
+                        if ($betting->is_back == 1) {
+                            $profit = $betting->loss;
+
+                            $loss = $betting->profit;
 
 
+                            if ($betting->selection_id == $runnerKey) {
+                                $total_exposure[$runnerKey] -= ($profit);
+                            } else {
+                                $total_exposure[$runnerKey] += ($loss);
+                            }
+                        } else {
+                            $profit = $betting->loss;
+                            $loss = $betting->profit;
+                            if ($betting->selection_id == $runnerKey) {
+                                $total_exposure[$runnerKey] += ($loss);
+                            } else {
+                                $total_exposure[$runnerKey] -= ($profit);
+                            }
+                        }
+                    }
+                }
 
 
-                // $total_exposure = array();
+                $exposure = $total_exposure;
 
-
-                // $runners = $CI->Event_model->get_market_book_odds_runner(array('market_id' => $market_id));
-
-                // $manual_runners = $CI->Event_model->get_manual_market_book_odds_runner(array('market_id' => $market_id));
-
-                // $runners = array_merge($runners, $manual_runners);
-
-
-                // if (!empty($runners)) {
-                //     foreach ($runners as $runner) {
-                //         $selection_id = $runner['selection_id'];
-                //         $total_exposure[$selection_id] = 0;
-                //     }
-                // }
-
-
-                // if (get_user_type() == 'User') {
-                //     if (!empty($bettings)) {
-                //         $newexposure = get_user_market_exposure_by_marketid($market_id);
-                //     }
-                // } else {
-                //     $newexposure = get_master_market_exposure_by_marketid($market_id);
-                // }
-                // $total_exposure = $newexposure;
 
                 $i = 0;
-
-                $total_exposure_new = get_redis_market_exposure(array(
-                    'user_id' => $user_id,
-                    'match_id' => $open_market->match_id,
-                    'market_id' => $open_market->market_id,
-
-                ));
-
-                // p($total_exposure_new,0);
-
-                // p($total_exposure);
-
-                // foreach ($total_exposure as $exposure) {
-                //     $i++;
-                //     $k = 'exposure_' . $i;
-                //     $open_markets[$openMarketskey]->exposure[] = $exposure;
-                // }
-
-
-                foreach ($total_exposure_new as $exposure) {
+                foreach ($total_exposure as $exposure) {
                     $i++;
                     $k = 'exposure_' . $i;
-                    $open_markets[$openMarketskey]->exposure[] = $exposure['exposure'];
+                    $open_markets[$openMarketskey]->exposure[] = $exposure;
                 }
             }
         }
@@ -2055,17 +1946,17 @@ function get_running_markets_user()
 
 
                                 if ($betting->selection_id == $runnerKey) {
-                                    $total_exposure[$runnerKey] += ($price);
+                                    $total_exposure[$runnerKey] += round($price);
                                 } else {
-                                    $total_exposure[$runnerKey] -= ($betting->stake);
+                                    $total_exposure[$runnerKey] -= round($betting->stake);
                                 }
                             } else {
                                 $price = ($betting->price_val * $betting->stake * 1) - $betting->stake;
 
                                 if ($betting->selection_id == $runnerKey) {
-                                    $total_exposure[$runnerKey] -= ($price);
+                                    $total_exposure[$runnerKey] -= round($price);
                                 } else {
-                                    $total_exposure[$runnerKey] += ($betting->stake);
+                                    $total_exposure[$runnerKey] += round($betting->stake);
                                 }
                             }
                         }
@@ -2137,12 +2028,12 @@ function count_market_exposure($all_bettings)
                         if (isset($tmp_betting[$betting->selection_id])) {
                             if ($betting->is_back == 1) {
                                 $price = ($betting->price_val * $betting->stake * -1) + $betting->stake;
-                                $tmp_betting[$betting->selection_id]['profit'] += ($betting->stake);
-                                $tmp_betting[$betting->selection_id]['loss'] += ($price);
+                                $tmp_betting[$betting->selection_id]['profit'] += round($betting->stake);
+                                $tmp_betting[$betting->selection_id]['loss'] += round($price);
                             } else {
                                 $price = ($betting->price_val * $betting->stake * -1) + $betting->stake;;
-                                $tmp_betting[$betting->selection_id]['profit'] -= ($betting->stake);
-                                $tmp_betting[$betting->selection_id]['loss'] -= ($price);
+                                $tmp_betting[$betting->selection_id]['profit'] -= round($betting->stake);
+                                $tmp_betting[$betting->selection_id]['loss'] -= round($price);
                             }
                         } else {
                             if ($betting->is_back == 1) {
@@ -2197,18 +2088,17 @@ function get_news()
 
     $news = $CI->News_model->get_latest_news($site_code);
 
-    $html = ' ';
+    $html = '';
     if (!empty($news)) {
         foreach ($news as $value) {
-            $html .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . $value['description'] . '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+            $html .= '<marquee direction="left" scrollamount="7" onmouseover="this.stop();" onmouseout="this.start();">' . $value['description'] . '</Marquee>';
         }
     }
-
-    echo '<marquee direction="left" scrollamount="4" onmouseover="this.stop();" onmouseout="this.start();">' . $html . '</Marquee>';
+    echo $html;
 }
 
 
-function get_master_market_exposure_by_marketid($market_id = null, $user_id = null, $unmatch_bet_include = 'No')
+function get_master_market_exposure_by_marketid($market_id = null, $user_id = null)
 {
     $CI = &get_instance();
     $CI->load->model("Masters_betting_settings_model");
@@ -2223,13 +2113,11 @@ function get_master_market_exposure_by_marketid($market_id = null, $user_id = nu
     ));
 
 
-    // p($bettings);
-
     $tmpExposure = array();
     // p($bettings);
     if (!empty($bettings)) {
-        $exposure = count_market_exposure2($bettings, $unmatch_bet_include);
-        // p($exposure);
+        $exposure = count_market_exposure2($bettings);
+        // p($exposure,0);
         if (!empty($exposure)) {
             foreach ($exposure as $key => $exp) {
                 $exposure_1 = $exp;
@@ -2247,7 +2135,7 @@ function get_master_market_exposure_by_marketid($market_id = null, $user_id = nu
 }
 
 
-function count_market_exposure2($all_bettings, $unmatch_bet_include = 'No')
+function count_market_exposure2($all_bettings)
 {
 
     $CI = &get_instance();
@@ -2258,8 +2146,7 @@ function count_market_exposure2($all_bettings, $unmatch_bet_include = 'No')
 
     if (!empty($all_bettings)) {
         foreach ($all_bettings as $betting) {
-            // $market_id = str_replace('.', '_', $betting->market_id);
-            $market_id = str_replace('.', '___', $betting->market_id);
+            $market_id = str_replace('.', '_', $betting->market_id);
             $markets[$market_id] = array();
         }
     }
@@ -2268,18 +2155,10 @@ function count_market_exposure2($all_bettings, $unmatch_bet_include = 'No')
     // p($markets);
     if (!empty($markets)) {
         foreach ($markets as $key => $market) {
-            // $market_id = str_replace('_', '.', $key);
-            $market_id = str_replace('___', '.', $key);
-            // $market_id = str_replace('.BM', '_BM', $market_id);
+            $market_id = str_replace('_', '.', $key);
+            $market_id = str_replace('.BM', '_BM', $market_id);
             // p($market_id,0);
             $runners = $CI->Event_model->get_market_book_odds_runner(array('market_id' => $market_id));
-
-
-            $manual_runners = $CI->Event_model->get_manual_market_book_odds_runner(array('market_id' => $market_id));
-
-            $runners = array_merge($runners, $manual_runners);
-
-
             if (!empty($runners)) {
                 foreach ($runners as $runner) {
 
@@ -2293,11 +2172,7 @@ function count_market_exposure2($all_bettings, $unmatch_bet_include = 'No')
 
                 foreach ($all_bettings as $betting) {
 
-                    if ($unmatch_bet_include == 'No') {
-                        if ($betting->unmatch_bet == 'Yes') {
-                            continue;
-                        }
-                    }
+
                     foreach ($total_exposure as $runnerKey => $exposure) {
 
                         if ($betting->is_back == 1) {
@@ -2331,14 +2206,14 @@ function count_market_exposure2($all_bettings, $unmatch_bet_include = 'No')
 
 
 
-    // p($total_exposure);
+
 
 
     return $total_exposure;
 }
 
 
-function get_user_market_exposure_by_marketid($market_id = null, $user_id = null, $unmatch_bet_include = 'No')
+function get_user_market_exposure_by_marketid($market_id = null, $user_id = null)
 {
     $CI = &get_instance();
     $CI->load->model("Betting_model");
@@ -2360,11 +2235,9 @@ function get_user_market_exposure_by_marketid($market_id = null, $user_id = null
 
     // echo $user->user_id;
     $bettings = $CI->Betting_model->get_bettings_by_market_id(array('user_id' => $user_id, 'market_id' => $market_id, 'betting_type' => 'Match', 'status' => 'Open'));
-
-    // p($bettings);
     if (!empty($bettings)) {
         $all_bettings = array_merge($all_bettings, $bettings);
-        $exposure = count_market_exposure_for_user($bettings, $unmatch_bet_include);
+        $exposure = count_market_exposure_for_user($bettings);
         // p($exposure);
         if (!empty($exposure)) {
             foreach ($exposure as $key => $exp) {
@@ -2383,10 +2256,8 @@ function get_user_market_exposure_by_marketid($market_id = null, $user_id = null
     return $tmpExposure;
 }
 
-function count_market_exposure_for_user($all_bettings, $unmatch_bet_include = 'No')
+function count_market_exposure_for_user($all_bettings)
 {
-
-
 
     $CI = &get_instance();
     $CI->load->model("Event_model");
@@ -2394,11 +2265,9 @@ function count_market_exposure_for_user($all_bettings, $unmatch_bet_include = 'N
 
     $markets = array();
 
-
-    // p("hello");
     if (!empty($all_bettings)) {
         foreach ($all_bettings as $betting) {
-            $market_id = str_replace('.', '___', $betting->market_id);
+            $market_id = str_replace('.', '_', $betting->market_id);
 
             $markets[$market_id] = array();
         }
@@ -2406,19 +2275,14 @@ function count_market_exposure_for_user($all_bettings, $unmatch_bet_include = 'N
 
 
 
-    // p("here");
-
-
     if (!empty($markets)) {
-        foreach ($markets as $key =>  $market) {
-            $market_id = str_replace('___', '.', $key);
+        foreach ($markets as $key => $market) {
+            $market_id = str_replace('_', '.', $key);
+
+
+            $market_id = str_replace('.BM', '_BM', $market_id);
             $runners = $CI->Event_model->get_market_book_odds_runner(array('market_id' => $market_id));
 
-
-            if (empty($runners)) {
-                $runners = $CI->Event_model->get_manual_market_book_odds_runner(array('market_id' => $market_id));
-            }
-            // p($runners);
 
             if (!empty($runners)) {
 
@@ -2430,24 +2294,8 @@ function count_market_exposure_for_user($all_bettings, $unmatch_bet_include = 'N
             }
 
 
-            if ($_SESSION['my_userdata']['user_name'] == 'TA04') {
-
-                // if($market_id == '9.220301184116_match_odds')
-                // {
-
-                // p($market_id);
-                // }
-            }
-
-
             if (!empty($all_bettings)) {
                 foreach ($all_bettings as $betting) {
-
-                    if ($unmatch_bet_include == 'No') {
-                        if ($betting->unmatch_bet == 'Yes') {
-                            continue;
-                        }
-                    }
 
 
                     foreach ($total_exposure as $runnerKey => $exposure) {
@@ -2456,25 +2304,20 @@ function count_market_exposure_for_user($all_bettings, $unmatch_bet_include = 'N
                             $price = ($betting->price_val * $betting->stake * 1) - $betting->stake;
 
 
-
                             if ($betting->selection_id == $runnerKey) {
-                                $total_exposure[$runnerKey]   += ($price);
+                                $total_exposure[$runnerKey] += round($price);
                             } else {
-                                $total_exposure[$runnerKey]   -= ($betting->stake);
+                                $total_exposure[$runnerKey] -= round($betting->stake);
                             }
                         } else {
                             $price = ($betting->price_val * $betting->stake * 1) - $betting->stake;
 
-
-
                             if ($betting->selection_id == $runnerKey) {
-                                $total_exposure[$runnerKey]   -= ($price);
+                                $total_exposure[$runnerKey] -= round($price);
                             } else {
-                                $total_exposure[$runnerKey]   += ($betting->stake);
+                                $total_exposure[$runnerKey] += round($betting->stake);
                             }
                         }
-
-                        // p($total_exposure,0);
                     }
                 }
             }
@@ -2482,10 +2325,9 @@ function count_market_exposure_for_user($all_bettings, $unmatch_bet_include = 'N
     }
 
 
-    // p($total_exposure);
-
     return $total_exposure;
 }
+
 
 function get_user_general_setting($user_id)
 {
@@ -2734,10 +2576,14 @@ function count_total_credit_limit($user_id)
 {
     $CI = &get_instance();
 
-    $CI->load->model("Ledger_model");
+    $CI->load->model("User_model");
     $balance = "";
     if (!empty($user_id)) {
-        $balance = $CI->Ledger_model->count_total_credit_limit($user_id);
+        $user_data = $CI->User_model->getUserById($user_id);
+
+        if (!empty($user_data)) {
+            $balance = $user_data->credit_limit;
+        }
     }
     return isset($balance) ? $balance : 0;
 }
@@ -2962,7 +2808,7 @@ function get_user_winnings($user_id)
 
 function get_user_credit_limit($user_id)
 {
-    return number_format(count_total_credit_limit($user_id), 2);
+    return count_total_credit_limit($user_id);
 }
 
 function get_user_exposure($user_id)
@@ -2983,7 +2829,7 @@ function get_user_exposure($user_id)
 
 function get_user_balance($user_id)
 {
-    return number_format(count_total_balance($user_id), 2);
+    return count_total_balance($user_id);
 }
 
 function get_view_more_option($user_id)
@@ -3095,7 +2941,7 @@ function count_user_exposure($user_id = null)
         foreach ($events as $key => $event) {
             $exposures = get_user_market_exposure_by_marketid($event->market_id, $user_id);
 
-            $totalRiskAmt += min($exposures) < 0 ? min($exposures) : 0;
+            $totalRiskAmt += min($exposures);
         }
     }
 
@@ -3177,7 +3023,7 @@ function count_user_exposure($user_id = null)
                 }
 
 
-                $totalRiskAmt += min($tmp_array) < 0 ? min($tmp_array) : 0;
+                $totalRiskAmt += min($tmp_array);
             }
         }
     }
@@ -3321,7 +3167,6 @@ function count_market_position_for_user($all_bettings)
             $runners = $CI->Event_model->get_market_book_odds_runner(array('market_id' => $market_id));
 
 
-
             if (!empty($runners)) {
 
                 foreach ($runners as $runner) {
@@ -3330,7 +3175,6 @@ function count_market_position_for_user($all_bettings)
                     $total_exposure[$selection_id] = 0;
                 }
             }
-
 
 
             if (!empty($all_bettings)) {
@@ -3354,7 +3198,7 @@ function count_market_position_for_user($all_bettings)
                             if ($betting->selection_id == $runnerKey) {
                                 $total_exposure[$runnerKey] += ($price);
                             } else {
-                                $total_exposure[$runnerKey] -= (($betting->stake));
+                                $total_exposure[$runnerKey] -= (($betting->stake ));
                             }
                         }
                     }
@@ -3389,7 +3233,7 @@ function get_master_market_position_by_marketid($market_id = null, $user_id = nu
     ));
 
 
-
+  
 
 
 
@@ -3453,7 +3297,7 @@ function count_market_position_for_master($all_bettings)
 
 
                 foreach ($all_bettings as $betting) {
-                    foreach ($total_exposure as $runnerKey => $exposure) {
+                     foreach ($total_exposure as $runnerKey => $exposure) {
 
                         if ($betting->is_back == 1) {
                             $profit = $betting->client_profit * (100 - $betting->partnership) / 100;
@@ -3526,7 +3370,7 @@ function read_chipsummary_data($file_name)
 }
 
 
-function get_winnings_amt_17_feb($user_id)
+function get_winnings_amt($user_id)
 {
     $CI = &get_instance();
 
@@ -3537,9 +3381,9 @@ function get_winnings_amt_17_feb($user_id)
             $total_settle_amount = $CI->Ledger_model->get_total_settlement_new($user_data->user_id, 'N', $user_data->user_type);
 
             if ($total_settle_amount >= 0) {
-                return '<span class="minus">' . number_format(abs($total_settle_amount), 2) . '</plus>';
+                return '<span class="minus">' . abs($total_settle_amount) . '</plus>';
             } else {
-                return '<span class="blue">' . number_format(abs($total_settle_amount), 2) . '</plus>';
+                return '<span class="blue">' . abs($total_settle_amount) . '</plus>';
             }
         }
     }
@@ -3554,23 +3398,6 @@ function get_winnings_amt_17_feb($user_id)
     //     return '<span class="blue">'.abs($amt).'</plus>';
 
     // }
-}
-
-function get_winnings_amt($user_id)
-{
-
-    $CI = &get_instance();
-
-    $user_data = $CI->User_model->getUserById($user_id);
-
-
-    $dataArray["user_data"] = $user_data;
-
-    $content = $CI->load->viewPartial('user-winnings-html', $dataArray, TRUE);
-
-    return $content;
-
-    // echo $html;
 }
 
 
@@ -3785,1060 +3612,4 @@ function get_live_tv($event_id)
     $response = curl_exec($curl);
     curl_close($curl);
     return $response;
-}
-
-
-function get_casino_timer($event_id)
-{
-    $curl = curl_init();
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => 'http://178.79.189.86:8001/getCasinoEvents/' . $event_id,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array(
-            "Cookie: __cfduid=d5dbee86719a0b4f706c9bb85dfb833851599671724"
-        ),
-    ));
-    $response = curl_exec($curl);
-    curl_close($curl);
-    return json_decode($response);
-}
-
-
-
-function get_master_open_bets_list($dataArray)
-{
-    $CI = &get_instance();
-    $CI->load->model("Betting_model");
-    $CI->load->model("User_model");
-    $CI->load->model("Masters_betting_settings_model");
-    $user_id = $dataArray['user_id'];
-    $match_id = $dataArray['match_id'];
-    $type = $dataArray['type'];
-    $selection_id = $dataArray['selection_id'];
-
-    $bettings = $CI->Masters_betting_settings_model->get_event_open_bettings_list1(array(
-        'user_id' => $user_id,
-        'match_id' => $match_id,
-        'unmatch_bet' => $dataArray['unmatch_bet']
-        // 'type' => $type,
-        // 'selection_id' => $selection_id
-
-    ));
-    return $bettings;
-}
-
-
-function generateRandomEventId($length = 10)
-{
-    $characters = '0123456789' . strtotime("now");
-    $charactersLength = strlen($characters);
-    $randomString = '';
-    for ($i = 0; $i < $length; $i++) {
-        $randomString .= $characters[rand(0, $charactersLength - 1)];
-    }
-    return $randomString;
-}
-
-
-function check_is_casino($type = null)
-{
-    $casinotypes = getCustomConfigItem('casino_event_type');
-    if (in_array($type, $casinotypes)) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-
-function get_fancy_odds($dataValues = array())
-{
-
-    $curl = curl_init();
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => "http://178.79.189.86:8001/checkFancyCurrentOdds/" . $dataValues['match_id'] . '/' . $dataValues['selection_id'],
-
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array(
-            "Cookie: __cfduid=d5dbee86719a0b4f706c9bb85dfb833851599671724"
-        ),
-    ));
-    $response = curl_exec($curl);
-    curl_close($curl);
-
-
-    return json_decode($response, true);
-}
-
-function get_match_odds($dataValues = array())
-{
-
-    $curl = curl_init();
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => "http://178.79.189.86:8001/checkCurrentOdds/" . $dataValues['market_id'] . '/' . $dataValues['selection_id'],
-
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array(
-            "Cookie: __cfduid=d5dbee86719a0b4f706c9bb85dfb833851599671724"
-        ),
-    ));
-    $response = curl_exec($curl);
-    curl_close($curl);
-
-
-    return json_decode($response, true);
-}
-
-
-
-function get_masters_winnings($user_id, $user_type)
-{
-    $CI = &get_instance();
-    $CI->load->model("Ledger_model");
-
-    $user_details = $CI->User_model->getUserById($user_id);
-
-
-
-    if ($user_details->user_type == 'User') {
-
-        $total_settle_amount = $CI->Ledger_model->get_total_settlement_for_user($user_id, 'N', $user_type);
-    } else {
-        // $total_settle_amount = $CI->Ledger_model->get_total_settlement($user_id, 'N', $user_type);
-        $total_settle_amount = $CI->Ledger_model->count_supers_total_settlement($user_id);
-    }
-
-    return $total_settle_amount;
-}
-
-function checkFancyCurrentOdds($match_id, $selection_id)
-{
-    $curl = curl_init();
-
-    // p("http://88.80.186.39/sgbet/api/Exchange_api/getMarketData/".$market_id);
-    curl_setopt_array($curl, array(
-        // CURLOPT_URL => "http://88.80.186.39/sgbet/api/Exchange_api/getMarketData/".$market_id,
-        CURLOPT_URL => "http://178.79.189.86:8001/checkFancyCurrentOdds/" . $match_id . "/" . $selection_id,
-
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array(
-            "Cookie: __cfduid=d5dbee86719a0b4f706c9bb85dfb833851599671724"
-        ),
-    ));
-
-    $response = curl_exec($curl);
-
-
-    curl_close($curl);
-    return json_decode($response);
-}
-
-
-
-function get_redis_market_exposure($dataValues = array())
-{
-    $curl = curl_init();
-
-    // p("http://88.80.186.39/sgbet/api/Exchange_api/getMarketData/".$market_id);
-    curl_setopt_array($curl, array(
-        // CURLOPT_URL => "http://88.80.186.39/sgbet/api/Exchange_api/getMarketData/".$market_id,
-        CURLOPT_URL => "http://178.79.189.86:8001/countMarketExposure/" . $dataValues['user_id'] . "/" . $dataValues['match_id'] . "/" . $dataValues['market_id'],
-
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array(
-            "Cookie: __cfduid=d5dbee86719a0b4f706c9bb85dfb833851599671724"
-        ),
-    ));
-
-    $response = curl_exec($curl);
-
-
-    curl_close($curl);
-    return json_decode($response, true);
-}
-
-
-function get_anim_url($dataValues = array())
-{
-    $curl = curl_init();
-
-    // p("http://88.80.186.39/sgbet/api/Exchange_api/getMarketData/".$market_id);
-    curl_setopt_array($curl, array(
-        // CURLOPT_URL => "http://88.80.186.39/sgbet/api/Exchange_api/getMarketData/".$market_id,
-        CURLOPT_URL => "http://178.79.189.86:4050/demo-2056818290/animurl?event_id=31245954",
-
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array(
-            "Cookie: __cfduid=d5dbee86719a0b4f706c9bb85dfb833851599671724"
-        ),
-    ));
-
-    $response = curl_exec($curl);
-
-
-    curl_close($curl);
-    return $response;
-}
-
-function isIosDevice()
-{
-    $userAgent = strtolower($_SERVER['HTTP_USER_AGENT']);
-    $iosDevice = array('iphone', 'ipod', 'ipad');
-    $isIos = false;
-
-    foreach ($iosDevice as $val) {
-        if (stripos($userAgent, $val) !== false) {
-            $isIos = true;
-            break;
-        }
-    }
-
-    return $isIos;
-}
-
-
-
-function getTodayAllEvents()
-{
-    $curl = curl_init();
-
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => "http://178.79.189.86:8001/getTodayAllEvents",
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array(
-            "Cookie: __cfduid=d5dbee86719a0b4f706c9bb85dfb833851599671724"
-        ),
-    ));
-
-    $response = curl_exec($curl);
-
-
-    curl_close($curl);
-    return json_decode($response, true);
-}
-
-
-function get_yesterday_datetime()
-{
-    return  date('Y-m-d H:i:s', strtotime("midnight", strtotime(date('Y-m-d H:i:s', strtotime('-1 days')))));
-}
-
-function get_today_end_datetime()
-{
-    $timestamp = strtotime("today 23:59:59");
-    return  date('Y-m-d H:i:s', $timestamp);;
-}
-
-function add_openning_bal_row($newopen_bal, $report_arr)
-{
-    $tempArray = array(
-        'user_id' => 0,
-        'remarks' => 'Opening balance',
-        'transaction_type' => 'Credit',
-        'type' => 'Free Chip',
-        'amount' => (float)$newopen_bal,
-        'created_at' => '2002-02-25 00:22:05',
-        'betting_type' => '',
-        'selection_id' => '',
-        'market_id' => '',
-        'match_id' => '',
-        'event_name' => '',
-        'market_name' => '',
-        'available_balance' => (float)$newopen_bal,
-        'is_opening' => 'Yes'
-    );
-    $report_arr[count($report_arr) + 1] = $tempArray;
-    return $report_arr;
-}
-
-
-function get_market_runners($market_id)
-{
-    $CI = &get_instance();
-    $CI->load->model("Event_model");
-    $CI->load->model("Betting_model");
-
-    $markets = array();
-
-    $runners = $CI->Event_model->get_market_book_odds_runner(array('market_id' => $market_id));
-
-
-    if (empty($runners)) {
-        $runners = $CI->Event_model->get_manual_market_book_odds_runner(array('market_id' => $market_id));
-    }
-    // p($runners);
-
-    if (!empty($runners)) {
-
-        foreach ($runners as $runner) {
-
-            $selection_id = $runner['selection_id'];
-            $total_exposure[$selection_id] = 0;
-        }
-    }
-
-    // p($total_exposure);
-
-    return $total_exposure;
-}
-
-
-
-function get_user_max_profit_by_marketid($market_id = null, $user_id = null, $unmatch_bet_include = 'No')
-{
-    $CI = &get_instance();
-    $CI->load->model("Betting_model");
-    $CI->load->model("User_model");
-
-    $return = "";
-    $matches = array();
-    $all_bettings = array();
-    // $exposure = array();
-    $tmpExposure = array();
-
-
-    if (!$user_id) {
-        $user_id = get_user_id();
-    }
-    $user = $CI->User_model->getUserById($user_id);
-    $partner_ship = $user->partnership;
-
-
-    // echo $user->user_id;
-    $bettings = $CI->Betting_model->get_unmatch_bettings_by_market_id(array('user_id' => $user_id, 'market_id' => $market_id, 'betting_type' => 'Match', 'status' => 'Open'));
-
-    if (!empty($bettings)) {
-        $all_bettings = array_merge($all_bettings, $bettings);
-        $exposure = count_market_max_profit_for_user($bettings, $unmatch_bet_include);
-        // p($exposure);
-        if (!empty($exposure)) {
-            foreach ($exposure as $key => $exp) {
-                $exposure_1 = $exp;
-
-                if (isset($tmpExposure[$key])) {
-                    $tmpExposure[$key] += ($exposure_1);
-                } else {
-                    $tmpExposure[$key] = ($exposure_1);
-                }
-            }
-        }
-    }
-
-
-    return $tmpExposure;
-}
-
-
-function count_market_max_profit_for_user($all_bettings, $unmatch_bet_include = 'No')
-{
-
-
-
-    $CI = &get_instance();
-    $CI->load->model("Event_model");
-    $CI->load->model("Betting_model");
-
-    $markets = array();
-
-
-    // p("hello");
-    if (!empty($all_bettings)) {
-        foreach ($all_bettings as $betting) {
-            $market_id = str_replace('.', '___', $betting->market_id);
-
-            $markets[$market_id] = array();
-        }
-    }
-
-
-
-    // p("here");
-
-
-    if (!empty($markets)) {
-        foreach ($markets as $key =>  $market) {
-            $market_id = str_replace('___', '.', $key);
-            $runners = $CI->Event_model->get_market_book_odds_runner(array('market_id' => $market_id));
-
-
-            if (empty($runners)) {
-                $runners = $CI->Event_model->get_manual_market_book_odds_runner(array('market_id' => $market_id));
-            }
-            // p($runners);
-
-            if (!empty($runners)) {
-
-                foreach ($runners as $runner) {
-
-                    $selection_id = $runner['selection_id'];
-                    $total_exposure[$selection_id] = 0;
-                }
-            }
-
-
-            if ($_SESSION['my_userdata']['user_name'] == 'TA04') {
-
-                // if($market_id == '9.220301184116_match_odds')
-                // {
-
-                // p($market_id);
-                // }
-            }
-
-
-            if (!empty($all_bettings)) {
-                foreach ($all_bettings as $betting) {
-
-                    if ($unmatch_bet_include == 'No') {
-                        if ($betting->unmatch_bet == 'Yes') {
-                            continue;
-                        }
-                    }
-
-
-                    foreach ($total_exposure as $runnerKey => $exposure) {
-
-                        if ($betting->is_back == 1) {
-                            $price = ($betting->price_val * $betting->stake * 1) - $betting->stake;
-
-
-
-                            if ($betting->selection_id == $runnerKey) {
-                                $total_exposure[$runnerKey]   += ($price);
-                            } else {
-                                // $total_exposure[$runnerKey]   -= ($betting->stake);
-                            }
-                        } else {
-                            $price = ($betting->price_val * $betting->stake * 1) - $betting->stake;
-
-
-
-                            if ($betting->selection_id == $runnerKey) {
-                                // $total_exposure[$runnerKey]   -= ($price);
-                            } else {
-                                $total_exposure[$runnerKey]   += ($betting->stake);
-                            }
-                        }
-
-                        // p($total_exposure,0);
-                    }
-                }
-            }
-        }
-    }
-
-
-    // p($total_exposure);
-
-    return $total_exposure;
-}
-
-function get_casino_odds($type = null)
-{
-
-    $curl = curl_init();
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => "http://178.79.189.86:8001/" . $type,
-
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array(
-            "Cookie: __cfduid=d5dbee86719a0b4f706c9bb85dfb833851599671724"
-        ),
-    ));
-    $response = curl_exec($curl);
-    curl_close($curl);
-
-
-    return json_decode($response, true);
-}
-
-
-function get_market_type_by_market_id($dataArray = array())
-{
-    $event_id = $dataArray['event_id'];
-    $market_id = $dataArray['market_id'];
-    $selection_id = $dataArray['selection_id'];
-
-
-
-    if ($event_id == '56767') {
-        $data = get_casino_odds('getODTP');
-
-
-        if (!empty($data)) {
-            $orginal_market_id = $data['additional_info']['mid'];
-
-            $round_id  = explode('.', $orginal_market_id);
-            $orginal_market_id = str_replace('.', '__', $orginal_market_id);
-            $markets = $data['markets'];
-
-
-            $tmp_market_type = str_replace($orginal_market_id . '_', '', $market_id);
-
-            $market_name = '';
-
-
-
-            if ($tmp_market_type == 'match_odds') {
-                $market_name = 'Match Odds';
-            }
-
-            $market_type_details = $markets[$tmp_market_type];
-
-            $market_detail = array(
-                'event_id' => $event_id,
-                'round_id' => $round_id[1],
-                'market_name' => $market_name,
-                'market_id' => $market_id,
-            );
-
-            $runner_details = array();
-
-            if (!empty($market_type_details)) {
-                foreach ($market_type_details as $market_type_detail) {
-
-                    if ($selection_id == $market_type_detail['sectionId']) {
-                        $runner_details[]  = array(
-                            'market_book_odd_id' => $market_id,
-                            'market_id' => $market_id,
-                            'event_id' => $event_id,
-                            'selection_id' => $market_type_detail['sectionId'],
-                            'runner_name' => $market_type_detail['nation'],
-                            'sort_priority' => $market_type_detail['Srno'],
-                            'status' => $market_type_detail['gstatus'],
-                            'back_1_price' => $market_type_detail['b1'],
-                            'lay_1_price' => $market_type_detail['l1'],
-                        );
-                    }
-                }
-            }
-        }
-
-        $responseData = array(
-            'runner_details' => $runner_details,
-            'market_detail' => $market_detail
-        );
-
-        return $responseData;
-    } else if ($event_id == '56768') {
-        $data = get_casino_odds('getTEEN20');
-
-
-        if (!empty($data)) {
-            $orginal_market_id = $data['additional_info']['mid'];
-
-            $round_id  = explode('.', $orginal_market_id);
-            $orginal_market_id = str_replace('.', '__', $orginal_market_id);
-            $markets = $data['markets'];
-
-
-            $tmp_market_type = str_replace($orginal_market_id . '_', '', $market_id);
-
-            $market_name = '';
-
-
-
-            if ($tmp_market_type == 'match_odds') {
-                $market_name = 'Match Odds';
-            }
-
-            $market_type_details = $markets[$tmp_market_type];
-
-            $market_detail = array(
-                'event_id' => $event_id,
-                'round_id' => $round_id[1],
-                'market_name' => $market_name,
-                'market_id' => $market_id,
-            );
-
-            $runner_details = array();
-
-            if (!empty($market_type_details)) {
-                foreach ($market_type_details as $market_type_detail) {
-
-                    if ($selection_id == $market_type_detail['sid']) {
-                        $runner_details[]  = array(
-                            'market_book_odd_id' => $market_id,
-                            'market_id' => $market_id,
-                            'event_id' => $event_id,
-                            'selection_id' => $market_type_detail['sid'],
-                            'runner_name' => $market_type_detail['nation'],
-                            'sort_priority' => $market_type_detail['sid'],
-                            'status' => $market_type_detail['gstatus'],
-                            'back_1_price' => $market_type_detail['rate'],
-                        );
-                    }
-                }
-            }
-        }
-
-        $responseData = array(
-            'runner_details' => $runner_details,
-            'market_detail' => $market_detail
-        );
-
-        return $responseData;
-    } else if ($event_id == '98789') {
-        $data = get_casino_odds('getLucky7A');
-
-
-        if (!empty($data)) {
-            $orginal_market_id = $data['additional_info']['mid'];
-
-            $round_id  = explode('.', $orginal_market_id);
-            $orginal_market_id = str_replace('.', '__', $orginal_market_id);
-            $markets = $data['markets'];
-
-
-            $tmp_market_type = str_replace($orginal_market_id . '_', '', $market_id);
-
-            $market_name = '';
-
-
-
-            if ($tmp_market_type == 'match_odds') {
-                $market_name = 'Match Odds';
-            }
-
-            $market_type_details = $markets[$tmp_market_type];
-
-            $market_detail = array(
-                'event_id' => $event_id,
-                'round_id' => $round_id[1],
-                'market_name' => $market_name,
-                'market_id' => $market_id,
-            );
-
-            $runner_details = array();
-
-            if (!empty($market_type_details)) {
-                foreach ($market_type_details as $market_type_detail) {
-
-                    if ($selection_id == $market_type_detail['sid']) {
-                        $runner_details[]  = array(
-                            'market_book_odd_id' => $market_id,
-                            'market_id' => $market_id,
-                            'event_id' => $event_id,
-                            'selection_id' => $market_type_detail['sid'],
-                            'runner_name' => $market_type_detail['nation'],
-                            'sort_priority' => $market_type_detail['sid'],
-                            'status' => $market_type_detail['gstatus'] == 1 ? 'ACTIVE' : 'SUSPENDED',
-                            'back_1_price' => $market_type_detail['rate'],
-                        );
-                    }
-                }
-            }
-        }
-
-        $responseData = array(
-            'runner_details' => $runner_details,
-            'market_detail' => $market_detail
-        );
-
-        return $responseData;
-    } else if ($event_id == '56967') {
-        $data = get_casino_odds('get32B');
-
-
-        if (!empty($data)) {
-            $orginal_market_id = $data['additional_info']['mid'];
-
-            $round_id  = explode('.', $orginal_market_id);
-            $orginal_market_id = str_replace('.', '__', $orginal_market_id);
-            $markets = $data['markets'];
-
-
-            $tmp_market_type = str_replace($orginal_market_id . '_', '', $market_id);
-
-            $market_name = '';
-
-
-
-            if ($tmp_market_type == 'match_odds') {
-                $market_name = 'Match Odds';
-            }
-
-            $market_type_details = $markets[$tmp_market_type];
-
-            $market_detail = array(
-                'event_id' => $event_id,
-                'round_id' => $round_id[1],
-                'market_name' => $market_name,
-                'market_id' => $market_id,
-            );
-
-            $runner_details = array();
-
-            if (!empty($market_type_details)) {
-                foreach ($market_type_details as $market_type_detail) {
-
-                    if ($selection_id == $market_type_detail['sid']) {
-                        $runner_details[]  = array(
-                            'market_book_odd_id' => $market_id,
-                            'market_id' => $market_id,
-                            'event_id' => $event_id,
-                            'selection_id' => $market_type_detail['sid'],
-                            'runner_name' => $market_type_detail['nation'],
-                            'sort_priority' => $market_type_detail['sid'],
-                            'status' => $market_type_detail['gstatus'] == 'ACTIVE' ? 'ACTIVE' : 'SUSPENDED',
-                            'back_1_price' => $market_type_detail['b1'],
-                            'lay_1_price' => $market_type_detail['l1'],
-
-                        );
-                    }
-                }
-            }
-        }
-
-        $responseData = array(
-            'runner_details' => $runner_details,
-            'market_detail' => $market_detail
-        );
-
-        return $responseData;
-    } else if ($event_id == '98790') {
-        $data = get_casino_odds('getDT20');
-
-
-        if (!empty($data)) {
-            $orginal_market_id = $data['additional_info']['mid'];
-
-            $round_id  = explode('.', $orginal_market_id);
-            $orginal_market_id = str_replace('.', '__', $orginal_market_id);
-            $markets = $data['markets'];
-
-
-            $tmp_market_type = str_replace($orginal_market_id . '_', '', $market_id);
-
-            $market_name = '';
-
-
-
-            if ($tmp_market_type == 'match_odds') {
-                $market_name = 'Match Odds';
-            }
-
-            $market_type_details = $markets[$tmp_market_type];
-
-            $market_detail = array(
-                'event_id' => $event_id,
-                'round_id' => $round_id[1],
-                'market_name' => $market_name,
-                'market_id' => $market_id,
-            );
-
-            $runner_details = array();
-
-            if (!empty($market_type_details)) {
-                foreach ($market_type_details as $market_type_detail) {
-
-                    if ($selection_id == $market_type_detail['sid']) {
-                        $runner_details[]  = array(
-                            'market_book_odd_id' => $market_id,
-                            'market_id' => $market_id,
-                            'event_id' => $event_id,
-                            'selection_id' => $market_type_detail['sid'],
-                            'runner_name' => $market_type_detail['nat'],
-                            'sort_priority' => $market_type_detail['sid'],
-                            'status' => $market_type_detail['gstatus'] == 1 ? 'ACTIVE' : 'SUSPENDED',
-                            'back_1_price' => $market_type_detail['rate'],
-
-                        );
-                    }
-                }
-            }
-        }
-
-        $responseData = array(
-            'runner_details' => $runner_details,
-            'market_detail' => $market_detail
-        );
-
-        return $responseData;
-    } else if ($event_id == '98791') {
-        $data = get_casino_odds('getAAA');
-
-
-        if (!empty($data)) {
-            $orginal_market_id = $data['additional_info']['mid'];
-
-            $round_id  = explode('.', $orginal_market_id);
-            $orginal_market_id = str_replace('.', '__', $orginal_market_id);
-            $markets = $data['markets'];
-
-
-            $tmp_market_type = str_replace($orginal_market_id . '_', '', $market_id);
-
-            $market_name = '';
-
-
-
-            if ($tmp_market_type == 'match_odds') {
-                $market_name = 'Match Odds';
-            }
-
-            $market_type_details = $markets[$tmp_market_type];
-
-            $market_detail = array(
-                'event_id' => $event_id,
-                'round_id' => $round_id[1],
-                'market_name' => $market_name,
-                'market_id' => $market_id,
-            );
-
-            $runner_details = array();
-
-            if (!empty($market_type_details)) {
-                foreach ($market_type_details as $market_type_detail) {
-
-                    if ($selection_id == $market_type_detail['sid']) {
-                        $runner_details[]  = array(
-                            'market_book_odd_id' => $market_id,
-                            'market_id' => $market_id,
-                            'event_id' => $event_id,
-                            'selection_id' => $market_type_detail['sid'],
-                            'runner_name' => $market_type_detail['nat'],
-                            'sort_priority' => $market_type_detail['sid'],
-                            'status' => $market_type_detail['gstatus'] == "ACTIVE" ? 'ACTIVE' : 'SUSPENDED',
-                            'back_1_price' => $market_type_detail['b1'],
-                            'lay_1_price' => $market_type_detail['l1'],
-
-
-                        );
-                    }
-                }
-            }
-        }
-
-        $responseData = array(
-            'runner_details' => $runner_details,
-            'market_detail' => $market_detail
-        );
-
-        return $responseData;
-    }
-}
-
-
-function sendOtp($dataArray)
-{
-    $smsConfig = getCustomConfigItem('sms');
-    $smsConfig['message'] = $dataArray['message'];
-    $smsConfig['numbers'] = $dataArray['number'];
-
-    $query = http_build_query($smsConfig);
-    // p($query);
-
-    $url = "http://sms.hspsms.com/sendSMS?" . $query;
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    $data = curl_exec($ch);
-    curl_close($ch);
-
-    $arr = json_decode($data);
-    return $arr;
-}
-
-
-function get_jwt_casino_token($data)
-{
-
-    $postdata = json_encode($data);
-    $url = get_ws_endpoint() . 'gettoken';
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-    $result = curl_exec($ch);
-    curl_close($ch);
-
-    $result = json_decode($result, true);
-
-    return $result['token'] ? $result['token'] : '';
-}
-
-
-
-
-function generateNumericOTP()
-{
-    $n = 5;
-    $generator = "1357902468";
-
-    $result = "";
-
-    for ($i = 1; $i <= $n; $i++) {
-        $result .= substr($generator, (rand() % (strlen($generator))), 1);
-    }
-    return $result;
-}
-
-
-function sendNotification($dataArray)
-{
-    $smsConfig = getCustomConfigItem('sms');
-    $smsConfig['message'] = $dataArray['message'];
-    $smsConfig['numbers'] = $dataArray['number'];
-
-    $query = http_build_query($smsConfig);
-    // p($query);
-    $url = "http://sms.hspsms.com/sendSMS?" . $query;
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    $data = curl_exec($ch);
-    curl_close($ch);
-
-    $arr = json_decode($data);
-
-    return $arr;
-}
-
-
-function count_total_bonus($user_id = null)
-{
-
-    $CI = &get_instance();
-    $CI->load->model("Bonus_model");
-
-    if (!$user_id) {
-        $user_id = get_user_id();
-    }
-
-    $total_bonus_amount = $CI->Bonus_model->count_total_bonus($user_id);
-    return $total_bonus_amount;
-}
-
-
-
-function get_total_settlement($user_id)
-{
-
-
-    $curl = curl_init();
-
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => "http://109.74.204.187:9090/getWinnings/" . $user_id,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array(
-            "Cookie: __cfduid=d5dbee86719a0b4f706c9bb85dfb833851599671724"
-        ),
-    ));
-
-    $response = curl_exec($curl);
-
-    curl_close($curl);
-    return json_decode($response, true);
-}
-
-
-function get_my_sharing($user_id)
-{
-
-    $curl = curl_init();
-
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => "http://109.74.204.187:9090/getMySharing/" . $user_id,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array(
-            "Cookie: __cfduid=d5dbee86719a0b4f706c9bb85dfb833851599671724"
-        ),
-    ));
-
-    $response = curl_exec($curl);
-
-    curl_close($curl);
-    return json_decode($response, true);
-}
-
-
-
-function get_upline_sharing($user_id)
-{
-
-    $curl = curl_init();
-
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => "http://109.74.204.187:9090/getUplineSharing/" . $user_id,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array(
-            "Cookie: __cfduid=d5dbee86719a0b4f706c9bb85dfb833851599671724"
-        ),
-    ));
-
-    $response = curl_exec($curl);
-
-    curl_close($curl);
-    return json_decode($response, true);
 }

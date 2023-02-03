@@ -48,7 +48,6 @@ class Event_model extends My_Model
         $return = $this->db->get()->row();
         return $return;
     }
-
     public function addEvent($dataValues)
     {
         $e_id = null;
@@ -336,7 +335,7 @@ class Event_model extends My_Model
 
     public function list_events($dataArray = array())
     {
-        $this->db->select('le.competition_id,le.event_type,le.event_id,le.event_name,le.open_date,le.score_match_id,le.is_tv,le.is_inplay,le.is_ball_running');
+        $this->db->select('le.competition_id,le.event_type,le.event_id,le.event_name,le.open_date,le.score_match_id,le.is_tv,le.is_inplay');
         $this->db->from('list_events as le');
         if (isset($dataArray['event_id'])) {
             $this->db->where('le.event_id', $dataArray['event_id']);
@@ -379,8 +378,6 @@ class Event_model extends My_Model
 
     public function list_market_book_odds_runner($dataArray = array())
     {
-
-        // p($dataArray);
         $return  = NULL;
         if (!empty($dataArray)) {
             $this->db->select('*');
@@ -397,8 +394,6 @@ class Event_model extends My_Model
             $this->db->order_by('id', 'asc');
 
             $return = $this->db->get()->result_array();
-
-            // p($this->db->last_query());
         }
 
         return $return;
@@ -560,11 +555,10 @@ class Event_model extends My_Model
     {
         $return  = NULL;
         if (!empty($dataArray)) {
-            $this->db->select('selection_id,id');
+            $this->db->select('selection_id');
             $this->db->from('market_book_odds_runner');
             $this->db->where('market_id', $dataArray['market_id']);
-            $this->db->order_by('id', 'asc');
-            // $this->db->order_by('sort_priority', 'asc');
+            $this->db->order_by('sort_priority', 'asc');
             $return = $this->db->get()->result_array();
 
             // p($this->db->last_query());
@@ -654,7 +648,7 @@ class Event_model extends My_Model
     public function get_active_market_events($dataArray = array())
     {
 
-        // $this->db->select('le.competition_id,le.event_type,le.event_id,le.event_name,le.open_date');
+         // $this->db->select('le.competition_id,le.event_type,le.event_id,le.event_name,le.open_date');
         // $this->db->from('list_events as le');
         // if (isset($dataArray['event_id'])) {
         //     $this->db->where('le.event_id', $dataArray['event_id']);
@@ -667,20 +661,20 @@ class Event_model extends My_Model
         // $return = $this->db->get()->result_array();
 
         // p($this->db->last_query());
-        $this->db->select('le.competition_id,le.event_type,le.event_id,le.event_name,le.open_date,le.is_inplay,le.is_fancy,le.is_bm,le.is_tv');
+        $this->db->select('le.competition_id,le.event_type,le.event_id,le.event_name,le.open_date,le.is_inplay,le.is_fancy,le.is_bm');
         $this->db->from('market_book_odds as mb');
         $this->db->join('list_events as le', 'le.event_id = mb.event_id', 'left');
 
         $this->db->where($dataArray);
         $this->db->where('mb.status', 'OPEN');
-        $this->db->where('le.updated_at >=', date('Y-m-d H:i:s', strtotime('-1 hours')));
+        $this->db->where('le.updated_at >=', date('Y-m-d H:i:s',strtotime('-1 hours')));
 
         $this->db->group_by('mb.event_id');
-        $this->db->order_by('le.event_type', 'DESC');
+        $this->db->order_by('le.event_type','DESC');
 
         $return = $this->db->get()->result_array();
-        // p($this->db->last_query());
 
+ 
         return $return;
     }
 
@@ -775,77 +769,6 @@ class Event_model extends My_Model
         $this->db->update('list_events', $dataValues);
         $event_id = $dataValues['event_id'];
 
-        return $event_id;
-    }
-
-
-    public function get_manual_market_book_odds_runner_by_id($dataArray = array())
-    {
-        $return  = NULL;
-        $site_code = getCustomConfigItem('site_code');
-        if (!empty($dataArray)) {
-            $this->db->select('*');
-            $this->db->from('manual_market_book_odds_runner');
-            $this->db->where('market_id', $dataArray['market_id']);
-            $this->db->where('selection_id', $dataArray['selection_id']);
-            $this->db->where('site_code', $site_code);
-
-
-            $this->db->order_by('sort_priority', 'asc');
-            $return = $this->db->get()->row();
-        }
-
-        return $return;
-    }
-
-    public function get_manual_market_book_odds_runner($dataArray = array())
-    {
-        $return  = NULL;
-        if (!empty($dataArray)) {
-            $site_code = getCustomConfigItem('site_code');
-
-            $this->db->select('selection_id');
-            $this->db->from('manual_market_book_odds_runner');
-            $this->db->where('market_id', $dataArray['market_id']);
-            $this->db->where('site_code', $site_code);
-
-            $this->db->order_by('sort_priority', 'asc');
-            $return = $this->db->get()->result_array();
-
-            // p($this->db->last_query());
-        }
-
-        return $return;
-    }
-
-
-    public function addWelcomeNoteBanner($dataValues)
-    {
-        $id = null;
-        if (count($dataValues) > 0) {
-            if (array_key_exists('id', $dataValues) && !empty($dataValues['id'])) {
-
-                $this->db->where('id', $dataValues['id']);
-                $this->db->update('welcome-note-banner', $dataValues);
-                $id = $dataValues['id'];
-            } else {
-                $dataValues["created_at"] = date("Y-m-d H:i:s");
-                $this->db->insert('welcome-note-banner', $dataValues);
-                $id = $this->db->insert_id();
-            }
-        }
-
-        return $id;
-    }
-
-    public function get_addWelcomeNoteBanner()
-    {
-        return $this->db->get('welcome-note-banner')->row_array();
-    }
-
-    public function delete_welcome_note_banner($id)
-    {
-        $this->db->where('id', $id);
-        $this->db->delete('welcome-note-banner');
+         return $event_id;
     }
 }

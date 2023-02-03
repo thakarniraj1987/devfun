@@ -52,27 +52,19 @@ class View_info_model extends My_Model
     {
         $info_id = NULL;
         if (count($dataValues) > 0) {
+            if (array_key_exists('setting_id', $dataValues) && !empty($dataValues['setting_id']) && array_key_exists('user_id', $dataValues) && !empty($dataValues['user_id'])) {
+                $this->db->where('user_id', $dataValues['user_id']);
+                $this->db->where('setting_id', $dataValues['setting_id']);
 
-            $this->db->where('user_id', $dataValues['user_id']);
-            $this->db->where('setting_id', $dataValues['setting_id']);
-            $this->db->delete('user_info');
-
-
-            // if (array_key_exists('setting_id', $dataValues) && !empty($dataValues['setting_id']) && array_key_exists('user_id', $dataValues) && !empty($dataValues['user_id'])) {
-            //     $this->db->where('user_id', $dataValues['user_id']);
-            //     $this->db->where('setting_id', $dataValues['setting_id']);
-
-            //     $dataValues["updated_at"] = date("Y-m-d H:i:s");
-            //     $this->db->update('user_info', $dataValues);
-            //     $info_id = $dataValues['info_id'];
-            // } else {
+                $dataValues["updated_at"] = date("Y-m-d H:i:s");
+                $this->db->update('user_info', $dataValues);
+                $info_id = $dataValues['info_id'];
+            } else {
                 $dataValues["created_at"] = date("Y-m-d H:i:s");
                 $this->db->insert('user_info', $dataValues);
                 $info_id = $this->db->insert_id();
-            // }
-
-
-         }
+            }
+        }
         return $info_id;
     }
 

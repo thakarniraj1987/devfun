@@ -4817,7 +4817,7 @@ c2.651-0.001,5.266,0.615,7.637,1.8l136.533,68.267C340.331,227.863,343.762,238.11
 									<div class="btn brt_btn"><button class=" " type="button" onclick="ClearStack( );">Clear</button></div>
 								</div>
 								<div class="bet-box-footer">
-									<button class="btn cancle-bet" type="button" onclick="ClearAllSelection();"> Cancel</button>
+									<button class="btn cancle-bet" type="button" onclick="ClearAllSelection();"> Reset Bet</button>
 									<button class="btn place-bet" type="button" onclick="PlaceBet();"> Place Bet</button>
 									<button class="btn multi-bet" type="button" onclick="PlaceMultiBet();"> Place Multiple Bet</button>
 									<button class="btn btn-success CommanBtn placefancy" type="button" onclick="PlaceFancy();" style="display:none"> Place Bet</button>
@@ -5061,7 +5061,6 @@ c2.651-0.001,5.266,0.615,7.637,1.8l136.533,68.267C340.331,227.863,343.762,238.11
 }*/
 </script>
 <script>
-	
 	function betopenNav() {
 		document.getElementById("betSidenav").style.width = "100%";
 	}
@@ -5071,7 +5070,6 @@ c2.651-0.001,5.266,0.615,7.637,1.8l136.533,68.267C340.331,227.863,343.762,238.11
 	}
 </script>
 <style type="text/css">
-	
 	.disabledbutton {
 		pointer-events: none;
 		opacity: 0.4;

@@ -74,14 +74,4 @@ class User_chip_model extends My_Model
         $this->db->insert_batch('users_chips', $dataValues);
         return true;
     }
-
-
-    public function delete_multiple_chips_entrys($user_ids = array())
-    {
-        $this->db->where_in('user_id', $user_ids);
-        $results =  $this->db->delete('users_chips');
-        return $results;
-    }
-
-     
 }

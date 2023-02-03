@@ -484,7 +484,7 @@ class Report_model extends My_Model
         $return = array();
 
 
-        $this->db->select('*,b.profit as profit,b.market_id,b.loss as loss,ru.user_name as client_name,ru.name as client_user_name,et.name as game,b.status betting_status,et.name as name,b.created_at,b.profit as client_profit,b.loss as client_loss,le.event_name as event_name,b.is_tie as betting_is_tie');
+        $this->db->select('*,mbs.profit as profit,mbs.loss as loss,ru.user_name as client_name,ru.name as client_user_name,et.name as game,b.status betting_status,et.name as name,b.created_at,b.profit as client_profit,b.loss as client_loss,le.event_name as event_name,b.is_tie as betting_is_tie');
         $this->db->from('masters_betting_settings as mbs');
         $this->db->join('betting as b', 'b.betting_id = mbs.betting_id', 'left');
         $this->db->join('event_types as et', 'et.event_type = b.event_type', 'left');
@@ -496,20 +496,6 @@ class Report_model extends My_Model
 
         if (isset($dataValues['market_id'])) {
             $this->db->where('b.market_id', $dataValues['market_id']);
-        }
-
-
-        if (isset($dataValues['is_fancy'])) {
-
-            if($dataValues['is_fancy'] == 'Yes')
-            {
-                $this->db->where('b.betting_type', 'Fancy');
-
-            }
-            else{
-            $this->db->where('b.betting_type', 'Match');
-                
-            }
         }
 
         if (isset($dataValues['user_id'])) {
@@ -877,13 +863,13 @@ class Report_model extends My_Model
     public function get_profit_loss_events_list($dataValues = array())
     {
         $return = array();
-        $query = $this->db->query("select * from (select 'No' AS is_casino,b.market_id,b.market_name,b.match_id,b.event_name , SUM(CASE WHEN bet_result = 'Plus' AND betting_type = 'Match' THEN b.profit ELSE 0  END ) loss,
-        SUM(CASE WHEN bet_result = 'Minus'  AND betting_type = 'Match' THEN b.loss ELSE 0  END ) profit,
+        $query = $this->db->query("select b.match_id,b.event_name ,  SUM(CASE WHEN bet_result = 'Plus' AND betting_type = 'Match' THEN mbs.loss ELSE 0  END ) loss,
+        SUM(CASE WHEN bet_result = 'Minus'  AND betting_type = 'Match' THEN mbs.profit ELSE 0  END ) profit,
 
-        SUM(CASE WHEN bet_result = 'Plus' AND betting_type = 'Fancy' THEN b.profit ELSE 0  END ) total_fancy_loss,
-         SUM(CASE WHEN bet_result = 'Minus'  AND betting_type = 'Fancy' THEN b.loss ELSE 0  END ) total_fancy_profit,
+        SUM(CASE WHEN bet_result = 'Plus' AND betting_type = 'Fancy' THEN mbs.loss ELSE 0  END ) total_fancy_loss,
+         SUM(CASE WHEN bet_result = 'Minus'  AND betting_type = 'Fancy' THEN mbs.profit ELSE 0  END ) total_fancy_profit,
         
-        SUM(CASE WHEN betting_type = 'Fancy' THEN stake ELSE 0  END ) total_fancy_stake, (mbs.`partnership`) AS partnership,(mbs.`partnership`) AS total_share,
+        SUM(CASE WHEN betting_type = 'Fancy' THEN stake ELSE 0  END ) total_fancy_stake, (100 - mbs.`partnership`) AS partnership,
         mbs.master_commission,mbs.sessional_commission,b.created_at,b.event_type
        FROM `betting` AS `b`
        LEFT JOIN `masters_betting_settings` AS `mbs` ON `mbs`.`betting_id` = `b`.`betting_id`
@@ -891,40 +877,15 @@ class Report_model extends My_Model
 
        LEFT JOIN `event_types` AS `et` ON `et`.`event_type` = `b`.`event_type`
         WHERE `mbs`.`user_id` = '" . $dataValues['user_id'] . "'
-       AND b.updated_at >= '" . $dataValues['fromDate'] . "' AND b.updated_at <= '" . $dataValues['toDate'] . "' and `b`.`status` = 'Settled' AND b.event_type IN (4,2,1,7)
-        GROUP BY `b`.`match_id` 
-        
-        
-        
-        union all
-
-
-
-        select 'Yes' AS is_casino,b.market_id,b.market_name,b.match_id,b.event_name , SUM(CASE WHEN bet_result = 'Plus' AND betting_type = 'Match' THEN b.profit ELSE 0  END ) loss,
-        SUM(CASE WHEN bet_result = 'Minus'  AND betting_type = 'Match' THEN b.loss ELSE 0  END ) profit,
-
-        SUM(CASE WHEN bet_result = 'Plus' AND betting_type = 'Fancy' THEN b.profit ELSE 0  END ) total_fancy_loss,
-         SUM(CASE WHEN bet_result = 'Minus'  AND betting_type = 'Fancy' THEN b.loss ELSE 0  END ) total_fancy_profit,
-        
-        SUM(CASE WHEN betting_type = 'Fancy' THEN stake ELSE 0  END ) total_fancy_stake, (mbs.`partnership`) AS partnership,(mbs.`partnership`) AS total_share,
-        mbs.master_commission,mbs.sessional_commission,b.created_at,b.event_type
-       FROM `betting` AS `b`
-       LEFT JOIN `masters_betting_settings` AS `mbs` ON `mbs`.`betting_id` = `b`.`betting_id`
-       LEFT JOIN `registered_users` AS `ru` ON `ru`.`user_id` = `b`.`user_id`
-
-       LEFT JOIN `event_types` AS `et` ON `et`.`event_type` = `b`.`event_type`
-        WHERE `mbs`.`user_id` = '" . $dataValues['user_id'] . "'
-       AND b.updated_at >= '" . $dataValues['fromDate'] . "' AND b.updated_at <= '" . $dataValues['toDate'] . "' and `b`.`status` = 'Settled' AND b.event_type NOT IN (4,2,1,7)
-        GROUP BY `b`.`match_id` , `b`.`market_id`
-        ) as ut
-       ORDER BY `created_at` DESC");
+       AND `b`.`status` = 'Settled'
+        GROUP BY `b`.`match_id`
+       ORDER BY `b`.`created_at` DESC");
         $result = $query->result_array();
 
-
-
-
-
         // p($this->db->last_query());
+
+
+
         return $result;
     }
 
@@ -938,21 +899,20 @@ class Report_model extends My_Model
         FROM `masters_betting_settings` AS `mbs`
         JOIN `betting` AS `b` ON `b`.`betting_id` = `mbs`.`betting_id`
         WHERE  
-         `mbs`.`user_id` = '" . $dataValues['user_id'] . "'
+         `mbs`.`user_id` = '".$dataValues['user_id']."'
         AND `b`.`status` = 'Settled'
-        AND `b`.`is_delete` = 'No') AND ru.user_type = '" . $dataValues['user_type'] . "'  and mbs1.created_at >= '" . $dataValues['fromDate'] . "' and  mbs1.created_at <= '" . $dataValues['toDate'] . "' GROUP BY user_id;");
+        AND `b`.`is_delete` = 'No') AND ru.user_type = '".$dataValues['user_type']."'  and mbs1.created_at >= '".$dataValues['fromDate']."' and  mbs1.created_at <= '".$dataValues['toDate']."' GROUP BY user_id;");
         $return = $query->result_array();
 
+ 
 
-        // p($this->db->last_query());
-
-
-
+ 
         return $return;
+
     }
 
 
-
+    
 
     public function get_super_pl($dataValues)
     {
@@ -968,9 +928,10 @@ class Report_model extends My_Model
             WHERE  
              `mbs`.`user_id` = '" . $dataValues['user_id'] . "'
             AND `b`.`status` = 'Settled'
-            AND `b`.`is_delete` = 'No') AND user_type = '" . $dataValues['user_type'] . "' and b1.created_at >= '" . $dataValues['fromDate'] . "' and  b1.created_at <= '" . $dataValues['toDate'] . "';");
+            AND `b`.`is_delete` = 'No') AND user_type = '" . $dataValues['user_type'] . "' and b1.created_at >= '".$dataValues['fromDate']."' and  b1.created_at <= '".$dataValues['toDate']."';");
             $result = $query->row();
-            return $result->profit - $result->loss;
+        return $result->profit - $result->loss;
+
         } else {
 
             //Comment for test 2 Dec 2021
@@ -984,7 +945,7 @@ class Report_model extends My_Model
             WHERE  
              `mbs`.`user_id` = '" . $dataValues['user_id'] . "'
             AND `b`.`status` = 'Settled'
-            AND `b`.`is_delete` = 'No') AND user_type = '" . $dataValues['user_type'] . "' and b1.created_at >= '" . $dataValues['fromDate'] . "' and  b1.created_at <= '" . $dataValues['toDate'] . "';");
+            AND `b`.`is_delete` = 'No') AND user_type = '" . $dataValues['user_type'] . "' and b1.created_at >= '".$dataValues['fromDate']."' and  b1.created_at <= '".$dataValues['toDate']."';");
             $result = $query->row();
             //Comment for test 2 Dec 2021
 
@@ -1001,8 +962,12 @@ class Report_model extends My_Model
             // AND `b`.`status` = 'Settled'
             // AND `b`.`is_delete` = 'No') AND user_type = '" . $dataValues['user_type'] . "' GROUP BY mbs1.user_id;");
             // $result = $query->row();
-
+ 
             return $result->profit - $result->loss;
+
+
+
+
         }
 
 
@@ -1010,172 +975,4 @@ class Report_model extends My_Model
         // p($this->db->last_query());
         // p($result);
     }
-
-
-    public function get_profit_loss_events_list_new($dataValues = array())
-    {
-
-
-        // p($dataValues);
-        $return = array();
-        $query = $this->db->query("select * FROM (
-            
-        select 'No' AS is_casino,b.market_id,b.market_name, (SELECT MAX(partnership) - MIN(partnership) AS total_share FROM masters_betting_settings AS mbs
-        WHERE betting_id  = b.betting_id AND user_type  IN ('" . $dataValues['parent_user_type'] . "','" . $dataValues['self_user_type'] . "' ) GROUP BY betting_id) AS total_share ,
-
-
-        b.match_id,b.event_name , SUM(CASE WHEN bet_result = 'Plus' AND betting_type = 'Match' THEN b.profit ELSE 0  END ) loss,
-        SUM(CASE WHEN bet_result = 'Minus'  AND betting_type = 'Match' THEN b.loss ELSE 0  END ) profit,
-
-        SUM(CASE WHEN bet_result = 'Plus' AND betting_type = 'Fancy' THEN b.profit ELSE 0  END ) total_fancy_loss,
-         SUM(CASE WHEN bet_result = 'Minus'  AND betting_type = 'Fancy' THEN b.loss ELSE 0  END ) total_fancy_profit,
-        
-        SUM(CASE WHEN betting_type = 'Fancy' THEN stake ELSE 0  END ) total_fancy_stake, (mbs.`partnership`) AS partnership,
-        mbs.master_commission,mbs.sessional_commission,b.created_at,b.event_type
-       FROM `betting` AS `b`
-       LEFT JOIN `masters_betting_settings` AS `mbs` ON `mbs`.`betting_id` = `b`.`betting_id`
-       LEFT JOIN `registered_users` AS `ru` ON `ru`.`user_id` = `b`.`user_id`
-
-       LEFT JOIN `event_types` AS `et` ON `et`.`event_type` = `b`.`event_type`
-        WHERE `mbs`.`user_id` = '" . $dataValues['user_id'] . "'
-       AND b.updated_at >= '" . $dataValues['fromDate'] . "' AND b.updated_at <= '" . $dataValues['toDate'] . "' and `b`.`status` = 'Settled' AND b.event_type IN  (4,2,1,7)
-        GROUP BY `b`.`match_id`
-
-
-        union all 
-
-        select 'Yes' AS is_casino,b.market_id,b.market_name, (SELECT MAX(partnership) - MIN(partnership) AS total_share FROM masters_betting_settings AS mbs
-        WHERE betting_id  = b.betting_id AND user_type  IN ('" . $dataValues['parent_user_type'] . "','" . $dataValues['self_user_type'] . "' ) GROUP BY betting_id) AS total_share ,
-
-
-        b.match_id,b.event_name , SUM(CASE WHEN bet_result = 'Plus' AND betting_type = 'Match' THEN b.profit ELSE 0  END ) loss,
-        SUM(CASE WHEN bet_result = 'Minus'  AND betting_type = 'Match' THEN b.loss ELSE 0  END ) profit,
-
-        SUM(CASE WHEN bet_result = 'Plus' AND betting_type = 'Fancy' THEN b.profit ELSE 0  END ) total_fancy_loss,
-         SUM(CASE WHEN bet_result = 'Minus'  AND betting_type = 'Fancy' THEN b.loss ELSE 0  END ) total_fancy_profit,
-        
-        SUM(CASE WHEN betting_type = 'Fancy' THEN stake ELSE 0  END ) total_fancy_stake, (mbs.`partnership`) AS partnership,
-        mbs.master_commission,mbs.sessional_commission,b.created_at,b.event_type
-       FROM `betting` AS `b`
-       LEFT JOIN `masters_betting_settings` AS `mbs` ON `mbs`.`betting_id` = `b`.`betting_id`
-       LEFT JOIN `registered_users` AS `ru` ON `ru`.`user_id` = `b`.`user_id`
-
-       LEFT JOIN `event_types` AS `et` ON `et`.`event_type` = `b`.`event_type`
-        WHERE `mbs`.`user_id` = '" . $dataValues['user_id'] . "'
-       AND b.updated_at >= '" . $dataValues['fromDate'] . "' AND b.updated_at <= '" . $dataValues['toDate'] . "' and `b`.`status` = 'Settled' AND b.event_type NOT IN  (4,2,1,7)
-        GROUP BY `b`.`match_id`,b.market_id
-
-        ) as ut ORDER BY `created_at` DESC");
-        $result = $query->result_array();
-
-
-
- 
-        return $result;
-    }
-
-
-
-    public function get_profit_loss_events_market_details($dataValues = array())
-    {
-        $return = array();
-
-        if(empty($dataValues['market_id']))
-        {
-            $query = $this->db->query("select b.match_id,b.market_id,b.event_name,b.market_name,b.betting_type,SUM(CASE WHEN b.`bet_result` = 'Plus' THEN b.profit * -1 ELSE b.loss END) AS total_pl,
-            (SELECT MAX(partnership) - MIN(partnership) AS total_share FROM masters_betting_settings AS mbs WHERE betting_id  = b.betting_id AND user_type  IN ('" . $dataValues['parent_user_type'] . "','" . $dataValues['self_user_type'] . "' ) 
-            GROUP BY betting_id) AS total_share,b.created_at 
-            FROM `masters_betting_settings` AS mbs LEFT JOIN betting AS b ON b.betting_id = mbs.betting_id WHERE b.match_id = '".$dataValues['match_id']."' AND mbs.user_id = '".$dataValues['user_id']."'  AND
-             betting_type = 'Match'  AND STATUS = 'Settled'GROUP BY b.market_id");
-            $result = $query->result_array();
-        }
-        else
-        {
-            $query = $this->db->query("select b.match_id,b.market_id,b.event_name,b.market_name,b.betting_type,SUM(CASE WHEN b.`bet_result` = 'Plus' THEN b.profit * -1 ELSE b.loss END) AS total_pl,
-            (SELECT MAX(partnership) - MIN(partnership) AS total_share FROM masters_betting_settings AS mbs WHERE betting_id  = b.betting_id AND user_type  IN ('" . $dataValues['parent_user_type'] . "','" . $dataValues['self_user_type'] . "' ) 
-            GROUP BY betting_id) AS total_share,b.created_at 
-            FROM `masters_betting_settings` AS mbs LEFT JOIN betting AS b ON b.betting_id = mbs.betting_id WHERE b.match_id = '".$dataValues['match_id']."' AND mbs.user_id = '".$dataValues['user_id']."'  AND
-             betting_type = 'Match'  AND STATUS = 'Settled'  AND b.market_id = '".$dataValues['market_id']."' GROUP BY b.market_id");
-            $result = $query->result_array();
-        }
-       
-
-
-
-        // p($this->db->last_query());
-
-
-        return $result;
-    }
-
-
-    public function get_profit_loss_events_fancy_details($dataValues = array())
-    {
-        $return = array();
-        $query = $this->db->query("select b.match_id,b.market_id,b.event_name,b.market_name,b.betting_type,SUM(CASE WHEN b.`bet_result` = 'Plus' THEN b.profit * -1 ELSE b.loss END) AS total_pl,
-        (SELECT MAX(partnership) - MIN(partnership) AS total_share FROM masters_betting_settings AS mbs WHERE betting_id  = b.betting_id AND user_type  IN ('" . $dataValues['parent_user_type'] . "','" . $dataValues['self_user_type'] . "' ) 
-        GROUP BY betting_id) AS total_share,b.created_at 
-        FROM `masters_betting_settings` AS mbs LEFT JOIN betting AS b ON b.betting_id = mbs.betting_id WHERE b.match_id = '".$dataValues['match_id']."' AND mbs.user_id = '".$dataValues['user_id']."'  AND
-         betting_type = 'Fancy'  AND STATUS = 'Settled'GROUP BY b.match_id");
-        $result = $query->result_array();
-
-
-
-        // p($this->db->last_query());
-
-
-        return $result;
-    }
-
-    public function get_profit_loss_masters_events_market_details($dataValues = array())
-    {
-
-        if(empty($dataValues['market_id']))
-        {
-            $return = array();
-            $query = $this->db->query("select b.match_id,b.market_id,b.event_name,b.market_name,b.betting_type,SUM(CASE WHEN b.`bet_result` = 'Plus' THEN b.profit * -1 ELSE b.loss END) AS total_pl,mbs.partnership as total_share,b.created_at 
-            FROM `masters_betting_settings` AS mbs LEFT JOIN betting AS b ON b.betting_id = mbs.betting_id WHERE b.match_id = '".$dataValues['match_id']."' AND mbs.user_id = '".$dataValues['user_id']."'  AND
-             betting_type = 'Match'  AND STATUS = 'Settled'GROUP BY b.market_id");
-            $result = $query->result_array();
-        }
-        else
-        {
-            $return = array();
-            $query = $this->db->query("select b.match_id,b.market_id,b.event_name,b.market_name,b.betting_type,SUM(CASE WHEN b.`bet_result` = 'Plus' THEN b.profit * -1 ELSE b.loss END) AS total_pl,mbs.partnership as total_share,b.created_at 
-            FROM `masters_betting_settings` AS mbs LEFT JOIN betting AS b ON b.betting_id = mbs.betting_id WHERE b.match_id = '".$dataValues['match_id']."' AND mbs.user_id = '".$dataValues['user_id']."'  AND
-             betting_type = 'Match'  AND STATUS = 'Settled' and b.market_id = '".$dataValues['market_id']."' GROUP BY b.market_id");
-            $result = $query->result_array();
-        }
-       
-
-
-
-        // p($this->db->last_query());
-
-
-        return $result;
-    }
-
-
-    public function get_profit_loss_masters_events_fancy_details($dataValues = array())
-    {
-        $return = array();
-        $query = $this->db->query("select b.match_id,b.market_id,b.event_name,b.market_name,b.betting_type,SUM(CASE WHEN b.`bet_result` = 'Plus' THEN b.profit * -1 ELSE b.loss END) AS total_pl,
-        mbs.partnership as total_share,b.created_at 
-        FROM `masters_betting_settings` AS mbs LEFT JOIN betting AS b ON b.betting_id = mbs.betting_id WHERE b.match_id = '".$dataValues['match_id']."' AND mbs.user_id = '".$dataValues['user_id']."'  AND
-         betting_type = 'Fancy'  AND STATUS = 'Settled'GROUP BY b.match_id");
-        $result = $query->result_array();
-
-
-
-        // p($this->db->last_query());
-
-
-        return $result;
-    }
-
-
-
-
-    
 }

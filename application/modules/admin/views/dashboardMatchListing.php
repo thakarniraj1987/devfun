@@ -110,7 +110,7 @@
 
                   // p($market_type);
             ?>
-                <div id="user_row_" class="sport_row sportrow  matchrow-<?php echo $cricket['event_id']; ?>" onclick="MarketSelection(`<?php echo $market_type['market_id']; ?>`,<?php echo $cricket['event_id']; ?>,<?php echo $cricket['event_type']; ?>);" title="Match OODS">
+                <div id="user_row_" class="sport_row sportrow  matchrow-<?php echo $cricket['event_id']; ?>" onclick="MarketSelection(<?php echo $market_type['market_id']; ?>,<?php echo $cricket['event_id']; ?>,<?php echo $cricket['event_type']; ?>);" title="Match OODS">
                    <div class="sport_name">
                      
 
