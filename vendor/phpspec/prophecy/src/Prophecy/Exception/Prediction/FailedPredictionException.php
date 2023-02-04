@@ -14,8 +14,8 @@ namespace Prophecy\Exception\Prediction;
 use RuntimeException;
 
 /**
- * Basic failed Matchexception.
- * Use it for custom Matchfailures.
+ * Basic failed prediction exception.
+ * Use it for custom prediction failures.
  *
  * @author Konstantin Kudryashov <ever.zet@gmail.com>
  */

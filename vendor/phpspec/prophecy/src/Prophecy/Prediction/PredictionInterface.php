@@ -16,8 +16,8 @@ use Prophecy\Prophecy\ObjectProphecy;
 use Prophecy\Prophecy\MethodProphecy;
 
 /**
- * Matchinterface.
- * Matches are logical test blocks, tied to `should...` keyword.
+ * Prediction interface.
+ * Predictions are logical test blocks, tied to `should...` keyword.
  *
  * @author Konstantin Kudryashov <ever.zet@gmail.com>
  */

@@ -12,7 +12,7 @@ enough to be used inside any testing framework out there with minimal effort.
 ```php
 <?php
 
-class UserTest extends PHPUnit_Framework_TestCase
+class UserTest extends PHPUnit\Framework\TestCase
 {
     private $prophet;
 
@@ -28,14 +28,14 @@ class UserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('hashed_pass', $user->getPassword());
     }
 
-    protected function setup()
+    protected function setUp()
     {
         $this->prophet = new \Prophecy\Prophet;
     }
 
     protected function tearDown()
     {
-        $this->prophet->checkMatches();
+        $this->prophet->checkPredictions();
     }
 }
 ```
@@ -44,7 +44,7 @@ class UserTest extends PHPUnit_Framework_TestCase
 
 ### Prerequisites
 
-Prophecy requires PHP 5.3.3 or greater.
+Prophecy requires PHP 7.2.0 or greater.
 
 ### Setup through composer
 
@@ -97,7 +97,7 @@ $prophecy->willImplement('SessionHandlerInterface');
 ```
 
 There are 2 interesting calls - `willExtend` and `willImplement`. The first one tells
-object prophecy that our object should extend specific class, the second one says that
+object prophecy that our object should extend a specific class. The second one says that
 it should implement some interface. Obviously, objects in PHP can implement multiple
 interfaces, but extend only one parent class.
 
@@ -140,7 +140,7 @@ $prophecy->read('123')->willReturn('value');
 Oh wow. We've just made an arbitrary call on the object prophecy? Yes, we did. And this
 call returned us a new object instance of class `MethodProphecy`. Yep, that's a specific
 method with arguments prophecy. Method prophecies give you the ability to create method
-promises or Matches. We'll talk about method Matches later in the _Mocks_ section.
+promises or predictions. We'll talk about method predictions later in the _Mocks_ section.
 
 #### Promises
 
@@ -159,7 +159,7 @@ promise, there's plenty others you can use:
 
 - `ReturnPromise` or `->willReturn(1)` - returns a value from a method call
 - `ReturnArgumentPromise` or `->willReturnArgument($index)` - returns the nth method argument from call
-- `ThrowPromise` or `->willThrow` - causes the method to throw specific exception
+- `ThrowPromise` or `->willThrow($exception)` - causes the method to throw specific exception
 - `CallbackPromise` or `->will($callback)` - gives you a quick way to define your own custom logic
 
 Keep in mind, that you can always add even more promises by implementing
@@ -168,7 +168,7 @@ Keep in mind, that you can always add even more promises by implementing
 #### Method prophecies idempotency
 
 Prophecy enforces same method prophecies and, as a consequence, same promises and
-Matches for the same method calls with the same arguments. This means:
+predictions for the same method calls with the same arguments. This means:
 
 ```php
 $methodProphecy1 = $prophecy->read('123');
@@ -205,6 +205,17 @@ $user->setName('everzet')->will(function ($args) use ($user) {
 
 And now it doesn't matter how many times or in which order your methods are called.
 What matters is their behaviors and how well you faked it.
+
+Note: If the method is called several times, you can use the following syntax to return different
+values for each call:
+
+```php
+$prophecy->read('123')->willReturn(1, 2, 3);
+```
+
+This feature is actually not recommended for most cases. Relying on the order of
+calls for the same arguments tends to make test fragile, as adding one more call
+can break everything.
 
 #### Arguments wildcarding
 
@@ -246,6 +257,8 @@ That's why Prophecy comes bundled with a bunch of other tokens:
 - `AnyValueToken` or `Argument::any()` - matches any argument
 - `AnyValuesToken` or `Argument::cetera()` - matches any arguments to the rest of the signature
 - `StringContainsToken` or `Argument::containingString($value)` - checks that the argument contains a specific string value
+- `InArrayToken` or `Argument::in($array)` - checks if value is in array
+- `NotInArrayToken` or `Argument::notIn($array)` - checks if value is not in array
 
 And you can add even more by implementing `TokenInterface` with your own custom classes.
 
@@ -331,19 +344,19 @@ calling it on a stub.
 Now we know how to define doubles without behavior (dummies) and doubles with behavior, but
 no expectations (stubs). What's left is doubles for which we have some expectations. These
 are called mocks and in Prophecy they look almost exactly the same as stubs, except that
-they define *Matches* instead of *promises* on method prophecies:
+they define *predictions* instead of *promises* on method prophecies:
 
 ```php
 $entityManager->flush()->shouldBeCalled();
 ```
 
-#### Matches
+#### Predictions
 
 The `shouldBeCalled()` method here assigns `CallPrediction` to our method prophecy.
-Matches are a delayed behavior check for your prophecies. You see, during the entire lifetime
+Predictions are a delayed behavior check for your prophecies. You see, during the entire lifetime
 of your doubles, Prophecy records every single call you're making against it inside your
 code. After that, Prophecy can use this collected information to check if it matches defined
-Matches. You can assign Matches to method prophecies using the
+predictions. You can assign predictions to method prophecies using the
 `MethodProphecy::should(PredictionInterface $prediction)` method. As a matter of fact,
 the `shouldBeCalled()` method we used earlier is just a shortcut to:
 
@@ -352,17 +365,17 @@ $entityManager->flush()->should(new Prophecy\Prediction\CallPrediction());
 ```
 
 It checks if your method of interest (that matches both the method name and the arguments wildcard)
-was called 1 or more times. If the Matchfailed then it throws an exception. When does this
-check happen? Whenever you call `checkMatches()` on the main Prophet object:
+was called 1 or more times. If the prediction failed then it throws an exception. When does this
+check happen? Whenever you call `checkPredictions()` on the main Prophet object:
 
 ```php
-$prophet->checkMatches();
+$prophet->checkPredictions();
 ```
 
-In PHPUnit, you would want to put this call into the `tearDown()` method. If no Matches
+In PHPUnit, you would want to put this call into the `tearDown()` method. If no predictions
 are defined, it would do nothing. So it won't harm to call it after every test.
 
-There are plenty more Matches you can play with:
+There are plenty more predictions you can play with:
 
 - `CallPrediction` or `shouldBeCalled()` - checks that the method has been called 1 or more times
 - `NoCallsPrediction` or `shouldNotBeCalled()` - checks that the method has not been called
@@ -370,14 +383,14 @@ There are plenty more Matches you can play with:
   `$count` times
 - `CallbackPrediction` or `should($callback)` - checks the method against your own custom callback
 
-Of course, you can always create your own custom Matchany time by implementing
+Of course, you can always create your own custom prediction any time by implementing
 `PredictionInterface`.
 
 ### Spies
 
 The last bit of awesomeness in Prophecy is out-of-the-box spies support. As I said in the previous
 section, Prophecy records every call made during the double's entire lifetime. This means
-you don't need to record Matches in order to check them. You can also do it
+you don't need to record predictions in order to check them. You can also do it
 manually by using the `MethodProphecy::shouldHave(PredictionInterface $prediction)` method:
 
 ```php

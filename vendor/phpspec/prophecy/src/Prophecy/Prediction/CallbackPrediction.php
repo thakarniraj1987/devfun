@@ -22,7 +22,7 @@ use Closure;
  *
  * @author Konstantin Kudryashov <ever.zet@gmail.com>
  */
-class CallbackMatchimplements PredictionInterface
+class CallbackPrediction implements PredictionInterface
 {
     private $callback;
 

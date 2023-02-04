@@ -20,12 +20,12 @@ use Prophecy\Util\StringUtil;
 use Prophecy\Exception\Prediction\UnexpectedCallsCountException;
 
 /**
- * Matchinterface.
- * Matches are logical test blocks, tied to `should...` keyword.
+ * Prediction interface.
+ * Predictions are logical test blocks, tied to `should...` keyword.
  *
  * @author Konstantin Kudryashov <ever.zet@gmail.com>
  */
-class CallTimesMatchimplements PredictionInterface
+class CallTimesPrediction implements PredictionInterface
 {
     private $times;
     private $util;

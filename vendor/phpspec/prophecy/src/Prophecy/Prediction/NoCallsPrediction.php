@@ -22,7 +22,7 @@ use Prophecy\Exception\Prediction\UnexpectedCallsException;
  *
  * @author Konstantin Kudryashov <ever.zet@gmail.com>
  */
-class NoCallsMatchimplements PredictionInterface
+class NoCallsPrediction implements PredictionInterface
 {
     private $util;
 

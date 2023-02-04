@@ -24,7 +24,7 @@ use Prophecy\Exception\Prediction\NoCallsException;
  *
  * @author Konstantin Kudryashov <ever.zet@gmail.com>
  */
-class CallMatchimplements PredictionInterface
+class CallPrediction implements PredictionInterface
 {
     private $util;
 
